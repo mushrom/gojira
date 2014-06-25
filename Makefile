@@ -1,6 +1,6 @@
 SRC=${wildcard *.c}
 OBJ=${SRC:.c=.o}
-CFLAGS=-I"${shell pwd}"/include -g
+CFLAGS=-I"${shell pwd}"/include -g -Wall
 
 .c.o:
 	@echo CC -c $<

@@ -16,11 +16,16 @@ typedef enum {
 	TYPE_CLOSE_PAREN,
 	TYPE_PERIOD,
 	TYPE_APOSTR,
+	TYPE_OCTOTHORPE,
 } type_t;
 
 typedef struct token {
 	type_t type;
-	void *data;
+
+	union {
+		void *data;
+		unsigned smalldata;
+	};
 
 	struct token *next;
 	struct token *down;
