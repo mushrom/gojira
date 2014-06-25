@@ -3,12 +3,17 @@ OBJ=${SRC:.c=.o}
 CFLAGS=-I"${shell pwd}"/include -g
 
 .c.o:
-	${CC} ${CFLAGS} -c $<
+	@echo CC -c $<
+	@${CC} ${CFLAGS} -c $<
 
-gojira: ${OBJ}
-	${CC} ${CFLAGS} -o $@ ${OBJ}
+out/gojira: ${OBJ}
+	@mkdir -p out
+	@echo CC -o $@ ${OBJ}
+	@${CC} ${CFLAGS} -o $@ ${OBJ}
+
+all: out/gojira
 
 clean:
-	-rm gojira *.o
+	-rm -rf out *.o
 
-.PHONY: gojira
+.PHONY: all
