@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <gojira/lexer.h>
 #include <gojira/parser.h>
+#include <gojira/config.h>
 
 void print_help( ){
 	printf( "Usage: gojira [-f filename] [-hi]\n" );
@@ -15,6 +16,10 @@ int main( int argc, char *argv[] ){
 	int i;
 	bool interactive = false;
 	FILE *input_file = NULL;
+
+	initialize_config( );
+	set_config_option( "testing", 1 );
+	printf( "Config option testing: %li\n", get_config_option( "testing" ));
 
 	if ( argc < 2 ){
 		interactive = true;
@@ -36,7 +41,8 @@ int main( int argc, char *argv[] ){
 					break;
 
 				case 'v':
-
+					set_config_option( "verbose", 1 );
+					set_config_option( "verbose", 1 );
 					break;
 
 				default:
@@ -47,18 +53,18 @@ int main( int argc, char *argv[] ){
 		}
 	}
 
-	// parse_file( input_file );
 	// initialize_runtime( flags );
-	
-	// Debugging output
-	printf( "> " );
-	char buf[128];
-	fgets( buf, 128, stdin );
-	
-	dump_tokens( parse_tokens( dump_tokens( lexerize( buf ), 0 )), 0 );
 
 	if ( interactive ){
 		// enter REPL
+		while ( 1 ){
+			// Debugging output, will be an actual REPL at some point.
+			printf( "> " );
+			char buf[128];
+			fgets( buf, 128, stdin );
+			
+			dump_tokens( parse_tokens( dump_tokens( lexerize( buf ), 0 )), 0 );
+		}
 	}
 
 	return ret;
