@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <gojira/lexer.h>
+#include <gojira/parser.h>
 
 void print_help( ){
 	printf( "Usage: gojira [-f filename] [-hi]\n" );
@@ -34,6 +35,10 @@ int main( int argc, char *argv[] ){
 					exit( 0 );
 					break;
 
+				case 'v':
+
+					break;
+
 				default:
 					print_help( );
 					exit( 1 );
@@ -50,7 +55,7 @@ int main( int argc, char *argv[] ){
 	char buf[128];
 	fgets( buf, 128, stdin );
 	
-	dump_tokens( lexerize( buf ), 0 );
+	dump_tokens( parse_tokens( dump_tokens( lexerize( buf ), 0 )), 0 );
 
 	if ( interactive ){
 		// enter REPL

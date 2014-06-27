@@ -22,6 +22,7 @@ typedef enum {
 
 typedef struct token {
 	type_t type;
+	unsigned status;
 
 	union {
 		void *data;
