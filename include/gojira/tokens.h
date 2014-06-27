@@ -17,6 +17,7 @@ typedef enum {
 	TYPE_PERIOD,
 	TYPE_APOSTR,
 	TYPE_OCTOTHORPE,
+	TYPE_ASTERISK,
 } type_t;
 
 typedef struct token {
@@ -30,5 +31,7 @@ typedef struct token {
 	struct token *next;
 	struct token *down;
 } token_t;
+
+token_t *dump_tokens( token_t *tokens, int level );
 
 #endif

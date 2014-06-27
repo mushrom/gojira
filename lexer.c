@@ -33,9 +33,16 @@ token_t *lexerize( char *string ){
 	return temp.next;
 }
 
+#define ALPHABET	"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#define DIGITS		"0123456789"
+#define ALPHANUM	ALPHABET DIGITS
+#define DELIMITER	"()[]{} "
+#define IDENTIFIER	ALPHABET "+*/-!"
+
 static token_return_t get_token_from_str( char *string ){
-	unsigned i;
 	token_return_t ret;
+	char *temp;
+	unsigned i;
 	
 	ret = (token_return_t){
 		.token 	= calloc( 1, sizeof( token_t )),
@@ -62,6 +69,11 @@ static token_return_t get_token_from_str( char *string ){
 			ret.token->type = TYPE_APOSTR;
 			ret.found = true;
 
+		} else if ( *string == '.' ){
+			ret.string = string + 1;
+			ret.token->type = TYPE_PERIOD;
+			ret.found = true;
+
 		} else if ( *string == '"' ){
 			ret.string = strchr( string + 1, '"' );
 
@@ -69,6 +81,7 @@ static token_return_t get_token_from_str( char *string ){
 				ret.string++;
 				ret.token->type = TYPE_STRING;
 				ret.found = true;
+
 			} else {
 				//TODO: let the user know they done messed up
 			}
@@ -96,13 +109,27 @@ static token_return_t get_token_from_str( char *string ){
 				ret.found = true;
 			}
 
-		} else if ( *string > 'A' && *string < 'z'
-			/* TODO: proper delimiting here */ ){
+		} else if ( strchr( DIGITS, *string )){
+			// TODO: Handle negative numbers
 
-			for ( i = 0; string[i] && string[i] >= 'A' && string[i] <= 'z'; i++ );
+			i = strspn( string, DIGITS );
+
+			ret.string = string + i;
+			ret.token->type = TYPE_NUMBER;
+			ret.found = true;
+
+		} else if ( strchr( IDENTIFIER, *string )){
+			i = strspn( string, IDENTIFIER );
+
 			ret.string = string + i;
 			ret.token->type = TYPE_SYMBOL;
 			ret.found = true;
+
+			temp = ret.token->data = malloc( sizeof( char[i + 1] ));
+			strncpy( ret.token->data, string, i );
+			temp[i] = 0;
+
+			printf( "> Have identifier \"%s\"\n", temp );
 		}
 	}
 
