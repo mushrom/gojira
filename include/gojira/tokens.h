@@ -18,6 +18,11 @@ typedef enum {
 	TYPE_APOSTR,
 	TYPE_OCTOTHORPE,
 	TYPE_ASTERISK,
+
+	// Types used by parser
+	TYPE_BASE_TOKEN,
+	TYPE_TOKEN_LIST,
+	TYPE_QUOTED_TOKEN,
 } type_t;
 
 typedef struct token {

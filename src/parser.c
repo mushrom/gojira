@@ -2,29 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <gojira/parser.h>
-
-static rule_t *scheme_rules = 
-	&(rule_t){
-		.type = TYPE_OPEN_PAREN,
-		.down = &(rule_t){
-			.type = TYPE_CLOSE_PAREN,
-			.ret  = TYPE_LIST,
-		}
-
-		/*
-		.next = &(rule_t){
-			.type = TYPE_
-		*/
-	};
-
-/*
-static rule_t *crules = NULL;
-extern char *debug_strings[];
-
-char *type_str( type_t type ){
-	return debug_strings[ type ];
-}
-*/
+#include <gojira/parse_debug.h>
+#include <gojira/scheme_rules.h>
 
 // Debugging function, to make sure the rule tables are being generated properly
 void dump_rules( int level, rule_t *rules ){
@@ -33,8 +12,7 @@ void dump_rules( int level, rule_t *rules ){
 		for ( i = 0; i < level; i++ )
 			printf( "    " );
 		
-		//printf( "%s -> %s\n", type_str( rules->type ), type_str( rules->ret ));
-		printf( "%d -> %d\n", rules->type, rules->ret );
+		printf( "%s -> %s\n", type_str( rules->type ), type_str( rules->ret ));
 		dump_rules( level+1, rules->down );
 		dump_rules( level, rules->next );
 	}
@@ -53,10 +31,8 @@ token_t *baseline_iter( token_t *tokens, rule_t *rules ){
 
 	if ( move ){
 		for ( ; !found && rmove; rmove = rmove->next ){
-			//printf( "r: \"%s\", ", type_str( rmove->type ));
 			if ( rmove->type == move->type ){
 				type = rmove->ret;
-				//printf( "matched. Type set to \"%s\"\n", type_str( type ));
 
 				if ( rmove->down ){
 					if ( move->next->type != rmove->down->type )
@@ -105,11 +81,6 @@ token_t *baseline( token_t *tokens, rule_t *rules ){
 		ret = temp;
 	}
 
-	/*
-	if ( ret )
-		printf( "returning \"%s\"\n", type_str( ret->type ));
-	*/
-
 	return ret;
 }
 
@@ -131,7 +102,7 @@ int has_higher_prec( type_t top, type_t bottom, rule_t *rules ){
 }
 
 // Repeatedly reduces until the returning token is either the topmost expression possible, 
-// or until it is of type "type"
+// or is of type "type"
 token_t *reduce( token_t *tokens, type_t type ){
 	token_t	*ret = tokens,
 			*move = tokens;

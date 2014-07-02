@@ -1,0 +1,7 @@
+; simplified scheme grammar
+pair		-> ( base_token . base_token )
+list		-> ( ) | ( token_list )
+token_list	-> base_token token_list | base_token
+base_token	-> boolean | number | char | string | vector | list | symbol | pair | quoted
+quoted		-> ' base_token
+vector		-> # list

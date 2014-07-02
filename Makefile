@@ -1,6 +1,6 @@
 SRC=${wildcard src/*.c} ${wildcard src/libs/*.c}
 OBJ=${SRC:.c=.o}
-CFLAGS=-I"${shell pwd}"/include -g -Wall
+CFLAGS=-I"${shell pwd}"/include -g -Wall -O3
 
 .c.o:
 	@echo CC -c $< -o $@

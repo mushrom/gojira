@@ -30,6 +30,9 @@ token_t *lexerize( char *string ){
 		foo = get_token_from_str( foo.string );
 	}
 
+	move->next = calloc( 1, sizeof( token_t ));
+	move->next->type = TYPE_NULL;
+
 	return temp.next;
 }
 
