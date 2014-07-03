@@ -9,7 +9,18 @@ token_t *dump_tokens( token_t *tokens, int level ){
 		for ( i = 0; i < level * 4; i++ )
 			putchar( ' ' );
 
-		printf( "%s\n", type_str( tokens->type ));
+		printf( "%s", type_str( tokens->type ));
+		switch( tokens->type ){
+			case TYPE_SYMBOL:
+				printf( ": %s", tokens->data );
+				break;
+			case TYPE_CHAR:
+				printf( ": %c", tokens->smalldata );
+				break;
+			default:
+				break;
+		}
+		printf( "\n" );
 		//printf( "Token, type: %d\n", tokens->type );
 		dump_tokens( tokens->down, level + 1 );
 		dump_tokens( tokens->next, level );
