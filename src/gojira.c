@@ -58,12 +58,16 @@ int main( int argc, char *argv[] ){
 	if ( interactive ){
 		// enter REPL
 		while ( 1 ){
+			token_t *tree;
 			// Debugging output, will be an actual REPL at some point.
 			printf( "> " );
 			char buf[128];
 			fgets( buf, 128, stdin );
-			
-			dump_tokens( parse_tokens( dump_tokens( lexerize( buf ), 0 )), 0 );
+
+			tree = parse_tokens( dump_tokens( lexerize( buf ), 0 ));
+			tree = remove_punc_tokens( tree );
+
+			dump_tokens( tree, 0 );
 		}
 	}
 

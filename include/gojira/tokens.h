@@ -39,5 +39,7 @@ typedef struct token {
 } token_t;
 
 token_t *dump_tokens( token_t *tokens, int level );
+token_t *strip_token( token_t *tokens, type_t type );
+token_t *remove_punc_tokens( token_t *tokens );
 
 #endif
