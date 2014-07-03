@@ -5,6 +5,7 @@
 #include <gojira/lexer.h>
 #include <gojira/parser.h>
 #include <gojira/config.h>
+#include <gojira/runtime/init.h>
 
 void print_help( ){
 	printf( "Usage: gojira [-f filename] [-hi]\n" );
@@ -16,6 +17,7 @@ int main( int argc, char *argv[] ){
 	int i;
 	bool interactive = false;
 	FILE *input_file = NULL;
+	runtime_t *runtime;
 
 	initialize_config( );
 	set_config_option( "testing", 1 );
@@ -42,7 +44,6 @@ int main( int argc, char *argv[] ){
 
 				case 'v':
 					set_config_option( "verbose", 1 );
-					set_config_option( "verbose", 1 );
 					break;
 
 				default:
@@ -53,7 +54,6 @@ int main( int argc, char *argv[] ){
 		}
 	}
 
-	// initialize_runtime( flags );
 
 	if ( interactive ){
 		// enter REPL
@@ -68,6 +68,8 @@ int main( int argc, char *argv[] ){
 			tree = remove_punc_tokens( tree );
 
 			dump_tokens( tree, 0 );
+
+			runtime = initialize_runtime( 0, tree );
 		}
 	}
 

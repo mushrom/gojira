@@ -1,4 +1,4 @@
-SRC=${wildcard src/*.c} ${wildcard src/libs/*.c}
+SRC=${wildcard src/*.c} ${wildcard src/libs/*.c} ${wildcard src/runtime/*.c}
 OBJ=${SRC:.c=.o}
 CFLAGS=-I"${shell pwd}"/include -g -Wall -O3
 
