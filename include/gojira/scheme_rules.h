@@ -11,6 +11,13 @@ static rule_t *scheme_rules =
 			.ret  = TYPE_LIST,
 
 		.next = &(rule_t){
+			.type = TYPE_TOKEN_LIST,
+			.down = &(rule_t){
+				.type = TYPE_CLOSE_PAREN,
+				.ret = TYPE_LIST,
+			},
+
+		.next = &(rule_t){
 			.type = TYPE_BASE_TOKEN,
 			.down = &(rule_t){
 				.type = TYPE_PERIOD,
@@ -22,14 +29,6 @@ static rule_t *scheme_rules =
 					},
 				},
 			},
-
-		.next = &(rule_t){
-			.type = TYPE_TOKEN_LIST,
-			.down = &(rule_t){
-				.type = TYPE_CLOSE_PAREN,
-				.ret = TYPE_LIST,
-			},
-
 		}}},
 
 	.next = &(rule_t){
