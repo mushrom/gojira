@@ -21,7 +21,8 @@ int main( int argc, char *argv[] ){
 
 	initialize_config( );
 	set_config_option( "testing", 1 );
-	printf( "Config option testing: %li\n", get_config_option( "testing" ));
+	printf( "Config option testing: %li\n",
+			get_config_option( "testing" ));
 
 	if ( argc < 2 ){
 		interactive = true;
@@ -55,6 +56,7 @@ int main( int argc, char *argv[] ){
 	}
 
 
+	runtime = initialize_runtime( 0 );
 	if ( interactive ){
 		// enter REPL
 		while ( 1 ){
@@ -68,10 +70,9 @@ int main( int argc, char *argv[] ){
 			tree = remove_punc_tokens( tree );
 
 			dump_tokens( tree, 0 );
-
-			runtime = initialize_runtime( 0, tree );
 		}
 	}
+	deinit_runtime( runtime );
 
 	return ret;
 } 
