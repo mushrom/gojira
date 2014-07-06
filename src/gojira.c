@@ -68,6 +68,8 @@ int main( int argc, char *argv[] ){
 			tree = remove_punc_tokens( tree );
 
 			dump_tokens( tree, 0 );
+
+			dump_tokens( eval_tokens( NULL, tree ), 0 );
 		}
 	}
 
