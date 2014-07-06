@@ -6,6 +6,7 @@
 #include <gojira/parser.h>
 #include <gojira/config.h>
 #include <gojira/runtime/init.h>
+#include <gojira/libs/stack.h>
 
 void print_help( ){
 	printf( "Usage: gojira [-f filename] [-hi]\n" );
@@ -14,10 +15,10 @@ void print_help( ){
 int main( int argc, char *argv[] ){
 	int ret = 0;
 	char option;
-	int i;
+	int i = 0;
 	bool interactive = false;
-	FILE *input_file = NULL;
 	runtime_t *runtime;
+	//FILE *input_file = NULL;
 
 	initialize_config( );
 	set_config_option( "testing", 1 );
@@ -54,7 +55,6 @@ int main( int argc, char *argv[] ){
 			}
 		}
 	}
-
 
 	runtime = initialize_runtime( 0 );
 	if ( interactive ){

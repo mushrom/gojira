@@ -11,6 +11,13 @@ list_head_t *list_create( int flags ){
 	return ret;
 }
 
+void list_free( list_head_t *list ){
+	if ( list ){
+		list_free_nodes( list->base );
+		free( list );
+	}
+}
+
 list_node_t *list_add_int( list_head_t *list, int val ){
 	list_node_t *ret;
 
@@ -37,6 +44,12 @@ list_node_t *list_remove_index( list_head_t *list, int index ){
 
 	move = list_get_index( list, index );
 	if ( move ){
+		if ( move == list->last )
+			list->last = move->prev;
+
+		if ( move == list->base )
+			list->base = move->next;
+
 		ret = list_remove_node( move );
 	}
 
@@ -44,22 +57,23 @@ list_node_t *list_remove_index( list_head_t *list, int index ){
 }
 
 list_node_t *list_get_index( list_head_t *list, int i ){
-	list_node_t *ret = list->base,
-		    *move = 0;
+	list_node_t *ret = list->base;
 	int n = 0;
 
-	if ( i > 0 )
-		move = list->base;
-	else if ( i < 0 )
-		move = list->last;
+	if ( i >= 0 ){
+		ret = list->base;
+	} else if ( i < 0 ){
+		ret = list->last;
+		n = -1;
+	}
 
-	while ( move && n != i ){
+	while ( ret && n != i ){
 		if ( i > 0 ){
 			n++;
-			ret = move = move->next;
+			ret = ret->next;
 		} else if ( i < 0 ){
 			n--;
-			ret = move = move->prev;
+			ret = ret->prev;
 		}
 	}
 
@@ -89,6 +103,8 @@ list_node_t *list_add_node( list_node_t *list, int val, void *data ){
 	temp = malloc( sizeof( list_node_t ));
 	temp->val = val;
 	temp->data = data;
+	temp->prev = 0;
+	temp->next = 0;
 	ret = temp;
 
 	if ( list ){
@@ -149,10 +165,12 @@ void list_free_nodes( list_node_t *node ){
 	list_node_t *move,
 		    *temp;
 
-	for ( move = node; move->prev; move = move->prev );
-	for ( ; move; move = temp ){
-		temp = move->next;
-		free( move );
+	if ( node ){
+		for ( move = node; move->prev; move = move->prev );
+		for ( ; move; move = temp ){
+			temp = move->next;
+			free( move );
+		}
 	}
 }
 
