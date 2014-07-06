@@ -5,7 +5,7 @@
 #include <gojira/lexer.h>
 #include <gojira/parser.h>
 #include <gojira/config.h>
-#include <gojira/runtime/init.h>
+#include <gojira/runtime/runtime.h>
 #include <gojira/libs/stack.h>
 
 void print_help( ){
@@ -17,7 +17,6 @@ int main( int argc, char *argv[] ){
 	char option;
 	int i = 0;
 	bool interactive = false;
-	runtime_t *runtime;
 	//FILE *input_file = NULL;
 
 	initialize_config( );
@@ -56,7 +55,6 @@ int main( int argc, char *argv[] ){
 		}
 	}
 
-	runtime = initialize_runtime( 0 );
 	if ( interactive ){
 		// enter REPL
 		while ( 1 ){
@@ -72,7 +70,6 @@ int main( int argc, char *argv[] ){
 			dump_tokens( tree, 0 );
 		}
 	}
-	deinit_runtime( runtime );
 
 	return ret;
 } 

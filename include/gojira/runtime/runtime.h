@@ -1,8 +1,9 @@
 #ifndef _GOJIRA_RUNTIME_RUNTIME_H
 #define _GOJIRA_RUNTIME_RUNTIME_H 1
 #include <gojira/tokens.h>
-#include <gojira/libs/list.h>
+#include <gojira/libs/stack.h>
 #include <gojira/libs/hashmap.h>
+#include <gojira/tokens.h>
 
 typedef struct variable {
 	token_t *token;
@@ -10,16 +11,15 @@ typedef struct variable {
 	unsigned references;
 } variable_t;
 
-typedef struct runtime {
-	unsigned flags;
+typedef struct continuation {
+	struct continuation *last; // Pointer to previous continuation
+	token_t *value;       // Where the end value of an expression is stored.
+	token_t *ret;         // pointer to original place in code (return position)
+	list_head_t *vars;    // Variable list, acts as the scope
+} continuation_t;
+typedef continuation_t cont_t;
 
-	list_head_t *scope_stack;
-	list_head_t *continuations;
-
-	list_node_t *current_scope;
-	list_node_t *current_cont;
-} runtime_t;
-
-token_t *eval_tokens( runtime_t *runtime, token_t *tokens );
+token_t *eval_tokens( continuation_t *cont, token_t *tokens );
+cont_t *cont_create( cont_t *cur_cont, token_t *ret_pos );
 
 #endif
