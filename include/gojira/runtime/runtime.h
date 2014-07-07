@@ -12,8 +12,8 @@ typedef struct variable {
 	unsigned references;
 } variable_t;
 
-typedef struct continuation {
-	struct continuation *last; // Pointer to previous continuation
+typedef struct stack_frame {
+	struct stack_frame *last; // Pointer to previous frameinuation
 	token_t *ret;         // pointer to original place in code (return position)
 	list_head_t *vars;    // Variable list, acts as the scope
 
@@ -21,11 +21,11 @@ typedef struct continuation {
 	token_t *end;         // last token in list
 	unsigned ntokens;     // number of tokens in the list
 	token_t *value;
-} continuation_t;
-typedef continuation_t cont_t;
+} stack_frame_t;
+typedef stack_frame_t st_frame_t;
 
-token_t *eval_tokens( continuation_t *cont, token_t *tokens );
-cont_t *cont_create( cont_t *cur_cont, token_t *ret_pos );
-variable_t *cont_add_var( cont_t *cont, char *key, token_t *token );
+token_t *eval_tokens( stack_frame_t *st_frame, token_t *tokens );
+st_frame_t *frame_create( st_frame_t *cur_frame, token_t *ret_pos );
+variable_t *frame_add_var( st_frame_t *frame, char *key, token_t *token );
 
 #endif

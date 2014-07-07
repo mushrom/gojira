@@ -4,22 +4,22 @@
 #include <string.h>
 #include <stdio.h>
 
-cont_t *eval_loop( cont_t *cont, token_t *tokens ){
+st_frame_t *eval_loop( st_frame_t *frame, token_t *tokens ){
 	token_t expr;
 	token_t *move;
 	token_t *cptr;
-	cont_t *cur_cont;
+	st_frame_t *cur_frame;
 
 	memset( &expr, 0, sizeof( token_t ));
 	move = &expr;
 	cptr = tokens;
 
-	cur_cont = cont;
+	cur_frame = frame;
 
-	while ( cur_cont ){
+	while ( cur_frame ){
 		while ( cptr ){
 			if ( cptr->type == TYPE_LIST && cptr->down ){
-				// Create continuation, evaluate tokens in list
+				// Create frameinuation, evaluate tokens in list
 				printf( "[%s] Got a list, ret = %p\n", __func__, cptr );
 
 				if ( cptr->down->type == TYPE_SYMBOL && (
@@ -28,7 +28,7 @@ cont_t *eval_loop( cont_t *cont, token_t *tokens ){
 
 					//handle special functions here
 
-					cur_cont->value = cptr;
+					cur_frame->value = cptr;
 					cptr = cptr->next;
 
 				} else {
@@ -37,7 +37,7 @@ cont_t *eval_loop( cont_t *cont, token_t *tokens ){
 								__func__, cptr->down->data );
 					}
 
-					cur_cont = cont_create( cur_cont, cptr->next );
+					cur_frame = frame_create( cur_frame, cptr->next );
 					cptr = cptr->down;
 				}
 
@@ -45,51 +45,51 @@ cont_t *eval_loop( cont_t *cont, token_t *tokens ){
 				printf( "[%s] Don't know what to do with token of type \"%s\", "
 						"continuing...\n", __func__, type_str( cptr->type ));
 
-				cur_cont->value = cptr;
+				cur_frame->value = cptr;
 				cptr = cptr->next;
 			}
 		}
 
-		// return from current continuation, if cur_cont->ret
+		// return from current frameinuation, if cur_frame->ret
 		// is not null
-		printf( "[%s] Returning to %p\n", __func__, cur_cont->ret );
-		cptr = cur_cont->ret;
-		cur_cont = cur_cont->last;
+		printf( "[%s] Returning to %p\n", __func__, cur_frame->ret );
+		cptr = cur_frame->ret;
+		cur_frame = cur_frame->last;
 	}
 
-	return cont;
+	return frame;
 }
 
-token_t *eval_tokens( continuation_t *cont, token_t *tokens ){
+token_t *eval_tokens( stack_frame_t *st_frame, token_t *tokens ){
 	token_t *ret = tokens;
-	cont_t *temp_cont = cont_create( NULL, NULL );
+	st_frame_t *temp_frame = frame_create( NULL, NULL );
 
-	eval_loop( temp_cont, tokens );
+	eval_loop( temp_frame, tokens );
 
 	return ret;
 }
 
-cont_t *cont_create( cont_t *cur_cont, token_t *ret_pos ){
-	cont_t *ret;
+st_frame_t *frame_create( st_frame_t *cur_frame, token_t *ret_pos ){
+	st_frame_t *ret;
 
-	ret = calloc( 1, sizeof( cont_t ));
-	ret->last = cur_cont;
+	ret = calloc( 1, sizeof( st_frame_t ));
+	ret->last = cur_frame;
 	ret->ret = ret_pos;
 
 	return ret;
 }
 
-variable_t *cont_add_var( cont_t *cont, char *key, token_t *token ){
+variable_t *frame_add_var( st_frame_t *frame, char *key, token_t *token ){
 	variable_t *new_var;
 
-	if ( !cont->vars )
-		cont->vars = list_create( 0 );
+	if ( !frame->vars )
+		frame->vars = list_create( 0 );
 
 	new_var = calloc( 1, sizeof( variable_t ));
 	new_var->key = strdup( key );
 	new_var->token = token;
 
-	list_add_data( cont->vars, new_var );
+	list_add_data( frame->vars, new_var );
 
 	return new_var;
 }
