@@ -4,6 +4,29 @@
 #include <string.h>
 #include <stdio.h>
 
+token_t *eval_function( st_frame_t *frame, list_head_t *tokens ){
+	list_node_t *temp;
+	token_t *token = NULL;
+	temp = tokens->base;
+
+	printf( "[%s] Dumping token list: ", __func__ );
+
+	foreach_in_list( temp ){
+		token = temp->data;
+
+		if ( token ){
+			printf( "%s", type_str( token->type ));
+			if ( token->type == TYPE_SYMBOL )
+				printf( " \"%s\"", (char *)token->data );
+			printf( " -> " );
+		}
+	}
+
+	printf( "\n" );
+
+	return token;
+}
+
 st_frame_t *eval_loop( st_frame_t *frame, token_t *tokens ){
 	token_t expr;
 	token_t *move;
@@ -38,6 +61,7 @@ st_frame_t *eval_loop( st_frame_t *frame, token_t *tokens ){
 					}
 
 					cur_frame = frame_create( cur_frame, cptr->next );
+					//list_add_data( cur_frame->expr, cptr->down );
 					cptr = cptr->down;
 				}
 
@@ -45,14 +69,32 @@ st_frame_t *eval_loop( st_frame_t *frame, token_t *tokens ){
 				printf( "[%s] Don't know what to do with token of type \"%s\", "
 						"continuing...\n", __func__, type_str( cptr->type ));
 
+				if ( cur_frame->last && cur_frame->last->expr ){
+					list_add_data( cur_frame->last->expr, cptr );
+					printf( "[%s] Adding token to current expression list of type \"%s\"\n", __func__, type_str( cptr->type ));
+					if ( cptr->type == TYPE_SYMBOL )
+						printf( "[%s]\t symbol: \"%s\"\n", __func__, (char *)cptr->data );
+				}
+
 				cur_frame->value = cptr;
 				cptr = cptr->next;
 			}
 		}
 
-		// return from current frameinuation, if cur_frame->ret
+		// Evaluate function
+		eval_function( cur_frame, cur_frame->expr );
+
+		// return from current frame, if cur_frame->ret
 		// is not null
 		printf( "[%s] Returning to %p\n", __func__, cur_frame->ret );
+
+		if ( cur_frame->last && cur_frame->last->expr && cur_frame->value ){
+			//list_add_data( cur_frame->last->expr, cur_frame->value );
+			//printf( "[%s] Returning token to last expression type \"%s\"\n", __func__, type_str( cptr->type ));
+		} else if ( !cur_frame->value ){
+			printf( "[%s] Warning: Frame returned no value, something might be broken\n", __func__ );
+		}
+
 		cptr = cur_frame->ret;
 		cur_frame = cur_frame->last;
 	}
@@ -75,6 +117,9 @@ st_frame_t *frame_create( st_frame_t *cur_frame, token_t *ret_pos ){
 	ret = calloc( 1, sizeof( st_frame_t ));
 	ret->last = cur_frame;
 	ret->ret = ret_pos;
+
+	ret->value = NULL;
+	ret->expr = list_create( 0 );
 
 	return ret;
 }
