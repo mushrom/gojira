@@ -29,5 +29,6 @@ st_frame_t *eval_loop( st_frame_t *frame, token_t *tokens );
 token_t *eval_tokens( stack_frame_t *st_frame, token_t *tokens );
 st_frame_t *frame_create( st_frame_t *cur_frame, token_t *ret_pos );
 variable_t *frame_add_var( st_frame_t *frame, char *key, token_t *token );
+token_t *frame_find_var( st_frame_t *frame, char *key );
 
 #endif

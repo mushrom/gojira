@@ -23,6 +23,10 @@ typedef enum {
 	TYPE_BASE_TOKEN,
 	TYPE_TOKEN_LIST,
 	TYPE_QUOTED_TOKEN,
+
+	// Types used by interpreter
+	TYPE_PROCEDURE,
+	TYPE_EXTERN_PROC,
 } type_t;
 
 typedef struct token {
