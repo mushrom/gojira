@@ -14,34 +14,24 @@ token_t *eval_function( st_frame_t *frame, list_head_t *tokens ){
 	temp = tokens->base;
 
 	if ( temp && temp->data ){
-		func = temp->data;
-		printf( "[%s] Dumping token list for type %s: ",
+		token = func = temp->data;
+		printf( "[%s] Dumping token list for type %s\n",
 				__func__, type_str( func->type ));
 		//printf( "[%s] Dumping token list: ", __func__ );
 
-		foreach_in_list( temp ){
-			token = temp->data;
 
-			if ( token ){
-				printf( "%s", type_str( token->type ));
-
-				if ( token->type == TYPE_SYMBOL ){
-					char *name = token->data;
-					printf( " \"%s\"", name );
-					printf( " (at %p)", frame_find_var( frame, name ));
-				}
-
-				printf( " -> " );
-			}
-		}
-
-		printf( "\n" );
+		printf( "===\n" );
+		stack_trace( frame );
+		printf( "===\n" );
 	}
 
+	/*
 	ret = calloc( 1, sizeof( token_t ));
 	ret->type = TYPE_QUOTED_TOKEN;
 	token = ret->down = calloc( 1, sizeof( token_t ));
 	token->type = TYPE_LIST;
+	*/
+	ret = token;
 
 	return ret;
 }
@@ -80,16 +70,36 @@ st_frame_t *eval_loop( st_frame_t *frame, token_t *tokens ){
 				}
 
 			} else {
+				/*
 				printf( "[%s] Don't know what to do with token of type \"%s\", "
 						"continuing...\n", __func__, type_str( cptr->type ));
+						*/
 
-				list_add_data( cur_frame->expr, cptr );
-				printf( "[%s] Adding token to current expression "
-						"list of type \"%s\"\n", __func__, type_str( cptr->type ));
-				if ( cptr->type == TYPE_SYMBOL )
-					printf( "[%s]\t symbol: \"%s\"\n", __func__, (char *)cptr->data );
+				token_t *add = NULL;
+				char *name = cptr->data;
+
+				if ( cptr->type == TYPE_SYMBOL ){
+					add = frame_find_var( cur_frame, (char *)cptr->data );
+
+					printf( "[%s]\t symbol: \"%s\" at %p\n", __func__,
+							name, add );
+
+					if ( !add ){
+						printf( "[%s] Error: variable \"%s\" not bound\n", __func__, name );
+						stack_trace( cur_frame );
+						add = cptr;
+					}
+
+				} else {
+					add = cptr;
+				}
 
 				cptr = cptr->next;
+
+				list_add_data( cur_frame->expr, add );
+				printf( "[%s] Adding token to current expression "
+						"list of type \"%s\"\n", __func__, type_str( add->type ));
+
 			}
 		}
 
@@ -122,7 +132,8 @@ token_t *eval_tokens( stack_frame_t *st_frame, token_t *tokens ){
 	st_frame_t *temp_frame = frame_create( NULL, NULL );
 	list_node_t *foo;
 
-	frame_add_var( temp_frame, "foo", parse_tokens( lexerize( "'()" )));
+	frame_add_var( temp_frame, "foo",
+			remove_punc_tokens( parse_tokens( lexerize( "#(a b c)" ))));
 
 	eval_loop( temp_frame, tokens );
 	foo = list_get_index( temp_frame->expr, 0 );
@@ -184,4 +195,43 @@ variable_t *frame_add_var( st_frame_t *frame, char *key, token_t *token ){
 	list_add_data( frame->vars, new_var );
 
 	return new_var;
+}
+
+void stack_trace( st_frame_t *frame ){
+	st_frame_t *move = frame;
+	list_node_t *temp;
+	token_t *token = NULL;
+	token_t *func = NULL;
+	unsigned i;
+
+	printf( "[stack trace]\n" );
+	for ( move = frame, i = 0; move; move = move->last, i++ ){
+		temp = move->expr->base;
+
+		printf( "[%u] ", i );
+
+		if ( temp && temp->data ){
+			func = temp->data;
+
+			foreach_in_list( temp ){
+				token = temp->data;
+
+				if ( token ){
+					printf( "%s", type_str( token->type ));
+
+					if ( token->type == TYPE_SYMBOL ){
+						char *name = token->data;
+						printf( " \"%s\"", name );
+						printf( " (at %p)", frame_find_var( frame, name ));
+					}
+
+					printf( " -> " );
+				}
+			}
+
+			printf( "\n" );
+		} else {
+			printf( "Frame has no tokens.\n" );
+		}
+	}
 }
