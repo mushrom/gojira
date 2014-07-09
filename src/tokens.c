@@ -74,6 +74,7 @@ token_t *remove_punc_tokens( token_t *tokens ){
 		ret = strip_token( ret, TYPE_OCTOTHORPE );
 		ret = strip_token( ret, TYPE_TOKEN_LIST );
 		ret = strip_token( ret, TYPE_BASE_TOKEN );
+		ret = strip_token( ret, TYPE_NULL );
 
 		ret->down = remove_punc_tokens( ret->down );
 		ret->next = remove_punc_tokens( ret->next );
@@ -81,3 +82,35 @@ token_t *remove_punc_tokens( token_t *tokens ){
 
 	return ret;
 }
+
+// Clones every token reachable from the given token
+token_t *clone_tokens( token_t *tree ){
+	token_t *ret = NULL;
+
+	if ( tree ){
+		ret = calloc( 1, sizeof( token_t ));
+		// TODO: copy tree->data or tree->smalldata depending on the type
+		memcpy( ret, tree, sizeof( token_t ));
+
+		ret->down = clone_tokens( tree->down );
+		ret->next = clone_tokens( tree->next );
+	}
+	
+	return ret;
+}
+
+// Clones a token and all lower nodes
+token_t *clone_token_tree( token_t *tree ){
+	token_t *ret = NULL;
+
+	if ( tree ){
+		ret = calloc( 1, sizeof( token_t ));
+		memcpy( ret, tree, sizeof( token_t ));
+
+		ret->down = clone_tokens( tree->down );
+		ret->next = NULL;
+	}
+
+	return ret;
+}
+
