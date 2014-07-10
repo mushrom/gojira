@@ -21,6 +21,9 @@ char *debug_strings[] = {
 	"base token",
 	"token_list",
 	"quoted",
+
+	"procedure",
+	"external procedure",
 };
 
 char *type_str( type_t type ){

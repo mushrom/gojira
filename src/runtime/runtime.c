@@ -1,30 +1,46 @@
 #include <gojira/runtime/runtime.h>
+#include <gojira/runtime/builtin.h>
 #include <gojira/parser.h>
 #include <gojira/lexer.h>
 #include <gojira/parse_debug.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 token_t *eval_function( st_frame_t *frame ){
 	token_t *token = NULL;
 	token_t *func = NULL;
 	token_t *ret = NULL;
+	ext_proc_t *ext;
+	scheme_func handle;
 
 	token = func = frame->expr;
 	printf( "[%s] Dumping token list for type %s\n",
 			__func__, type_str( func->type ));
 	//printf( "[%s] Dumping token list: ", __func__ );
 
+	switch ( func->type ){
+		case TYPE_EXTERN_PROC:
+			ext = func->data;
+			handle = ext->handler;
+			printf( "[%s] Have external procedure, evaluating at %p...\n",
+					__func__, handle );
+
+			ret = handle( frame );
+			break;
+
+		default:
+			// debugging output until procedures are implemented
+			ret = calloc( 1, sizeof( token_t ));
+			ret->type = TYPE_LIST;
+			ret->down = token;
+			break;
+	}
 
 	printf( "===\n" );
 	stack_trace( frame );
 	printf( "===\n" );
-
-	// debugging output until procedures are implemented
-	ret = calloc( 1, sizeof( token_t ));
-	ret->type = TYPE_LIST;
-	ret->down = token;
 
 	dump_tokens( ret, 2 );
 
@@ -43,33 +59,54 @@ st_frame_t *eval_loop( st_frame_t *frame, token_t *tokens ){
 
 	while ( cur_frame ){
 		while ( cptr ){
+
+			// Evaluate a token list, if it's a list
 			if ( cptr->type == TYPE_LIST && cptr->down ){
-				// Create frameinuation, evaluate tokens in list
+
 				printf( "[%s] Got a list, ret = %p\n", __func__, cptr );
 
-				if ( cptr->down->type == TYPE_SYMBOL && (
-						strcmp( cptr->down->data, "define" ) == 0 ||
-						strcmp( cptr->down->data, "lambda" ) == 0 )){
-
-					//handle special functions here
-					cptr = cptr->next;
-
-				} else {
-					if ( cptr->down->type == TYPE_SYMBOL ){
-						printf( "[%s] Will be evaluating \"%s\"...\n",
-								__func__, (char *)cptr->down->data );
-					}
-
-					cur_frame = frame_create( cur_frame, cptr->next );
-					cptr = cptr->down;
+				if ( cptr->down->type == TYPE_SYMBOL ){
+					printf( "[%s] Will be evaluating \"%s\"...\n",
+							__func__, (char *)cptr->down->data );
 				}
 
+				cur_frame = frame_create( cur_frame, cptr->next );
+				cptr = cptr->down;
+
+			// Otherwise add tokens in the list to the current stack frame
 			} else {
 
 				token_t *add = NULL;
 				char *name = cptr->data;
+				bool builtin = false;
 
-				if ( cptr->type == TYPE_SYMBOL ){
+				// handle special functions where expressions in the list shouldn't be evaluated
+				if ( cptr->type == TYPE_SYMBOL && (
+						strcmp( cptr->data, "define" ) == 0 ||
+						strcmp( cptr->data, "lambda" ) == 0 )){
+
+					token_t *move;
+					token_t *add;
+
+					builtin = true;
+					add = frame_find_var( cur_frame, (char *)cptr->data );
+
+					if ( add ){
+						frame_add_token( cur_frame, add );
+
+						printf( "[%s]\t symbol: \"%s\" at %p\n", __func__,
+								(char *)cptr->data, add );
+					} else {
+						printf( "[%s] Error: got null value for builtin function (!?)\n", __func__ );
+					}
+
+					for ( cptr = cptr->next; cptr; cptr = cptr->next )
+						frame_add_token( cur_frame, cptr );
+
+					stack_trace( cur_frame );
+
+				// Create new stack frame, enter it, and set cptr inside the list
+				} else if ( cptr->type == TYPE_SYMBOL ){
 					add = frame_find_var( cur_frame, (char *)cptr->data );
 
 					printf( "[%s]\t symbol: \"%s\" at %p\n", __func__,
@@ -77,7 +114,8 @@ st_frame_t *eval_loop( st_frame_t *frame, token_t *tokens ){
 
 					if ( !add ){
 						printf( "[%s] Error: variable \"%s\" not bound\n", __func__, name );
-						stack_trace( cur_frame );
+						// Uncomment and error out
+						// stack_trace( cur_frame );
 						add = cptr;
 					}
 
@@ -85,13 +123,15 @@ st_frame_t *eval_loop( st_frame_t *frame, token_t *tokens ){
 					add = cptr;
 				}
 
-				cptr = cptr->next;
+				if ( !builtin ){
+					cptr = cptr->next;
 
-				//list_add_data( cur_frame->expr, add );
-				frame_add_token( cur_frame, add );
-				
-				printf( "[%s] Adding token to current expression "
-						"list of type \"%s\"\n", __func__, type_str( add->type ));
+					//list_add_data( cur_frame->expr, add );
+					frame_add_token( cur_frame, add );
+
+					printf( "[%s] Adding token to current expression "
+							"list of type \"%s\"\n", __func__, type_str( add->type ));
+				}
 
 				stack_trace( cur_frame );
 			}
@@ -130,6 +170,12 @@ token_t *eval_tokens( stack_frame_t *st_frame, token_t *tokens ){
 
 	frame_add_var( temp_frame, "foo",
 			remove_punc_tokens( parse_tokens( lexerize( "#(a b c)" ))));
+
+	frame_add_var( temp_frame, "define",
+			ext_proc_token( builtin_define ));
+
+	frame_add_var( temp_frame, "lambda",
+			ext_proc_token( builtin_lambda ));
 
 	eval_loop( temp_frame, tokens );
 	ret = temp_frame->expr;
@@ -212,7 +258,8 @@ void stack_trace( st_frame_t *frame ){
 				printf( " (at %p)", frame_find_var( frame, name ));
 			}
 
-			printf( " -> " );
+			if ( token->next )
+				printf( " -> " );
 		}
 
 		printf( "\n" );
@@ -229,6 +276,8 @@ token_t *frame_add_token( st_frame_t *frame, token_t *token ){
 		frame->end->next = clone_token_tree( token );
 		frame->end = frame->end->next;
 	}
+
+	frame->ntokens++;
 
 	return ret;
 }
