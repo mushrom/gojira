@@ -19,13 +19,18 @@ typedef enum {
 	TYPE_OCTOTHORPE,
 	TYPE_ASTERISK,
 
+	// Generated from symbol names in lexer
+	TYPE_DEFINE,
+	TYPE_LAMBDA,
+
 	// Types used by parser
 	TYPE_BASE_TOKEN,
 	TYPE_TOKEN_LIST,
 	TYPE_QUOTED_TOKEN,
+	TYPE_DEFINE_EXPR,
+	TYPE_PROCEDURE,
 
 	// Types used by interpreter
-	TYPE_PROCEDURE,
 	TYPE_EXTERN_PROC,
 } type_t;
 

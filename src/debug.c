@@ -18,11 +18,15 @@ char *debug_strings[] = {
 	"#",
 	"*",
 
+	"define",
+	"lambda",
+
 	"base token",
 	"token_list",
 	"quoted",
-
+	"definition",
 	"procedure",
+
 	"external procedure",
 };
 

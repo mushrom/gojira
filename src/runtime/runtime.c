@@ -18,7 +18,6 @@ token_t *eval_function( st_frame_t *frame ){
 	token = func = frame->expr;
 	printf( "[%s] Dumping token list for type %s\n",
 			__func__, type_str( func->type ));
-	//printf( "[%s] Dumping token list: ", __func__ );
 
 	switch ( func->type ){
 		case TYPE_EXTERN_PROC:
@@ -29,6 +28,9 @@ token_t *eval_function( st_frame_t *frame ){
 
 			ret = handle( frame );
 			break;
+
+		case TYPE_DEFINE_EXPR:
+			printf( "[%s] Have define expression\n", __func__ );
 
 		default:
 			// debugging output until procedures are implemented

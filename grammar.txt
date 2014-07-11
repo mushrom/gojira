@@ -2,6 +2,9 @@
 pair		-> ( base_token . base_token )
 list		-> ( ) | ( token_list )
 token_list	-> base_token token_list | base_token
-base_token	-> boolean | number | char | string | vector | list | symbol | pair | quoted
+base_token	-> boolean | number | char | string | vector
+				| list | symbol | pair | quoted | define_expr | procedure
 quoted		-> ' base_token
 vector		-> # list
+define_expr -> define token_list
+procedure   -> lambda token_list

@@ -1,3 +1,4 @@
+#include <gojira/runtime/runtime.h>
 #include <gojira/runtime/builtin.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -20,10 +21,28 @@ token_t *builtin_define( stack_frame_t *frame ){
 	token_t *ret = frame->expr;
 
 	printf( "[%s] Got here\n", __func__ );
-	if ( frame->ntokens != 3 )
-		printf( "[%s] Have invalid number of tokens in define (have %d, expected 2)\n", __func__, frame->ntokens - 1 );
+	if ( frame->ntokens == 3 ){
+		char *name = NULL;
 
-	ret = ret->next;
+		if( ret->next->type == TYPE_SYMBOL ){
+			name = ret->next->data;
+
+			if ( frame->last ){
+				frame_add_var( frame->last, name, ret->next->next );
+			} else {
+				printf( "[%s] Error: don't have a returning frame to define in (how did you even call this?)\n", __func__ );
+			}
+
+		} else { 
+			printf( "[%s] Error: symbol expected\n", __func__ );
+			stack_trace( frame );
+		}
+
+		ret = ret->next;
+			
+	} else {
+		printf( "[%s] Have invalid number of tokens in define (have %d, expected 2)\n", __func__, frame->ntokens - 1 );
+	}
 
 	return ret;
 }
