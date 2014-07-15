@@ -8,179 +8,92 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-token_t *eval_function( st_frame_t *frame ){
-	token_t *token = NULL;
-	token_t *func = NULL;
-	token_t *ret = NULL;
-	ext_proc_t *ext;
-	scheme_func handle;
+token_t *eval_tokens( stack_frame_t *frame, token_t *tokens ){
+	token_t *ret = tokens;
+	token_t *temp;
+	token_t *move;
+	token_t *foo;
+	char *name;
+	st_frame_t *tempframe;
+	
+	//tempframe = frame_create( frame, NULL );
 
-	token = func = frame->expr;
-	printf( "[%s] Dumping token list for type %s\n",
-			__func__, type_str( func->type ));
+	if ( tokens ){
+		for ( move = tokens; move; move = move->next ){
+			if ( move->type == TYPE_SYMBOL ){
+				name = move->data;
+				temp = frame_find_var( frame, name );
 
-	switch ( func->type ){
-		case TYPE_EXTERN_PROC:
-			ext = func->data;
-			handle = ext->handler;
-			printf( "[%s] Have external procedure, evaluating at %p...\n",
-					__func__, handle );
+				if ( temp ){
+					ret = temp;
 
-			ret = handle( frame );
-			break;
-
-		case TYPE_DEFINE_EXPR:
-			printf( "[%s] Have define expression\n", __func__ );
-
-		default:
-			// debugging output until procedures are implemented
-			ret = calloc( 1, sizeof( token_t ));
-			ret->type = TYPE_LIST;
-			ret->down = token;
-			break;
-	}
-
-	printf( "===\n" );
-	stack_trace( frame );
-	printf( "===\n" );
-
-	dump_tokens( ret, 2 );
-
-	return ret;
-}
-
-st_frame_t *eval_loop( st_frame_t *frame, token_t *tokens ){
-	token_t expr;
-	token_t *cptr;
-	st_frame_t *cur_frame;
-
-	memset( &expr, 0, sizeof( token_t ));
-	cptr = tokens;
-
-	cur_frame = frame;
-
-	while ( cur_frame ){
-		while ( cptr ){
-
-			// Evaluate a token list, if it's a list
-			if ( cptr->type == TYPE_LIST && cptr->down ){
-
-				printf( "[%s] Got a list, ret = %p\n", __func__, cptr );
-
-				if ( cptr->down->type == TYPE_SYMBOL ){
-					printf( "[%s] Will be evaluating \"%s\"...\n",
-							__func__, (char *)cptr->down->data );
+				} else {
+					// Error out here, undefined variable
+					printf( "[%s] Error: undefined variable \"%s\"\n", __func__, name );
+					//ret = NULL;
+					ret = move;
 				}
 
-				cur_frame = frame_create( cur_frame, cptr->next );
-				cptr = cptr->down;
+			} else if ( move->type != TYPE_LIST ){
+				ret = move;
 
-			// Otherwise add tokens in the list to the current stack frame
 			} else {
-
-				token_t *add = NULL;
-				char *name = cptr->data;
 				bool builtin = false;
+				temp = move->down;
 
-				// handle special functions where expressions in the list shouldn't be evaluated
-				if ( cptr->type == TYPE_SYMBOL && (
-						strcmp( cptr->data, "define" ) == 0 ||
-						strcmp( cptr->data, "lambda" ) == 0 )){
+				if ( move->down ){
+					if ( temp->type == TYPE_DEFINE_EXPR ){
+						builtin = true;
 
-					token_t *move;
-					token_t *add;
+						temp = temp->down;
+						token_t *newvar = NULL;
+						token_t *setvar = NULL;
 
-					builtin = true;
-					add = frame_find_var( cur_frame, (char *)cptr->data );
+						if ( temp->next && temp->next->type == TYPE_SYMBOL ){
+							newvar = temp->next;
 
-					if ( add ){
-						frame_add_token( cur_frame, add );
+							if ( temp->next->next ){
+								setvar = eval_tokens( frame, temp->next->next );
+							}
+						}
 
-						printf( "[%s]\t symbol: \"%s\" at %p\n", __func__,
-								(char *)cptr->data, add );
-					} else {
-						printf( "[%s] Error: got null value for builtin function (!?)\n", __func__ );
+						if ( newvar ){
+							frame_add_var( frame, newvar->data, setvar );
+
+						} else {
+							printf( "[%s] Definition missing arguments\n", __func__ );
+							stack_trace( frame );
+						}
+
+					} else if ( temp->type == TYPE_PROCEDURE ){
+						builtin = true;
+						printf( "[%s] has procedure\n", __func__ );
 					}
 
-					for ( cptr = cptr->next; cptr; cptr = cptr->next )
-						frame_add_token( cur_frame, cptr );
+					if ( !builtin ){
+						printf( "[%s] Got here\n", __func__ );
+						tempframe = frame_create( frame, NULL );
 
-					stack_trace( cur_frame );
+						/*
+						for ( ; temp; temp = temp->next ){
+							frame_add_token( tempframe, eval_tokens( tempframe, temp ));
+						}
+						*/
+						frame_add_token( tempframe, eval_tokens( tempframe, temp ));
 
-				// Create new stack frame, enter it, and set cptr inside the list
-				} else if ( cptr->type == TYPE_SYMBOL ){
-					add = frame_find_var( cur_frame, (char *)cptr->data );
-
-					printf( "[%s]\t symbol: \"%s\" at %p\n", __func__,
-							name, add );
-
-					if ( !add ){
-						printf( "[%s] Error: variable \"%s\" not bound\n", __func__, name );
-						// Uncomment and error out
-						// stack_trace( cur_frame );
-						add = cptr;
+						eval_tokens( tempframe, tempframe->expr );
+						stack_trace( tempframe );
 					}
 
 				} else {
-					add = cptr;
+					printf( "Error: empty expression\n" );
+					stack_trace( frame );
+					ret = NULL;
+					builtin = true;
 				}
-
-				if ( !builtin ){
-					cptr = cptr->next;
-
-					//list_add_data( cur_frame->expr, add );
-					frame_add_token( cur_frame, add );
-
-					printf( "[%s] Adding token to current expression "
-							"list of type \"%s\"\n", __func__, type_str( add->type ));
-				}
-
-				stack_trace( cur_frame );
 			}
 		}
-
-		// Evaluate function
-		cur_frame->value = eval_function( cur_frame );
-
-		// return from current frame, if cur_frame->ret
-		// is not null
-		printf( "[%s] Returning to %p\n", __func__, cur_frame->ret );
-
-		if ( cur_frame->last && cur_frame->value ){
-			//list_add_data( cur_frame->last->expr, cur_frame->value );
-			frame_add_token( cur_frame->last, cur_frame->value );
-
-			printf( "[%s] Returning token to last expression type \"%s\"\n",
-					__func__, type_str( cur_frame->value->type ));
-
-		} else if ( !cur_frame->value ){
-			printf( "[%s] Warning: Frame returned no value, "
-					"something might be broken\n", __func__ );
-		}
-
-		cptr = cur_frame->ret;
-		cur_frame = cur_frame->last;
 	}
-
-	return frame;
-}
-
-token_t *eval_tokens( stack_frame_t *st_frame, token_t *tokens ){
-	//token_t *ret = tokens;
-	token_t *ret;
-	st_frame_t *temp_frame = frame_create( NULL, NULL );
-
-	frame_add_var( temp_frame, "foo",
-			remove_punc_tokens( parse_tokens( lexerize( "#(a b c)" ))));
-
-	frame_add_var( temp_frame, "define",
-			ext_proc_token( builtin_define ));
-
-	frame_add_var( temp_frame, "lambda",
-			ext_proc_token( builtin_lambda ));
-
-	eval_loop( temp_frame, tokens );
-	ret = temp_frame->expr;
 
 	return ret;
 }
@@ -223,16 +136,22 @@ token_t *frame_find_var( st_frame_t *frame, char *key ){
 }
 
 variable_t *frame_add_var( st_frame_t *frame, char *key, token_t *token ){
-	variable_t *new_var;
+	variable_t *new_var = NULL;
 
-	if ( !frame->vars )
-		frame->vars = list_create( 0 );
+	if ( frame ){
+		if ( !frame->vars )
+			frame->vars = list_create( 0 );
 
-	new_var = calloc( 1, sizeof( variable_t ));
-	new_var->key = strdup( key );
-	new_var->token = token;
+		new_var = calloc( 1, sizeof( variable_t ));
+		new_var->key = strdup( key );
+		new_var->token = token;
 
-	list_add_data( frame->vars, new_var );
+		list_add_data( frame->vars, new_var );
+
+	} else {
+		printf( "[%s] Warning: Got null frame, can't add variable \"%s\"\n",
+				__func__, key );
+	}
 
 	return new_var;
 }

@@ -17,6 +17,7 @@ int main( int argc, char *argv[] ){
 	char option;
 	int i = 0;
 	bool interactive = false;
+	stack_frame_t *global_frame;
 	//FILE *input_file = NULL;
 
 	initialize_config( );
@@ -55,6 +56,8 @@ int main( int argc, char *argv[] ){
 		}
 	}
 
+	global_frame = frame_create( NULL, NULL );
+
 	if ( interactive ){
 		// enter REPL
 		while ( 1 ){
@@ -69,7 +72,7 @@ int main( int argc, char *argv[] ){
 
 			dump_tokens( tree, 0 );
 
-			dump_tokens( eval_tokens( NULL, tree ), 0 );
+			dump_tokens( eval_tokens( global_frame, tree ), 0 );
 		}
 	}
 

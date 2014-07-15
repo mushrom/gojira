@@ -18,7 +18,7 @@ token_t *ext_proc_token( scheme_func handle ){
 }
 
 token_t *builtin_define( stack_frame_t *frame ){
-	token_t *ret = frame->expr;
+	token_t *ret = frame->expr->down;
 
 	printf( "[%s] Got here\n", __func__ );
 	if ( frame->ntokens == 3 ){

@@ -114,3 +114,11 @@ token_t *clone_token_tree( token_t *tree ){
 	return ret;
 }
 
+unsigned tokens_length( token_t *tree ){
+	unsigned ret;
+	token_t *move = tree;
+
+	for ( ret = 0; move; move = move->next, ret++ );
+
+	return ret;
+}
