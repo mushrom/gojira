@@ -13,11 +13,13 @@ typedef struct ext_proc {
 
 token_t *ext_proc_token( scheme_func handle );
 
+token_t *builtin_equal( stack_frame_t *frame );
 token_t *builtin_add( stack_frame_t *frame );
 token_t *builtin_multiply( stack_frame_t *frame );
 token_t *builtin_subtract( stack_frame_t *frame );
 token_t *builtin_divide( stack_frame_t *frame );
 token_t *builtin_display( stack_frame_t *frame );
 token_t *builtin_newline( stack_frame_t *frame );
+token_t *builtin_stacktrace( stack_frame_t *frame );
 
 #endif

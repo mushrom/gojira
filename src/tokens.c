@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <gojira/parse_debug.h>
 #include <gojira/tokens.h>
+#include <stdbool.h>
 
 token_t *dump_tokens( token_t *tokens, int level ){
 	if ( tokens ){
@@ -20,6 +21,9 @@ token_t *dump_tokens( token_t *tokens, int level ){
 			case TYPE_NUMBER:
 				printf( ": %d", tokens->smalldata );
 				break;
+			case TYPE_BOOLEAN:
+				printf( ": %c", (tokens->smalldata == true)? 't' : 'f' );
+
 			default:
 				break;
 		}

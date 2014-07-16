@@ -103,6 +103,8 @@ token_t *eval_tokens( stack_frame_t *frame, token_t *tokens ){
 	token_t *foo;
 	char *name;
 	st_frame_t *tempframe;
+
+	//printf( "[%s] Got here\n", __func__ );
 	
 	if ( tokens ){
 		move = tokens;
@@ -124,12 +126,10 @@ token_t *eval_tokens( stack_frame_t *frame, token_t *tokens ){
 			ret = move;
 
 		} else {
-			bool builtin = false;
 			temp = move->down;
 
 			if ( move->down ){
 				if ( temp->type == TYPE_DEFINE_EXPR ){
-					builtin = true;
 
 					temp = temp->down;
 					token_t *newvar = NULL;
@@ -152,7 +152,6 @@ token_t *eval_tokens( stack_frame_t *frame, token_t *tokens ){
 					}
 
 				} else if ( temp->type == TYPE_LAMBDA ){
-					builtin = true;
 
 					foo = calloc( 1, sizeof( token_t ));
 					foo->type = TYPE_PROCEDURE;
@@ -160,30 +159,37 @@ token_t *eval_tokens( stack_frame_t *frame, token_t *tokens ){
 					ret = foo;
 
 					printf( "[%s] has lambda, returning procedure\n", __func__ );
-				}
 
-				if ( !builtin ){
-					//printf( "[%s] Got here\n", __func__ );
+				} else if ( temp->type == TYPE_SYMBOL && ( strcmp( temp->data, "if" ) == 0 )){
+						printf( "[%s] Have \"if\" statement\n", __func__ );
+						
+						foo = eval_tokens( frame, temp->next );
+
+						printf( "[%s] if has \"%s\"\n", __func__, type_str( foo->type ));
+
+						if ( foo->type == TYPE_BOOLEAN && foo->smalldata == false ){
+							ret = clone_token_tree( eval_tokens( frame, temp->next->next->next ));
+						} else {
+							ret = clone_token_tree( eval_tokens( frame, temp->next->next ));
+						}
+
+				} else {
 					tempframe = frame_create( frame, NULL );
 
 					for ( ; temp; temp = temp->next ){
 						frame_add_token( tempframe, eval_tokens( tempframe, temp ));
 					}
 
-					/*
 					printf( "[%s] Evaluating procedure of type \"%s\"\n",
 							__func__, type_str( tempframe->expr->type ));
-					*/
 
 					ret = eval_function( tempframe );
-					//stack_trace( tempframe );
 				}
 
 			} else {
 				printf( "Error: empty expression\n" );
 				stack_trace( frame );
 				ret = NULL;
-				builtin = true;
 			}
 		}
 	}

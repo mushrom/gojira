@@ -64,6 +64,8 @@ int main( int argc, char *argv[] ){
 	frame_add_var( global_frame, "/", ext_proc_token( builtin_divide ));
 	frame_add_var( global_frame, "display", ext_proc_token( builtin_display ));
 	frame_add_var( global_frame, "newline", ext_proc_token( builtin_newline ));
+	frame_add_var( global_frame, "stacktrace", ext_proc_token( builtin_stacktrace ));
+	frame_add_var( global_frame, "eq?", ext_proc_token( builtin_equal ));
 
 	if ( interactive ){
 		// enter REPL
