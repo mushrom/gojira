@@ -18,8 +18,25 @@ token_t *ext_proc_token( scheme_func handle ){
 }
 
 token_t *builtin_add( stack_frame_t *frame ){
-	token_t *ret = frame->expr;
+	token_t *ret;
+	token_t *move;
+	int sum = 0;
 
+	ret = calloc( 1, sizeof( token_t ));
+	ret->type = TYPE_NUMBER;
+
+	move = frame->expr->next;
+	foreach_in_list( move ){
+		if ( move->type == TYPE_NUMBER ){
+			sum += move->smalldata;
+
+		} else {
+			printf( "[%s] Error: Bad argument type \"%s\"\n", __func__, type_str( move->type ));
+			break;
+		}
+	}
+
+	ret->smalldata = sum;
 	printf( "[%s] Got here\n", __func__ );
 
 	return ret;
