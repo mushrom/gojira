@@ -17,6 +17,9 @@ token_t *dump_tokens( token_t *tokens, int level ){
 			case TYPE_CHAR:
 				printf( ": %c", tokens->smalldata );
 				break;
+			case TYPE_NUMBER:
+				printf( ": %d", tokens->smalldata );
+				break;
 			default:
 				break;
 		}

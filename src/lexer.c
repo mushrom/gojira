@@ -116,10 +116,15 @@ static token_return_t get_token_from_str( char *string ){
 			// TODO: Handle negative numbers
 
 			i = strspn( string, DIGITS );
+			temp = malloc( sizeof( char[i + 1]));
+			strncpy( temp, string, i );
 
 			ret.string = string + i;
 			ret.token->type = TYPE_NUMBER;
 			ret.found = true;
+			ret.token->smalldata = atoi( temp );
+
+			free( temp );
 
 		} else if ( strchr( IDENTIFIER, *string )){
 			i = strspn( string, IDENTIFIER );
