@@ -59,6 +59,9 @@ int main( int argc, char *argv[] ){
 
 	global_frame = frame_create( NULL, NULL );
 	frame_add_var( global_frame, "+", ext_proc_token( builtin_add ));
+	frame_add_var( global_frame, "*", ext_proc_token( builtin_multiply ));
+	frame_add_var( global_frame, "-", ext_proc_token( builtin_subtract ));
+	frame_add_var( global_frame, "/", ext_proc_token( builtin_divide ));
 
 	if ( interactive ){
 		// enter REPL

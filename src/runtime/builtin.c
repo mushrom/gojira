@@ -1,5 +1,6 @@
 #include <gojira/runtime/runtime.h>
 #include <gojira/runtime/builtin.h>
+#include <gojira/parse_debug.h>
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -42,39 +43,86 @@ token_t *builtin_add( stack_frame_t *frame ){
 	return ret;
 }
 
-token_t *builtin_define( stack_frame_t *frame ){
-	token_t *ret = frame->expr->down;
+token_t *builtin_multiply( stack_frame_t *frame ){
+	token_t *ret;
+	token_t *move;
+	int sum = 1;
 
-	printf( "[%s] Got here\n", __func__ );
-	if ( frame->ntokens == 3 ){
-		char *name = NULL;
+	ret = calloc( 1, sizeof( token_t ));
+	ret->type = TYPE_NUMBER;
 
-		if( ret->next->type == TYPE_SYMBOL ){
-			name = ret->next->data;
+	move = frame->expr->next;
+	foreach_in_list( move ){
+		if ( move->type == TYPE_NUMBER ){
+			sum *= move->smalldata;
 
-			if ( frame->last ){
-				frame_add_var( frame->last, name, ret->next->next );
-			} else {
-				printf( "[%s] Error: don't have a returning frame to define in (how did you even call this?)\n", __func__ );
-			}
-
-		} else { 
-			printf( "[%s] Error: symbol expected\n", __func__ );
-			stack_trace( frame );
+		} else {
+			printf( "[%s] Error: Bad argument type \"%s\"\n", __func__, type_str( move->type ));
+			break;
 		}
-
-		ret = ret->next;
-			
-	} else {
-		printf( "[%s] Have invalid number of tokens in define (have %d, expected 2)\n", __func__, frame->ntokens - 1 );
 	}
+
+	ret->smalldata = sum;
+	printf( "[%s] Got here\n", __func__ );
 
 	return ret;
 }
 
-token_t *builtin_lambda( stack_frame_t *frame ){
-	token_t *ret = frame->expr;
+token_t *builtin_subtract( stack_frame_t *frame ){
+	token_t *ret;
+	token_t *move;
+	int sum = 0;
 
+	ret = calloc( 1, sizeof( token_t ));
+	ret->type = TYPE_NUMBER;
+
+	move = frame->expr->next;
+	if ( move ){
+		sum = move->smalldata;
+		move = move->next;
+
+		foreach_in_list( move ){
+			if ( move->type == TYPE_NUMBER ){
+				sum -= move->smalldata;
+
+			} else {
+				printf( "[%s] Error: Bad argument type \"%s\"\n", __func__, type_str( move->type ));
+				break;
+			}
+		}
+	}
+
+	ret->smalldata = sum;
+	printf( "[%s] Got here\n", __func__ );
+
+	return ret;
+}
+
+token_t *builtin_divide( stack_frame_t *frame ){
+	token_t *ret;
+	token_t *move;
+	int sum = 1;
+
+	ret = calloc( 1, sizeof( token_t ));
+	ret->type = TYPE_NUMBER;
+
+	move = frame->expr->next;
+	if ( move ){
+		sum = move->smalldata;
+		move = move->next;
+
+		foreach_in_list( move ){
+			if ( move->type == TYPE_NUMBER ){
+				sum /= move->smalldata;
+
+			} else {
+				printf( "[%s] Error: Bad argument type \"%s\"\n", __func__, type_str( move->type ));
+				break;
+			}
+		}
+	}
+
+	ret->smalldata = sum;
 	printf( "[%s] Got here\n", __func__ );
 
 	return ret;
