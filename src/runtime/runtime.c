@@ -17,6 +17,8 @@ st_frame_t *init_global_frame( st_frame_t *frame ){
 	frame_add_var( frame, "newline", ext_proc_token( builtin_newline ));
 	frame_add_var( frame, "stacktrace", ext_proc_token( builtin_stacktrace ));
 	frame_add_var( frame, "eq?", ext_proc_token( builtin_equal ));
+	frame_add_var( frame, "<", ext_proc_token( builtin_lessthan ));
+	frame_add_var( frame, ">", ext_proc_token( builtin_greaterthan ));
 
 	return frame;
 }

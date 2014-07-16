@@ -45,6 +45,56 @@ token_t *builtin_equal( stack_frame_t *frame ){
 	return ret;
 }
 
+token_t *builtin_lessthan( stack_frame_t *frame ){
+	token_t *ret;
+	bool val = false;
+
+	token_t *op1, *op2;
+
+	ret = calloc( 1, sizeof( token_t ));
+	ret->type = TYPE_BOOLEAN;
+
+	if ( frame->ntokens - 1 == 2 ){
+		op1 = frame->expr->next;
+		op2 = frame->expr->next->next;
+
+		val =	( op1->type      == op2->type      ) &&
+				( op1->smalldata <  op2->smalldata );
+
+	} else {
+		printf( "[%s] Error: Expected 2 arguments to \"<\"\n", __func__ );
+	}
+
+	ret->smalldata = val;
+
+	return ret;
+}
+
+token_t *builtin_greaterthan( stack_frame_t *frame ){
+	token_t *ret;
+	bool val = false;
+
+	token_t *op1, *op2;
+
+	ret = calloc( 1, sizeof( token_t ));
+	ret->type = TYPE_BOOLEAN;
+
+	if ( frame->ntokens - 1 == 2 ){
+		op1 = frame->expr->next;
+		op2 = frame->expr->next->next;
+
+		val =	( op1->type      == op2->type      ) &&
+				( op1->smalldata >  op2->smalldata );
+
+	} else {
+		printf( "[%s] Error: Expected 2 arguments to \">\"\n", __func__ );
+	}
+
+	ret->smalldata = val;
+
+	return ret;
+}
+
 token_t *builtin_add( stack_frame_t *frame ){
 	token_t *ret;
 	token_t *move;

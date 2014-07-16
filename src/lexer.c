@@ -40,7 +40,7 @@ token_t *lexerize( char *string ){
 #define DIGITS		"0123456789"
 #define ALPHANUM	ALPHABET DIGITS
 #define DELIMITER	"()[]{} "
-#define IDENTIFIER	ALPHABET "+*/-!?"
+#define IDENTIFIER	ALPHABET "+*/-!?<>"
 
 static token_return_t get_token_from_str( char *string ){
 	token_return_t ret;

@@ -22,4 +22,7 @@ token_t *builtin_display( stack_frame_t *frame );
 token_t *builtin_newline( stack_frame_t *frame );
 token_t *builtin_stacktrace( stack_frame_t *frame );
 
+token_t *builtin_greaterthan( stack_frame_t *frame );
+token_t *builtin_lessthan( stack_frame_t *frame );
+
 #endif
