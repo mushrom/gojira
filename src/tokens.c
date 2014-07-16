@@ -23,6 +23,10 @@ token_t *dump_tokens( token_t *tokens, int level ){
 				break;
 			case TYPE_BOOLEAN:
 				printf( ": %c", (tokens->smalldata == true)? 't' : 'f' );
+				break;
+			case TYPE_STRING:
+				printf( ": \"%s\"", (char *)tokens->data );
+				break;
 
 			default:
 				break;

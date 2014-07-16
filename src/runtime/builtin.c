@@ -167,6 +167,9 @@ token_t *builtin_display( stack_frame_t *frame ){
 			case TYPE_BOOLEAN:
 				printf( "#%c", (move->smalldata == true)? 't' : 'f' );
 				break;
+			case TYPE_STRING:
+				printf( "%s", (char *)move->data );
+				break;
 			default:
 				printf( "#<%s>", type_str( move->type ));
 				break;

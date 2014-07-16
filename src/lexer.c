@@ -44,7 +44,7 @@ token_t *lexerize( char *string ){
 
 static token_return_t get_token_from_str( char *string ){
 	token_return_t ret;
-	char *temp;
+	char *temp, *foo;
 	unsigned i;
 	
 	ret = (token_return_t){
@@ -78,10 +78,19 @@ static token_return_t get_token_from_str( char *string ){
 			ret.found = true;
 
 		} else if ( *string == '"' ){
-			ret.string = strchr( string + 1, '"' );
+			//ret.string = strchr( string + 1, '"' );
+			ret.string = temp = string + 1;
+			for ( i = 0; temp[i] && temp[i] != '"'; i++ );
+
+			foo = malloc( sizeof( char[i + 1] ));
+
+			strncpy( foo, temp, i );
+			foo[i] = 0;
+
+			ret.token->data = foo;
 
 			if ( ret.string ){
-				ret.string++;
+				ret.string += i + 1;
 				ret.token->type = TYPE_STRING;
 				ret.found = true;
 
