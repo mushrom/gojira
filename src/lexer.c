@@ -25,7 +25,7 @@ token_t *lexerize( char *string ){
 	while ( foo.found ){
 		move->next = foo.token;
 		move = move->next;
-		printf( ": %s", foo.string );
+		//printf( ": %s", foo.string );
 
 		foo = get_token_from_str( foo.string );
 	}
@@ -137,13 +137,13 @@ static token_return_t get_token_from_str( char *string ){
 			strncpy( ret.token->data, string, i );
 			temp[i] = 0;
 
-			printf( "> Have identifier \"%s\"\n", temp );
+			//printf( "> Have identifier \"%s\"\n", temp );
 
 			if ( strcmp( temp, "define" ) == 0 ){
-				printf( "[%s] Is define token\n", __func__ );
+				//printf( "[%s] Is define token\n", __func__ );
 				ret.token->type = TYPE_DEFINE;
 			} else if ( strcmp( temp, "lambda" ) == 0 ){
-				printf( "[%s] Is lambda (procedure) token\n", __func__ );
+				//printf( "[%s] Is lambda (procedure) token\n", __func__ );
 				ret.token->type = TYPE_LAMBDA;
 			}
 		}

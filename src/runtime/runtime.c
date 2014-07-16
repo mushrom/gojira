@@ -8,6 +8,30 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+st_frame_t *init_global_frame( st_frame_t *frame ){
+	frame_add_var( frame, "+", ext_proc_token( builtin_add ));
+	frame_add_var( frame, "*", ext_proc_token( builtin_multiply ));
+	frame_add_var( frame, "-", ext_proc_token( builtin_subtract ));
+	frame_add_var( frame, "/", ext_proc_token( builtin_divide ));
+	frame_add_var( frame, "display", ext_proc_token( builtin_display ));
+	frame_add_var( frame, "newline", ext_proc_token( builtin_newline ));
+	frame_add_var( frame, "stacktrace", ext_proc_token( builtin_stacktrace ));
+	frame_add_var( frame, "eq?", ext_proc_token( builtin_equal ));
+
+	return frame;
+}
+
+token_t *eval_all_tokens( stack_frame_t *frame, token_t *tokens ){
+	token_t *ret = tokens;
+	token_t *move;
+
+	for ( move = tokens; move; move = move->next ){
+		ret = eval_tokens( frame, move );
+	}
+
+	return ret;
+}
+
 token_t *expand_procedure( stack_frame_t *frame, token_t *tokens ){
 	token_t *ret = tokens;
 	token_t *move;
@@ -53,9 +77,7 @@ token_t *expand_procedure( stack_frame_t *frame, token_t *tokens ){
 				}
 			}
 
-			for ( ; body; body = body->next ){
-				ret = eval_tokens( tempframe, body );
-			}
+			ret = eval_all_tokens( tempframe, body );
 		}
 
 	} else {
@@ -158,14 +180,14 @@ token_t *eval_tokens( stack_frame_t *frame, token_t *tokens ){
 					foo->down = temp;
 					ret = foo;
 
-					printf( "[%s] has lambda, returning procedure\n", __func__ );
+					//printf( "[%s] has lambda, returning procedure\n", __func__ );
 
 				} else if ( temp->type == TYPE_SYMBOL && ( strcmp( temp->data, "if" ) == 0 )){
-						printf( "[%s] Have \"if\" statement\n", __func__ );
+						//printf( "[%s] Have \"if\" statement\n", __func__ );
 						
 						foo = eval_tokens( frame, temp->next );
 
-						printf( "[%s] if has \"%s\"\n", __func__, type_str( foo->type ));
+						//printf( "[%s] if has \"%s\"\n", __func__, type_str( foo->type ));
 
 						if ( foo->type == TYPE_BOOLEAN && foo->smalldata == false ){
 							ret = clone_token_tree( eval_tokens( frame, temp->next->next->next ));
@@ -180,8 +202,10 @@ token_t *eval_tokens( stack_frame_t *frame, token_t *tokens ){
 						frame_add_token( tempframe, eval_tokens( tempframe, temp ));
 					}
 
+					/*
 					printf( "[%s] Evaluating procedure of type \"%s\"\n",
 							__func__, type_str( tempframe->expr->type ));
+					*/
 
 					ret = eval_function( tempframe );
 				}

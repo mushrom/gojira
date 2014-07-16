@@ -18,8 +18,10 @@ int main( int argc, char *argv[] ){
 	char option;
 	int i = 0;
 	bool interactive = false;
+	char *fname = NULL;
+	FILE *input_file = NULL;
+
 	stack_frame_t *global_frame;
-	//FILE *input_file = NULL;
 
 	initialize_config( );
 	set_config_option( "testing", 1 );
@@ -33,7 +35,9 @@ int main( int argc, char *argv[] ){
 		while (( option = getopt( argc, argv, "f:hi" )) != -1 && i++ < argc ){
 			switch ( option ){
 				case 'f':
-					printf( "Have file \"%s\"\n", argv[++i] );
+					fname = argv[++i];
+					interactive = false;
+					printf( "Have file \"%s\"\n", fname );
 					break;
 
 				case 'i':
@@ -58,14 +62,25 @@ int main( int argc, char *argv[] ){
 	}
 
 	global_frame = frame_create( NULL, NULL );
-	frame_add_var( global_frame, "+", ext_proc_token( builtin_add ));
-	frame_add_var( global_frame, "*", ext_proc_token( builtin_multiply ));
-	frame_add_var( global_frame, "-", ext_proc_token( builtin_subtract ));
-	frame_add_var( global_frame, "/", ext_proc_token( builtin_divide ));
-	frame_add_var( global_frame, "display", ext_proc_token( builtin_display ));
-	frame_add_var( global_frame, "newline", ext_proc_token( builtin_newline ));
-	frame_add_var( global_frame, "stacktrace", ext_proc_token( builtin_stacktrace ));
-	frame_add_var( global_frame, "eq?", ext_proc_token( builtin_equal ));
+	init_global_frame( global_frame );
+
+	if ( fname ){
+		char *buf;
+		unsigned rsize = 0x1000;
+		token_t *tree;
+
+		input_file = fopen( fname, "r" );
+
+		if ( input_file ){
+			buf = malloc( rsize );
+
+			fread( buf, rsize, 1, input_file );
+			tree = remove_punc_tokens( parse_tokens( lexerize( buf )));
+
+			dump_tokens( eval_all_tokens( global_frame, tree ), 0 );
+			free( buf );
+		}
+	}
 
 	if ( interactive ){
 		// enter REPL
@@ -76,13 +91,15 @@ int main( int argc, char *argv[] ){
 			char buf[128];
 			fgets( buf, 128, stdin );
 
-			tree = parse_tokens( dump_tokens( lexerize( buf ), 0 ));
+			//tree = parse_tokens( dump_tokens( lexerize( buf ), 0 ));
+			tree = parse_tokens( lexerize( buf ));
 			tree = remove_punc_tokens( tree );
 
-			dump_tokens( tree, 0 );
+			//dump_tokens( tree, 0 );
 
-			dump_tokens( eval_tokens( global_frame, tree ), 0 );
+			dump_tokens( eval_all_tokens( global_frame, tree ), 0 );
 		}
+
 	}
 
 	return ret;
