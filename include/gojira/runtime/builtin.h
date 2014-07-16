@@ -17,5 +17,7 @@ token_t *builtin_add( stack_frame_t *frame );
 token_t *builtin_multiply( stack_frame_t *frame );
 token_t *builtin_subtract( stack_frame_t *frame );
 token_t *builtin_divide( stack_frame_t *frame );
+token_t *builtin_display( stack_frame_t *frame );
+token_t *builtin_newline( stack_frame_t *frame );
 
 #endif

@@ -38,7 +38,7 @@ token_t *builtin_add( stack_frame_t *frame ){
 	}
 
 	ret->smalldata = sum;
-	printf( "[%s] Got here\n", __func__ );
+	//printf( "[%s] Got here\n", __func__ );
 
 	return ret;
 }
@@ -124,6 +124,39 @@ token_t *builtin_divide( stack_frame_t *frame ){
 
 	ret->smalldata = sum;
 	printf( "[%s] Got here\n", __func__ );
+
+	return ret;
+}
+
+token_t *builtin_display( stack_frame_t *frame ){
+	token_t *ret;
+	token_t *move;
+
+	ret = calloc( 1, sizeof( token_t ));
+	ret->type = TYPE_NULL;
+
+	move = frame->expr->next;
+	if ( move ){
+		switch ( move->type ){
+			case TYPE_NUMBER:
+				printf( "%d", move->smalldata );
+				break;
+			default:
+				printf( "#<unspecified>" );
+				break;
+		}
+	}
+
+	return ret;
+}
+
+token_t *builtin_newline( stack_frame_t *frame ){
+	token_t *ret;
+
+	ret = calloc( 1, sizeof( token_t ));
+	ret->type = TYPE_NULL;
+
+	putchar( '\n' );
 
 	return ret;
 }

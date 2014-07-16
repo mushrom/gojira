@@ -19,7 +19,6 @@ token_t *expand_procedure( stack_frame_t *frame, token_t *tokens ){
 
 	stack_frame_t *tempframe;
 
-	printf( "[%s] Got here\n", __func__ );
 	if ( tokens->type == TYPE_PROCEDURE ){
 		move = tokens->down;
 
@@ -36,8 +35,10 @@ token_t *expand_procedure( stack_frame_t *frame, token_t *tokens ){
 				if ( temp->type == TYPE_SYMBOL ){
 					var_name = temp->data;
 
+					/*
 					printf( "[%s] procedure takes variable \"%s\"\n",
 							__func__, var_name );
+					*/
 
 					if ( !move ){
 						printf( "[%s] Error: Have unbound variable \"%s\"\n", __func__, var_name );
@@ -52,7 +53,9 @@ token_t *expand_procedure( stack_frame_t *frame, token_t *tokens ){
 				}
 			}
 
-			ret = eval_tokens( tempframe, body );
+			for ( ; body; body = body->next ){
+				ret = eval_tokens( tempframe, body );
+			}
 		}
 
 	} else {
@@ -69,14 +72,13 @@ token_t *eval_function( st_frame_t *frame ){
 	ext_proc_t *ext;
 	scheme_func handle;
 
-	printf( "[%s] Got here\n", __func__ );
 	switch ( move->type ){
 		case TYPE_PROCEDURE:
 			ret = expand_procedure( frame, move );
 			break;
 
 		case TYPE_EXTERN_PROC:
-			printf( "[%s] Have external function\n", __func__ );
+			//printf( "[%s] Have external function\n", __func__ );
 			ext = move->data;
 			handle = ext->handler;
 
@@ -161,18 +163,20 @@ token_t *eval_tokens( stack_frame_t *frame, token_t *tokens ){
 				}
 
 				if ( !builtin ){
-					printf( "[%s] Got here\n", __func__ );
+					//printf( "[%s] Got here\n", __func__ );
 					tempframe = frame_create( frame, NULL );
 
 					for ( ; temp; temp = temp->next ){
 						frame_add_token( tempframe, eval_tokens( tempframe, temp ));
 					}
 
+					/*
 					printf( "[%s] Evaluating procedure of type \"%s\"\n",
 							__func__, type_str( tempframe->expr->type ));
+					*/
 
 					ret = eval_function( tempframe );
-					stack_trace( tempframe );
+					//stack_trace( tempframe );
 				}
 
 			} else {

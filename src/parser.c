@@ -116,8 +116,8 @@ token_t *reduce( token_t *tokens, type_t type ){
 token_t *parse_tokens( token_t *tokens ){
 	token_t *ret = NULL;
 
-	printf( "-=[ Rules dump: \n" );
-	dump_rules( 0, scheme_rules );
+	//printf( "-=[ Rules dump: \n" );
+	//dump_rules( 0, scheme_rules );
 	ret = reduce( tokens, TYPE_NULL );
 
 	return ret;
