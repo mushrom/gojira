@@ -6,6 +6,7 @@
 #include <gojira/parser.h>
 #include <gojira/config.h>
 #include <gojira/runtime/runtime.h>
+#include <gojira/runtime/builtin.h>
 #include <gojira/libs/stack.h>
 
 void print_help( ){
@@ -57,6 +58,7 @@ int main( int argc, char *argv[] ){
 	}
 
 	global_frame = frame_create( NULL, NULL );
+	frame_add_var( global_frame, "+", ext_proc_token( builtin_add ));
 
 	if ( interactive ){
 		// enter REPL

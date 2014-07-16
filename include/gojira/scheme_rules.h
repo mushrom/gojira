@@ -38,12 +38,14 @@ static rule_t *scheme_rules =
 			.ret = TYPE_DEFINE_EXPR,
 		},
 
+	/*
 	.next = &(rule_t){
 		.type = TYPE_LAMBDA,
 		.down = &(rule_t){
 			.type = TYPE_TOKEN_LIST,
 			.ret = TYPE_PROCEDURE,
 		},
+	*/
 
 	.next = &(rule_t){
 		.type = TYPE_BASE_TOKEN,
@@ -59,8 +61,13 @@ static rule_t *scheme_rules =
 		.ret = TYPE_BASE_TOKEN,
 
 	.next = &(rule_t){
+		.type = TYPE_LAMBDA,
+		.ret = TYPE_BASE_TOKEN,
+	/*
+	.next = &(rule_t){
 		.type = TYPE_PROCEDURE,
 		.ret = TYPE_BASE_TOKEN,
+	*/
 
 	.next = &(rule_t){
 		.type = TYPE_BOOLEAN,
@@ -108,6 +115,7 @@ static rule_t *scheme_rules =
 			.ret = TYPE_VECTOR,
 		},
 
-	}}}}}}}}}}}}}}}};
+	//}
+	}}}}}}}}}}}}}}};
 
 #endif

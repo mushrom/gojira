@@ -12,6 +12,7 @@ typedef struct ext_proc {
 } ext_proc_t;
 
 token_t *ext_proc_token( scheme_func handle );
+token_t *builtin_add( stack_frame_t *frame );
 token_t *builtin_define( stack_frame_t *frame );
 token_t *builtin_lambda( stack_frame_t *frame );
 

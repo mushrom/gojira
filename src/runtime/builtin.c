@@ -17,6 +17,14 @@ token_t *ext_proc_token( scheme_func handle ){
 	return ret;
 }
 
+token_t *builtin_add( stack_frame_t *frame ){
+	token_t *ret = frame->expr;
+
+	printf( "[%s] Got here\n", __func__ );
+
+	return ret;
+}
+
 token_t *builtin_define( stack_frame_t *frame ){
 	token_t *ret = frame->expr->down;
 

@@ -8,6 +8,92 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+token_t *expand_procedure( stack_frame_t *frame, token_t *tokens ){
+	token_t *ret = tokens;
+	token_t *move;
+	token_t *temp;
+
+	token_t *args;
+	token_t *body;
+	char *var_name;
+
+	stack_frame_t *tempframe;
+
+	printf( "[%s] Got here\n", __func__ );
+	if ( tokens->type == TYPE_PROCEDURE ){
+		move = tokens->down;
+
+		args = move->next;
+
+		if ( args && args->type == TYPE_LIST ){
+			body = args->next;
+			temp = args->down;
+
+			tempframe = frame_create( frame, NULL );
+			move = tokens->next;
+			
+			foreach_in_list( temp ){
+				if ( temp->type == TYPE_SYMBOL ){
+					var_name = temp->data;
+
+					printf( "[%s] procedure takes variable \"%s\"\n",
+							__func__, var_name );
+
+					if ( !move ){
+						printf( "[%s] Error: Have unbound variable \"%s\"\n", __func__, var_name );
+						break;
+					}
+
+					frame_add_var( tempframe, var_name, move );
+					move = move->next;
+
+				} else {
+					printf( "[%s] Error: expected symbol in procedure definition\n", __func__ );
+				}
+			}
+
+			ret = eval_tokens( tempframe, body );
+		}
+
+	} else {
+		printf( "[%s] Error: Trying to apply non-procedure as procedure (?!)\n", __func__ );
+	}
+
+	return ret;
+}
+
+token_t *eval_function( st_frame_t *frame ){
+	token_t *ret = frame->expr;
+	token_t *move = ret;
+
+	ext_proc_t *ext;
+	scheme_func handle;
+
+	printf( "[%s] Got here\n", __func__ );
+	switch ( move->type ){
+		case TYPE_PROCEDURE:
+			ret = expand_procedure( frame, move );
+			break;
+
+		case TYPE_EXTERN_PROC:
+			printf( "[%s] Have external function\n", __func__ );
+			ext = move->data;
+			handle = ext->handler;
+
+			if ( handle )
+				ret = handle( frame );
+
+			break;
+
+		default:
+			printf( "[%s] Error: Unapplicable type \"%s\"\n", __func__, type_str( move->type ));
+			stack_trace( frame );
+			break;
+	}
+
+	return ret;
+}
+
 token_t *eval_tokens( stack_frame_t *frame, token_t *tokens ){
 	token_t *ret = tokens;
 	token_t *temp;
@@ -16,81 +102,84 @@ token_t *eval_tokens( stack_frame_t *frame, token_t *tokens ){
 	char *name;
 	st_frame_t *tempframe;
 	
-	//tempframe = frame_create( frame, NULL );
-
 	if ( tokens ){
-		for ( move = tokens; move; move = move->next ){
-			if ( move->type == TYPE_SYMBOL ){
-				name = move->data;
-				temp = frame_find_var( frame, name );
+		move = tokens;
+		if ( move->type == TYPE_SYMBOL ){
+			name = move->data;
+			temp = frame_find_var( frame, name );
 
-				if ( temp ){
-					ret = temp;
-
-				} else {
-					// Error out here, undefined variable
-					printf( "[%s] Error: undefined variable \"%s\"\n", __func__, name );
-					//ret = NULL;
-					ret = move;
-				}
-
-			} else if ( move->type != TYPE_LIST ){
-				ret = move;
+			if ( temp ){
+				ret = temp;
 
 			} else {
-				bool builtin = false;
-				temp = move->down;
+				// Error out here, undefined variable
+				printf( "[%s] Error: undefined variable \"%s\"\n", __func__, name );
+				//ret = NULL;
+				ret = move;
+			}
 
-				if ( move->down ){
-					if ( temp->type == TYPE_DEFINE_EXPR ){
-						builtin = true;
+		} else if ( move->type != TYPE_LIST ){
+			ret = move;
 
-						temp = temp->down;
-						token_t *newvar = NULL;
-						token_t *setvar = NULL;
+		} else {
+			bool builtin = false;
+			temp = move->down;
 
-						if ( temp->next && temp->next->type == TYPE_SYMBOL ){
-							newvar = temp->next;
-
-							if ( temp->next->next ){
-								setvar = eval_tokens( frame, temp->next->next );
-							}
-						}
-
-						if ( newvar ){
-							frame_add_var( frame, newvar->data, setvar );
-
-						} else {
-							printf( "[%s] Definition missing arguments\n", __func__ );
-							stack_trace( frame );
-						}
-
-					} else if ( temp->type == TYPE_PROCEDURE ){
-						builtin = true;
-						printf( "[%s] has procedure\n", __func__ );
-					}
-
-					if ( !builtin ){
-						printf( "[%s] Got here\n", __func__ );
-						tempframe = frame_create( frame, NULL );
-
-						/*
-						for ( ; temp; temp = temp->next ){
-							frame_add_token( tempframe, eval_tokens( tempframe, temp ));
-						}
-						*/
-						frame_add_token( tempframe, eval_tokens( tempframe, temp ));
-
-						eval_tokens( tempframe, tempframe->expr );
-						stack_trace( tempframe );
-					}
-
-				} else {
-					printf( "Error: empty expression\n" );
-					stack_trace( frame );
-					ret = NULL;
+			if ( move->down ){
+				if ( temp->type == TYPE_DEFINE_EXPR ){
 					builtin = true;
+
+					temp = temp->down;
+					token_t *newvar = NULL;
+					token_t *setvar = NULL;
+
+					if ( temp->next && temp->next->type == TYPE_SYMBOL ){
+						newvar = temp->next;
+
+						if ( temp->next->next ){
+							setvar = eval_tokens( frame, temp->next->next );
+						}
+					}
+
+					if ( newvar ){
+						frame_add_var( frame, newvar->data, setvar );
+
+					} else {
+						printf( "[%s] Definition missing arguments\n", __func__ );
+						stack_trace( frame );
+					}
+
+				} else if ( temp->type == TYPE_LAMBDA ){
+					builtin = true;
+
+					foo = calloc( 1, sizeof( token_t ));
+					foo->type = TYPE_PROCEDURE;
+					foo->down = temp;
+					ret = foo;
+
+					printf( "[%s] has lambda, returning procedure\n", __func__ );
 				}
+
+				if ( !builtin ){
+					printf( "[%s] Got here\n", __func__ );
+					tempframe = frame_create( frame, NULL );
+
+					for ( ; temp; temp = temp->next ){
+						frame_add_token( tempframe, eval_tokens( tempframe, temp ));
+					}
+
+					printf( "[%s] Evaluating procedure of type \"%s\"\n",
+							__func__, type_str( tempframe->expr->type ));
+
+					ret = eval_function( tempframe );
+					stack_trace( tempframe );
+				}
+
+			} else {
+				printf( "Error: empty expression\n" );
+				stack_trace( frame );
+				ret = NULL;
+				builtin = true;
 			}
 		}
 	}
@@ -128,6 +217,9 @@ token_t *frame_find_var( st_frame_t *frame, char *key ){
 				}
 			}
 
+			if ( !ret )
+				ret = frame_find_var( frame->last, key );
+
 		} else {
 			ret = frame_find_var( frame->last, key );
 		}
@@ -160,6 +252,8 @@ void stack_trace( st_frame_t *frame ){
 	st_frame_t *move = frame;
 	token_t *token = NULL;
 	token_t *func = NULL;
+	list_node_t *vars;
+	variable_t *var;
 	unsigned i;
 
 	printf( "[stack trace]\n" );
@@ -168,6 +262,10 @@ void stack_trace( st_frame_t *frame ){
 
 		func = move->expr;
 		token = func;
+		if ( move->vars )
+			vars = move->vars->base;
+		else
+			vars = NULL;
 
 		foreach_in_list( token ){
 			printf( "%s", type_str( token->type ));
@@ -184,6 +282,17 @@ void stack_trace( st_frame_t *frame ){
 		}
 
 		printf( "\n" );
+
+		if ( vars ){
+			printf( " `- has variables " );
+			foreach_in_list( vars ){
+				var = vars->data;
+
+				printf( "\"%s\" ", var->key );
+			}
+
+			printf( "\n" );
+		}
 	}
 }
 
