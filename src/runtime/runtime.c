@@ -192,9 +192,9 @@ token_t *eval_tokens( stack_frame_t *frame, token_t *tokens ){
 						//printf( "[%s] if has \"%s\"\n", __func__, type_str( foo->type ));
 
 						if ( foo->type == TYPE_BOOLEAN && foo->smalldata == false ){
-							ret = clone_token_tree( eval_tokens( frame, temp->next->next->next ));
+							ret = eval_tokens( frame, temp->next->next->next );
 						} else {
-							ret = clone_token_tree( eval_tokens( frame, temp->next->next ));
+							ret = eval_tokens( frame, temp->next->next );
 						}
 
 				} else {
