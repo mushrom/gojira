@@ -23,11 +23,6 @@ int main( int argc, char *argv[] ){
 
 	stack_frame_t *global_frame;
 
-	initialize_config( );
-	set_config_option( "testing", 1 );
-	printf( "Config option testing: %li\n",
-			get_config_option( "testing" ));
-
 	if ( argc < 2 ){
 		interactive = true;
 
@@ -50,7 +45,6 @@ int main( int argc, char *argv[] ){
 					break;
 
 				case 'v':
-					set_config_option( "verbose", 1 );
 					break;
 
 				default:

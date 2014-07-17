@@ -58,3 +58,14 @@ void hashmap_remove( hashmap_t *map, unsigned hash ){
 	if ( node )
 		list_remove_node( node );
 }
+
+unsigned hash_string( char *str ){
+	unsigned ret = 0, i;
+
+	for ( i = 0; str[i]; i++ ){
+		ret ^= str[i] * (i + 1);
+		ret *= str[i];
+	}
+
+	return ret;
+}
