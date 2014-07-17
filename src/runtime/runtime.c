@@ -24,7 +24,7 @@ st_frame_t *init_global_frame( st_frame_t *frame ){
 }
 
 token_t *eval_all_tokens( stack_frame_t *frame, token_t *tokens ){
-	token_t *ret = tokens;
+	token_t *ret = NULL;
 	token_t *move;
 
 	for ( move = tokens; move; move = move->next ){
@@ -80,6 +80,7 @@ token_t *expand_procedure( stack_frame_t *frame, token_t *tokens ){
 			}
 
 			ret = eval_all_tokens( tempframe, body );
+			frame_free( tempframe );
 		}
 
 	} else {
@@ -187,15 +188,15 @@ token_t *eval_tokens( stack_frame_t *frame, token_t *tokens ){
 				} else if ( temp->type == TYPE_SYMBOL && ( strcmp( temp->data, "if" ) == 0 )){
 						//printf( "[%s] Have \"if\" statement\n", __func__ );
 						
-						foo = eval_tokens( frame, temp->next );
+					foo = eval_tokens( frame, temp->next );
 
-						//printf( "[%s] if has \"%s\"\n", __func__, type_str( foo->type ));
+					//printf( "[%s] if has \"%s\"\n", __func__, type_str( foo->type ));
 
-						if ( foo->type == TYPE_BOOLEAN && foo->smalldata == false ){
-							ret = eval_tokens( frame, temp->next->next->next );
-						} else {
-							ret = eval_tokens( frame, temp->next->next );
-						}
+					if ( foo->type == TYPE_BOOLEAN && foo->smalldata == false ){
+						ret = eval_tokens( frame, temp->next->next->next );
+					} else {
+						ret = eval_tokens( frame, temp->next->next );
+					}
 
 				} else {
 					tempframe = frame_create( frame, NULL );
@@ -209,7 +210,8 @@ token_t *eval_tokens( stack_frame_t *frame, token_t *tokens ){
 							__func__, type_str( tempframe->expr->type ));
 					*/
 
-					ret = eval_function( tempframe );
+					ret = clone_token_tree( eval_function( tempframe ));
+					frame_free( tempframe );
 				}
 
 			} else {
@@ -234,6 +236,26 @@ st_frame_t *frame_create( st_frame_t *cur_frame, token_t *ret_pos ){
 	ret->expr = NULL;
 
 	return ret;
+}
+
+st_frame_t *frame_free( st_frame_t *frame ){
+	//printf( "[%s] Freeing frame\n", __func__ );
+	list_node_t *move;
+
+	if ( frame ){
+		if ( frame->vars ){
+			move = frame->vars->base;
+			foreach_in_list( move )
+				free( move->data );
+
+			list_free( frame->vars );
+		}
+
+		free_tokens( frame->expr );
+		free( frame );
+	}
+
+	return NULL;
 }
 
 token_t *frame_find_var( st_frame_t *frame, char *key ){

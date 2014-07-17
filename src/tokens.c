@@ -125,6 +125,21 @@ token_t *clone_token_tree( token_t *tree ){
 	return ret;
 }
 
+void free_tokens( token_t *tree ){
+	if ( tree ){
+		free_tokens( tree->down );
+		free_tokens( tree->next );
+		free( tree );
+	}
+}
+
+void free_token_tree( token_t *tree ){
+	if ( tree ){
+		free_tokens( tree->down );
+		free( tree );
+	}
+}
+
 unsigned tokens_length( token_t *tree ){
 	unsigned ret;
 	token_t *move = tree;

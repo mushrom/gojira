@@ -55,5 +55,7 @@ token_t *clone_token_tree( token_t *tree );
 token_t *clone_tokens( token_t *tree );
 
 unsigned tokens_length( token_t *tree );
+void free_tokens( token_t *tree );
+void free_token_tree( token_t *tree );
 
 #endif

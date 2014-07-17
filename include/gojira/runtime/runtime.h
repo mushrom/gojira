@@ -37,4 +37,6 @@ token_t *frame_add_token( st_frame_t *frame, token_t *token );
 token_t *frame_find_var( st_frame_t *frame, char *key );
 void stack_trace( st_frame_t *frame );
 
+st_frame_t *frame_free( st_frame_t *frame );
+
 #endif

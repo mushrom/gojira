@@ -71,7 +71,8 @@ int main( int argc, char *argv[] ){
 			fread( buf, rsize, 1, input_file );
 			tree = remove_punc_tokens( parse_tokens( lexerize( buf )));
 
-			dump_tokens( eval_all_tokens( global_frame, tree ), 0 );
+			//dump_tokens( eval_all_tokens( global_frame, tree ), 0 );
+			eval_all_tokens( global_frame, tree );
 			free( buf );
 		}
 	}
