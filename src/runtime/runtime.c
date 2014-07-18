@@ -204,6 +204,14 @@ token_t *eval_tokens( stack_frame_t *frame, token_t *tokens ){
 						ret = eval_tokens( frame, temp->next->next );
 					}
 
+				} else if ( temp->type == TYPE_SYMBOL && ( strcmp( temp->data, "begin" ) == 0 )){
+					if ( temp->next ){
+						ret = eval_all_tokens( frame, temp->next );
+					} else {
+						ret = calloc( 1, sizeof( token_t ));
+						ret->type = TYPE_NULL;
+					}
+
 				} else {
 					tempframe = frame_create( frame, NULL );
 
