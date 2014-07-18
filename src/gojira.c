@@ -70,6 +70,7 @@ int main( int argc, char *argv[] ){
 
 			fread( buf, rsize, 1, input_file );
 			tree = remove_punc_tokens( parse_tokens( lexerize( buf )));
+			//dump_tokens( tree, 0 );
 
 			//dump_tokens( eval_all_tokens( global_frame, tree ), 0 );
 			eval_all_tokens( global_frame, tree );
@@ -86,13 +87,15 @@ int main( int argc, char *argv[] ){
 			char buf[128];
 			fgets( buf, 128, stdin );
 
-			//tree = parse_tokens( dump_tokens( lexerize( buf ), 0 ));
-			tree = parse_tokens( lexerize( buf ));
-			tree = remove_punc_tokens( tree );
+			if ( strlen( buf ) > 1){
+				//tree = parse_tokens( dump_tokens( lexerize( buf ), 0 ));
+				tree = parse_tokens( lexerize( buf ));
+				tree = remove_punc_tokens( tree );
 
-			//dump_tokens( tree, 0 );
+				//dump_tokens( tree, 0 );
 
-			dump_tokens( eval_all_tokens( global_frame, tree ), 0 );
+				dump_tokens( eval_all_tokens( global_frame, tree ), 0 );
+			}
 		}
 
 	}
