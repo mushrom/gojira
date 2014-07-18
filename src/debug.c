@@ -1,7 +1,7 @@
 #include <gojira/parse_debug.h>
 
 char *debug_strings[] = {
-	"null",
+	"unspecified",
 	"boolean",
 	"number",
 	"char",

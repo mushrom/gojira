@@ -24,5 +24,8 @@ token_t *builtin_stacktrace( stack_frame_t *frame );
 
 token_t *builtin_greaterthan( stack_frame_t *frame );
 token_t *builtin_lessthan( stack_frame_t *frame );
+token_t *builtin_car( stack_frame_t *frame );
+token_t *builtin_cdr( stack_frame_t *frame );
+token_t *builtin_is_null( stack_frame_t *frame );
 
 #endif

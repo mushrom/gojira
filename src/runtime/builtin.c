@@ -19,6 +19,60 @@ token_t *ext_proc_token( scheme_func handle ){
 	return ret;
 }
 
+token_t *builtin_car( stack_frame_t *frame ){
+	token_t *move = frame->expr->next;
+	token_t *ret = move;
+
+	if ( move && move->type == TYPE_LIST && move->down ){
+		ret = move->down;
+
+	} else {
+		printf( "[%s] Bad argument type \"%s\"\n", __func__, type_str( move->type ));
+		stack_trace( frame );
+	}
+
+	return ret;
+}
+
+token_t *builtin_cdr( stack_frame_t *frame ){
+	token_t *move = frame->expr->next;
+	token_t *ret = move;
+
+	if ( move && move->type == TYPE_LIST && move->down ){
+		ret = calloc( 1, sizeof( token_t ));
+		ret->type = TYPE_LIST;
+		ret->down = move->down->next;
+
+	} else {
+		printf( "[%s] Bad argument type \"%s\"\n", __func__, type_str( move->type ));
+		stack_trace( frame );
+	}
+
+	return ret;
+}
+
+token_t *builtin_is_null( stack_frame_t *frame ){
+	token_t *ret;
+	token_t *move;
+	bool val = false;
+
+	ret = calloc( 1, sizeof( token_t ));
+	ret->type = TYPE_BOOLEAN;
+
+	if ( frame->ntokens - 1 == 1 ){
+		move = frame->expr->next;
+
+		val = move->type == TYPE_LIST && move->down == NULL;
+
+	} else {
+		printf( "[%s] Error: Expected 2 arguments to \"eq?\"\n", __func__ );
+	}
+
+	ret->smalldata = val;
+
+	return ret;
+}
+
 token_t *builtin_equal( stack_frame_t *frame ){
 	token_t *ret;
 	bool val = false;
@@ -218,6 +272,7 @@ token_t *builtin_display( stack_frame_t *frame ){
 				printf( "#%c", (move->smalldata == true)? 't' : 'f' );
 				break;
 			case TYPE_STRING:
+			case TYPE_SYMBOL:
 				printf( "%s", (char *)move->data );
 				break;
 			default:

@@ -19,6 +19,9 @@ st_frame_t *init_global_frame( st_frame_t *frame ){
 	frame_add_var( frame, "eq?", ext_proc_token( builtin_equal ));
 	frame_add_var( frame, "<", ext_proc_token( builtin_lessthan ));
 	frame_add_var( frame, ">", ext_proc_token( builtin_greaterthan ));
+	frame_add_var( frame, "car", ext_proc_token( builtin_car ));
+	frame_add_var( frame, "cdr", ext_proc_token( builtin_cdr ));
+	frame_add_var( frame, "null?", ext_proc_token( builtin_is_null ));
 
 	return frame;
 }
@@ -146,6 +149,9 @@ token_t *eval_tokens( stack_frame_t *frame, token_t *tokens ){
 				//ret = NULL;
 				ret = move;
 			}
+
+		} else if ( move->type == TYPE_QUOTED_TOKEN ){
+			ret = move->down;
 
 		} else if ( move->type != TYPE_LIST ){
 			ret = move;
