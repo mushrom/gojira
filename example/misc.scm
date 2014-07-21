@@ -14,9 +14,9 @@
 
 (define not
   (lambda (x)
-    (if (eq? x #t)
-      #f
-      #t)))
+    (if (eq? x #f)
+      #t
+      #f)))
 
 (define or
   (lambda (a b)
@@ -125,10 +125,18 @@
 		(print (car x))
 		(asdf (cdr x))))))
 
+; Calculate the sum of a function with inputs from 1 to n.
+(define sum
+  (lambda (n f)
+    (if (> n 0)
+      (+ (f n)
+         (sum (- n 1) f))
+      0)))
+
 ; The main function, used as the entry point
 (define main
   (lambda ()
-    (clear)
+    ;(clear)
 	(print "Hello, world!")
 
     (print "-== Factorial of 6:")
