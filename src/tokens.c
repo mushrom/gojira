@@ -3,6 +3,7 @@
 #include <gojira/parse_debug.h>
 #include <gojira/tokens.h>
 #include <stdbool.h>
+#include <string.h>
 
 token_t *dump_tokens( token_t *tokens, int level ){
 	if ( tokens ){
@@ -13,7 +14,7 @@ token_t *dump_tokens( token_t *tokens, int level ){
 		printf( "%s", type_str( tokens->type ));
 		switch( tokens->type ){
 			case TYPE_SYMBOL:
-				printf( ": %s", tokens->data );
+				printf( ": %s", (char *)tokens->data );
 				break;
 			case TYPE_CHAR:
 				printf( ": %c", tokens->smalldata );

@@ -20,6 +20,8 @@ char *debug_strings[] = {
 
 	"define",
 	"lambda",
+	"if",
+	"begin",
 
 	"base token",
 	"token_list",

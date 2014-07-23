@@ -63,6 +63,14 @@ static rule_t *scheme_rules =
 	.next = &(rule_t){
 		.type = TYPE_LAMBDA,
 		.ret = TYPE_BASE_TOKEN,
+
+	.next = &(rule_t){
+		.type = TYPE_IF,
+		.ret = TYPE_BASE_TOKEN,
+
+	.next = &(rule_t){
+		.type = TYPE_BEGIN,
+		.ret = TYPE_BASE_TOKEN,
 	/*
 	.next = &(rule_t){
 		.type = TYPE_PROCEDURE,
@@ -116,6 +124,6 @@ static rule_t *scheme_rules =
 		},
 
 	//}
-	}}}}}}}}}}}}}}};
+	}}}}}}}}}}}}}}}}};
 
 #endif

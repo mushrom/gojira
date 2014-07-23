@@ -22,6 +22,8 @@ typedef enum {
 	// Generated from symbol names in lexer
 	TYPE_DEFINE,
 	TYPE_LAMBDA,
+	TYPE_IF,
+	TYPE_BEGIN,
 
 	// Types used by parser
 	TYPE_BASE_TOKEN,

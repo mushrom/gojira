@@ -158,6 +158,14 @@ static token_return_t get_token_from_str( char *string ){
 			} else if ( strcmp( temp, "lambda" ) == 0 ){
 				//printf( "[%s] Is lambda (procedure) token\n", __func__ );
 				ret.token->type = TYPE_LAMBDA;
+
+			} else if ( strcmp( temp, "if" ) == 0 ){
+				//printf( "[%s] Is lambda (procedure) token\n", __func__ );
+				ret.token->type = TYPE_IF;
+
+			} else if ( strcmp( temp, "begin" ) == 0 ){
+				//printf( "[%s] Is lambda (procedure) token\n", __func__ );
+				ret.token->type = TYPE_BEGIN;
 			}
 		}
 	}

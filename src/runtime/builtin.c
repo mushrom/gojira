@@ -19,6 +19,40 @@ token_t *ext_proc_token( scheme_func handle ){
 	return ret;
 }
 
+token_t *builtin_intern_set( stack_frame_t *frame ){
+	token_t *ret;
+	token_t *move;
+	token_t *var;
+
+	ret = calloc( 1, sizeof( token_t ));
+	ret->type = TYPE_NULL;
+
+	move = frame->expr->next;
+
+	if ( move ){
+		if ( move->type == TYPE_SYMBOL ){
+			var = move;
+
+			if ( move->next ){
+				frame_add_var( frame->last, var->data, move->next );
+			} else {
+				printf( "[%s] Error: Invalid set, expected value after symbol\n", __func__ );
+			}
+
+		} else {
+			printf( "[%s] Error: expected symbol, but got \"%s\"\n", __func__, type_str( move->type ));
+		}
+	} else {
+		printf( "[%s] Error: expected symbol, but have no arguments.\n", __func__ );
+	}
+
+	return ret;
+}
+
+token_t *builtin_return_last( stack_frame_t *frame ){
+	return frame->end;
+}
+
 token_t *builtin_car( stack_frame_t *frame ){
 	token_t *move = frame->expr->next;
 	token_t *ret = move;

@@ -16,6 +16,7 @@ typedef struct variable {
 typedef struct stack_frame {
 	struct stack_frame *last; // Pointer to previous frameinuation
 	token_t *ret;         // pointer to original place in code (return position)
+	token_t *ptr;         // pointer to next token to evaluate
 
 	list_head_t *vars;    // Variable list, acts as the scope
 	token_t *expr;        // Token list built during evaluation
@@ -27,11 +28,12 @@ typedef struct stack_frame {
 typedef stack_frame_t st_frame_t;
 
 variable_t *frame_add_var( st_frame_t *frame, char *key, token_t *token );
-st_frame_t *eval_loop( st_frame_t *frame, token_t *tokens );
-st_frame_t *frame_create( st_frame_t *cur_frame, token_t *ret_pos );
+token_t *eval_loop( stack_frame_t *base, token_t *tokens );
+//st_frame_t *frame_create( st_frame_t *cur_frame, token_t *ret_pos );
+st_frame_t *frame_create( st_frame_t *cur_frame, token_t *ptr );
 st_frame_t *init_global_frame( st_frame_t *frame );
 token_t *eval_function( st_frame_t *frame );
-token_t *eval_tokens( stack_frame_t *frame, token_t *tokens );
+//token_t *eval_tokens( stack_frame_t *frame, token_t *tokens );
 token_t *eval_all_tokens( stack_frame_t *frame, token_t *tokens );
 token_t *frame_add_token( st_frame_t *frame, token_t *token );
 token_t *frame_find_var( st_frame_t *frame, char *key );
