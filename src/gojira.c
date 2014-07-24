@@ -72,6 +72,9 @@ int main( int argc, char *argv[] ){
 			tree = remove_punc_tokens( parse_tokens( lexerize( buf )));
 			//dump_tokens( tree, 0 );
 
+			global_frame->ptr = tree;
+			eval_loop( global_frame, tree );
+
 			//dump_tokens( eval_all_tokens( global_frame, tree ), 0 );
 			//eval_all_tokens( global_frame, tree );
 			free( buf );

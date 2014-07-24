@@ -53,6 +53,10 @@ token_t *builtin_return_last( stack_frame_t *frame ){
 	return frame->end;
 }
 
+token_t *builtin_return_first( stack_frame_t *frame ){
+	return frame->expr->next;
+}
+
 token_t *builtin_car( stack_frame_t *frame ){
 	token_t *move = frame->expr->next;
 	token_t *ret = move;
