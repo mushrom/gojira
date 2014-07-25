@@ -32,22 +32,6 @@ static rule_t *scheme_rules =
 		}}},
 
 	.next = &(rule_t){
-		.type = TYPE_DEFINE,
-		.down = &(rule_t){
-			.type = TYPE_TOKEN_LIST,
-			.ret = TYPE_DEFINE_EXPR,
-		},
-
-	/*
-	.next = &(rule_t){
-		.type = TYPE_LAMBDA,
-		.down = &(rule_t){
-			.type = TYPE_TOKEN_LIST,
-			.ret = TYPE_PROCEDURE,
-		},
-	*/
-
-	.next = &(rule_t){
 		.type = TYPE_BASE_TOKEN,
 		.ret = TYPE_TOKEN_LIST,
 
@@ -55,10 +39,6 @@ static rule_t *scheme_rules =
 			.type = TYPE_TOKEN_LIST,
 			.ret  = TYPE_TOKEN_LIST,
 		},
-
-	.next = &(rule_t){
-		.type = TYPE_DEFINE_EXPR,
-		.ret = TYPE_BASE_TOKEN,
 
 	.next = &(rule_t){
 		.type = TYPE_LAMBDA,
@@ -75,11 +55,6 @@ static rule_t *scheme_rules =
 	.next = &(rule_t){
 		.type = TYPE_SYNTAX_RULES,
 		.ret = TYPE_BASE_TOKEN,
-	/*
-	.next = &(rule_t){
-		.type = TYPE_PROCEDURE,
-		.ret = TYPE_BASE_TOKEN,
-	*/
 
 	.next = &(rule_t){
 		.type = TYPE_BOOLEAN,
@@ -127,6 +102,6 @@ static rule_t *scheme_rules =
 			.ret = TYPE_VECTOR,
 		},
 
-	}}}}}}}}}}}}}}}}}};
+	}}}}}}}}}}}}}}}};
 
 #endif

@@ -1,3 +1,8 @@
+(define-syntax define
+  (syntax-rules ()
+    ((_ sym def)
+     (intern-set 'sym def))))
+
 (define help "To see the gojira scheme tutorial, visit http://example.com. To see the currently defined variables, try (stacktrace).")
 
 ; Recursive factorial function
@@ -66,9 +71,9 @@
 (define for
   (lambda (times f)
     (if (> times 0)
-	  (begin
+	  ((lambda ()
         (for (- times 1) f)
-		(f times))
+		(f times)))
 	  times)))
 
 ; repeatedly perform a function for "times", using iteration
@@ -79,9 +84,9 @@
 
      (lambda (self count)
        (if (<= count times)
-         (begin
+         ((lambda ()
            (f count)
-           (self self (seq count)))
+           (self self (seq count))))
          count)))))
 
 ; Square a number
@@ -121,9 +126,9 @@
   (lambda (x)
 	(if (null? x)
 	  x
-	  (begin
+	  ((lambda ()
 		(print (car x))
-		(asdf (cdr x))))))
+		(asdf (cdr x)))))))
 
 ; Calculate the sum of a function with inputs from 1 to n.
 (define sum

@@ -152,11 +152,6 @@ static token_return_t get_token_from_str( char *string ){
 
 			//printf( "> Have identifier \"%s\"\n", temp );
 
-			/*
-			if ( strcmp( temp, "define" ) == 0 ){
-				ret.token->type = TYPE_DEFINE;
-
-			} else */
 			if ( strcmp( temp, "lambda" ) == 0 ){
 				ret.token->type = TYPE_LAMBDA;
 

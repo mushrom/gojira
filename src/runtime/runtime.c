@@ -127,8 +127,6 @@ token_t *expand_syntax_rules( stack_frame_t *frame, token_t *tokens ){
 	int args;
 	int len;
 
-	printf( "[%s] Expanding syntax rules\n", __func__ );
-
 	cur = tokens->down;
 	len = tokens_length( cur );
 	args = tokens_length( tokens );
@@ -162,8 +160,6 @@ token_t *expand_syntax_rules( stack_frame_t *frame, token_t *tokens ){
 	if ( !matched ){
 		printf( "[%s] Error: Could not match syntax pattern\n", __func__ );
 	}
-
-	dump_tokens( ret, 1 );
 
 	return ret;
 }
@@ -324,7 +320,7 @@ token_t *eval_loop( stack_frame_t *base, token_t *tokens ){
 						continue;
 
 					case TYPE_DEF_SYNTAX:
-						printf( "[%s] Will be returning syntax definition\n", __func__ );
+						//printf( "[%s] Will be returning syntax definition\n", __func__ );
 						frame_add_var( frame->last, frame->expr->next->data, frame->expr->next->next );
 
 						frame->value = calloc( 1, sizeof( token_t ));
