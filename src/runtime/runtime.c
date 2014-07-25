@@ -97,8 +97,73 @@ token_t *expand_if_expr( stack_frame_t *frame, token_t *tokens ){
 	return ret;
 }
 
+token_t *replace_symbol( token_t *tokens, token_t *replace, char *name ){
+	token_t *ret = tokens;
+
+	if ( tokens ){
+		if ( tokens->type == TYPE_SYMBOL && ( strcmp( tokens->data, name )) == 0 ){
+				ret = clone_token_tree( replace );
+				ret->next = replace_symbol( tokens->next, replace, name );
+
+		} else {
+			ret->down = replace_symbol( ret->down, replace, name );
+			ret->next = replace_symbol( ret->next, replace, name );
+		}
+	}
+	
+	return ret;
+}
+
 token_t *expand_syntax_rules( stack_frame_t *frame, token_t *tokens ){
 	token_t *ret = NULL;
+
+	token_t *keywords;
+	token_t *cur;
+	token_t *pattern;
+	token_t *template;
+
+	token_t *move, *foo;
+	bool matched = false;
+	int args;
+	int len;
+
+	printf( "[%s] Expanding syntax rules\n", __func__ );
+
+	cur = tokens->down;
+	len = tokens_length( cur );
+	args = tokens_length( tokens );
+
+	if ( len >= 3 ){
+		// do stuff
+		cur = cur->next->next;
+
+		for ( ; cur; cur = cur->next ){
+			pattern = cur->down->down;
+			template = cur->down->next;
+
+			if ( tokens_length( pattern ) == args ){
+				printf( "[%s] Have pattern with same number of tokens\n", __func__ );
+				matched = true;
+
+				ret = clone_token_tree( template );
+
+				for ( move = pattern, foo = tokens; move && foo;
+						move = move->next, foo = foo->next )
+				{
+					ret = replace_symbol( ret, foo, move->data );
+				}
+			}
+		}
+
+	} else {
+		printf( "[%s] Error: Expected at least 3 tokens, but got %d\n", __func__, len );
+	}
+
+	if ( !matched ){
+		printf( "[%s] Error: Could not match syntax pattern\n", __func__ );
+	}
+
+	dump_tokens( ret, 1 );
 
 	return ret;
 }
@@ -146,8 +211,13 @@ token_t *eval_loop( stack_frame_t *base, token_t *tokens ){
 					if ( move ){
 						frame_add_token( frame, move );
 
-						//if ( move->type != TYPE_SYNTAX )
+						if ( move->type != TYPE_SYNTAX ){
 							frame->ptr = frame->ptr->next;
+
+						} else {
+							for ( frame->ptr = frame->ptr->next; frame->ptr; frame->ptr = frame->ptr->next )
+								frame_add_token( frame, frame->ptr );
+						}
 
 					} else {
 						printf( "[%s] Error: undefined variable \"%s\"\n",
@@ -262,6 +332,27 @@ token_t *eval_loop( stack_frame_t *base, token_t *tokens ){
 
 						break;
 
+					case TYPE_SYNTAX:
+						foo = expand_syntax_rules( frame, frame->expr );
+
+						if ( foo ){
+							if ( foo->type == TYPE_LIST ){
+								frame->ptr = foo->down;
+								frame->expr = NULL;
+								continue;
+
+							} else {
+								frame->value = foo;
+							}
+
+							break;
+
+						} else {
+							have_error = true;
+						}
+
+						break;
+
 					default:
 						printf( "[%s] Can't apply \"%s\"\n", __func__, type_str( frame->expr->type ));
 						stack_trace( frame );
@@ -269,10 +360,13 @@ token_t *eval_loop( stack_frame_t *base, token_t *tokens ){
 						break;
 				}
 
-				temp_frame = frame->last;
-				frame_add_token( temp_frame, frame->value );
+				if ( !have_error ){
+					temp_frame = frame->last;
+					frame_add_token( temp_frame, frame->value );
 
-				frame = temp_frame;
+					frame = temp_frame;
+				}
+
 			} else {
 				running = false;
 			}
