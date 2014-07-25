@@ -23,7 +23,8 @@ typedef enum {
 	TYPE_DEFINE,
 	TYPE_LAMBDA,
 	TYPE_IF,
-	TYPE_BEGIN,
+	TYPE_DEF_SYNTAX,
+	TYPE_SYNTAX_RULES,
 
 	// Types used by parser
 	TYPE_BASE_TOKEN,
@@ -34,6 +35,7 @@ typedef enum {
 
 	// Types used by interpreter
 	TYPE_EXTERN_PROC,
+	TYPE_SYNTAX,
 } type_t;
 
 typedef struct token {

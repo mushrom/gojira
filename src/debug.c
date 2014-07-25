@@ -21,7 +21,8 @@ char *debug_strings[] = {
 	"define",
 	"lambda",
 	"if",
-	"begin",
+	"define-syntax",
+	"syntax-rules",
 
 	"base token",
 	"token_list",
@@ -30,6 +31,7 @@ char *debug_strings[] = {
 	"procedure",
 
 	"external procedure",
+	"syntax",
 };
 
 char *type_str( type_t type ){

@@ -97,6 +97,12 @@ token_t *expand_if_expr( stack_frame_t *frame, token_t *tokens ){
 	return ret;
 }
 
+token_t *expand_syntax_rules( stack_frame_t *frame, token_t *tokens ){
+	token_t *ret = NULL;
+
+	return ret;
+}
+
 token_t *eval_loop( stack_frame_t *base, token_t *tokens ){
 	stack_frame_t *frame = base;
 	stack_frame_t *temp_frame;
@@ -140,22 +146,45 @@ token_t *eval_loop( stack_frame_t *base, token_t *tokens ){
 					if ( move ){
 						frame_add_token( frame, move );
 
+						//if ( move->type != TYPE_SYNTAX )
+							frame->ptr = frame->ptr->next;
+
 					} else {
 						printf( "[%s] Error: undefined variable \"%s\"\n",
 								__func__, (char *)frame->ptr->data );
 
 						stack_trace( frame );
 						have_error = true;
-						break;
 					}
 
-					frame->ptr = frame->ptr->next;
 					break;
 
 				case TYPE_LAMBDA:
 					for ( ; frame->ptr; frame->ptr = frame->ptr->next )
 						frame_add_token( frame, frame->ptr );
 
+					break;
+
+				case TYPE_DEF_SYNTAX:
+					frame_add_token( frame, frame->ptr );
+					frame_add_token( frame, frame->ptr->next );
+					frame->ptr = frame->ptr->next->next;
+					break;
+
+				case TYPE_SYNTAX_RULES:
+					move = calloc( 1, sizeof( token_t ));
+					move->type = TYPE_SYNTAX;
+					move->down = frame->ptr;
+
+					frame_add_token( frame, ext_proc_token( builtin_return_first ));
+					frame_add_token( frame, move );
+
+					frame->ptr = NULL;
+					break;
+
+				case TYPE_SYNTAX:
+					printf( "[%s] Expanding syntax macro...\n", __func__ );
+					running = false;
 					break;
 
 				case TYPE_IF:
@@ -223,6 +252,15 @@ token_t *eval_loop( stack_frame_t *base, token_t *tokens ){
 						frame_add_token( frame, ext_proc_token( builtin_return_first ));
 
 						continue;
+
+					case TYPE_DEF_SYNTAX:
+						printf( "[%s] Will be returning syntax definition\n", __func__ );
+						frame_add_var( frame->last, frame->expr->next->data, frame->expr->next->next );
+
+						frame->value = calloc( 1, sizeof( token_t ));
+						frame->value->type = TYPE_NULL;
+
+						break;
 
 					default:
 						printf( "[%s] Can't apply \"%s\"\n", __func__, type_str( frame->expr->type ));

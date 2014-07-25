@@ -69,7 +69,11 @@ static rule_t *scheme_rules =
 		.ret = TYPE_BASE_TOKEN,
 
 	.next = &(rule_t){
-		.type = TYPE_BEGIN,
+		.type = TYPE_DEF_SYNTAX,
+		.ret = TYPE_BASE_TOKEN,
+
+	.next = &(rule_t){
+		.type = TYPE_SYNTAX_RULES,
 		.ret = TYPE_BASE_TOKEN,
 	/*
 	.next = &(rule_t){
@@ -123,7 +127,6 @@ static rule_t *scheme_rules =
 			.ret = TYPE_VECTOR,
 		},
 
-	//}
-	}}}}}}}}}}}}}}}}};
+	}}}}}}}}}}}}}}}}}};
 
 #endif
