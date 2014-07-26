@@ -1,0 +1,11 @@
+#ifndef _GOJIRA_RUNTIME_SYNTAX_H
+#define _GOJIRA_RUNTIME_SYNTAX_H
+
+#include <gojira/tokens.h>
+#include <gojira/runtime/runtime.h>
+
+stack_frame_t *expand_procedure( stack_frame_t *frame, token_t *tokens );
+token_t *expand_if_expr( stack_frame_t *frame, token_t *tokens );
+token_t *expand_syntax_rules( stack_frame_t *frame, token_t *tokens );
+
+#endif

@@ -20,6 +20,5 @@ To run a file,
 
 Status
 - - - -
-Currently does not support syntax definitions, closures (lazy binding of variables), continuations,
-tail call recursion, a lot of the standard library, or even working garbage collection.
+Currently does not support proper syntax definitions, (explicit) continuations, optimized tail calls, and a lot of the standard library.
 But it does print "Hello world".
