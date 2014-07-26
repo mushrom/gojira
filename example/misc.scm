@@ -1,7 +1,9 @@
 (define-syntax define
   (syntax-rules ()
     ((_ sym def)
-     (intern-set 'sym def))))
+     (intern-set 'sym def))
+    ((_ sym)
+     (intern-set 'sym 0))))
 
 (define help "To see the gojira scheme tutorial, visit http://example.com. To see the currently defined variables, try (stacktrace).")
 
@@ -86,7 +88,8 @@
        (if (<= count times)
          ((lambda ()
            (f count)
-           (self self (seq count))))
+           (self self (seq count))
+           ))
          count)))))
 
 ; Square a number

@@ -75,9 +75,11 @@ int main( int argc, char *argv[] ){
 			global_frame->ptr = tree;
 			eval_loop( global_frame, tree );
 
+			free_tokens( tree );
+
 			//dump_tokens( eval_all_tokens( global_frame, tree ), 0 );
 			//eval_all_tokens( global_frame, tree );
-			free( buf );
+			//free( buf );
 		}
 	}
 
@@ -101,10 +103,14 @@ int main( int argc, char *argv[] ){
 				//dump_tokens( eval_all_tokens( global_frame, tree ), 0 );
 				eval_loop( global_frame, tree );
 				dump_tokens( global_frame->end, 0 );
+
+				free_tokens( tree );
 			}
 		}
-
 	}
+
+	frame_free( global_frame );
+
 
 	return ret;
 } 

@@ -4,7 +4,6 @@
 #include <gojira/libs/stack.h>
 #include <gojira/libs/list.h>
 #include <gojira/libs/hashmap.h>
-#include <gojira/tokens.h>
 
 typedef struct variable {
 	token_t *token;
@@ -27,18 +26,16 @@ typedef struct stack_frame {
 } stack_frame_t;
 typedef stack_frame_t st_frame_t;
 
-variable_t *frame_add_var( st_frame_t *frame, char *key, token_t *token );
 token_t *eval_loop( stack_frame_t *base, token_t *tokens );
-//st_frame_t *frame_create( st_frame_t *cur_frame, token_t *ret_pos );
-st_frame_t *frame_create( st_frame_t *cur_frame, token_t *ptr );
+
 st_frame_t *init_global_frame( st_frame_t *frame );
-token_t *eval_function( st_frame_t *frame );
-//token_t *eval_tokens( stack_frame_t *frame, token_t *tokens );
-token_t *eval_all_tokens( stack_frame_t *frame, token_t *tokens );
+st_frame_t *frame_create( st_frame_t *cur_frame, token_t *ptr );
+st_frame_t *frame_free( st_frame_t *frame );
+variable_t *frame_add_var( st_frame_t *frame, char *key, token_t *token );
 token_t *frame_add_token( st_frame_t *frame, token_t *token );
 token_t *frame_find_var( st_frame_t *frame, char *key );
+
 void stack_trace( st_frame_t *frame );
 
-st_frame_t *frame_free( st_frame_t *frame );
 
 #endif

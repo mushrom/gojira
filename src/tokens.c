@@ -149,3 +149,47 @@ unsigned tokens_length( token_t *tree ){
 
 	return ret;
 }
+
+token_t *replace_symbol( token_t *tokens, token_t *replace, char *name ){
+	token_t *ret = tokens;
+
+	if ( tokens ){
+		if ( tokens->type == TYPE_SYMBOL && ( strcmp( tokens->data, name )) == 0 ){
+			ret = clone_token_tree( replace );
+			ret->next = replace_symbol( tokens->next, replace, name );
+			free_token_tree( tokens );
+
+		} else {
+			ret->down = replace_symbol( ret->down, replace, name );
+			ret->next = replace_symbol( ret->next, replace, name );
+		}
+	}
+	
+	return ret;
+}
+
+// Replaces tokens while preserving variable definitions in lambdas/procedures.
+token_t *replace_symbol_safe( token_t *tokens, token_t *replace, char *name ){
+	token_t *ret = tokens;
+
+	if ( tokens ){
+		if ( tokens->type == TYPE_SYMBOL && ( strcmp( tokens->data, name )) == 0 ){
+			ret = clone_token_tree( replace );
+			ret->next = replace_symbol_safe( tokens->next, replace, name );
+			free_token_tree( tokens );
+
+		} else if ( tokens->type == TYPE_LAMBDA ){
+			ret->next->next = replace_symbol_safe( ret->next->next, replace, name );
+
+		} else if ( tokens->type == TYPE_PROCEDURE ){
+			ret->next = replace_symbol_safe( ret->next, replace, name );
+
+		} else {
+			ret->down = replace_symbol_safe( ret->down, replace, name );
+			ret->next = replace_symbol_safe( ret->next, replace, name );
+		}
+	}
+	
+	return ret;
+}
+

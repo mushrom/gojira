@@ -20,7 +20,6 @@ typedef enum {
 	TYPE_ASTERISK,
 
 	// Generated from symbol names in lexer
-	TYPE_DEFINE,
 	TYPE_LAMBDA,
 	TYPE_IF,
 	TYPE_DEF_SYNTAX,
@@ -30,7 +29,6 @@ typedef enum {
 	TYPE_BASE_TOKEN,
 	TYPE_TOKEN_LIST,
 	TYPE_QUOTED_TOKEN,
-	TYPE_DEFINE_EXPR,
 	TYPE_PROCEDURE,
 
 	// Types used by interpreter
@@ -61,5 +59,7 @@ token_t *clone_tokens( token_t *tree );
 unsigned tokens_length( token_t *tree );
 void free_tokens( token_t *tree );
 void free_token_tree( token_t *tree );
+token_t *replace_symbol( token_t *tokens, token_t *replace, char *name );
+token_t *replace_symbol_safe( token_t *tokens, token_t *replace, char *name );
 
 #endif

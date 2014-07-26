@@ -18,7 +18,6 @@ char *debug_strings[] = {
 	"#",
 	"*",
 
-	"define",
 	"lambda",
 	"if",
 	"define-syntax",
@@ -27,11 +26,11 @@ char *debug_strings[] = {
 	"base token",
 	"token_list",
 	"quoted",
-	"definition",
 	"procedure",
 
 	"external procedure",
 	"syntax",
+	"If you see this something has gone terribly wrong",
 };
 
 char *type_str( type_t type ){
