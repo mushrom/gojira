@@ -78,16 +78,18 @@ token_t *strip_token( token_t *tokens, type_t type ){
 
 token_t *remove_punc_tokens( token_t *tokens ){
 	token_t *ret = tokens;
+	type_t remove[] = {
+		TYPE_OPEN_PAREN, TYPE_CLOSE_PAREN, TYPE_APOSTR,
+		TYPE_OCTOTHORPE, TYPE_TOKEN_LIST, TYPE_BASE_TOKEN, TYPE_NULL
+	};
+
+	int i;
+	int size = sizeof( remove ) / sizeof( type_t );
+
+	for ( i = 0; ret && i < size; i++ )
+		ret = strip_token( ret, remove[i] );
 
 	if ( ret ){
-		ret = strip_token( ret, TYPE_OPEN_PAREN );
-		ret = strip_token( ret, TYPE_CLOSE_PAREN );
-		ret = strip_token( ret, TYPE_APOSTR );
-		ret = strip_token( ret, TYPE_OCTOTHORPE );
-		ret = strip_token( ret, TYPE_TOKEN_LIST );
-		ret = strip_token( ret, TYPE_BASE_TOKEN );
-		ret = strip_token( ret, TYPE_NULL );
-
 		ret->down = remove_punc_tokens( ret->down );
 		ret->next = remove_punc_tokens( ret->next );
 	}

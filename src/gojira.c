@@ -90,8 +90,9 @@ int main( int argc, char *argv[] ){
 			printf( "> " );
 			char *buf = read_with_parens( stdin );
 
-			if ( strlen( buf ) > 1 ){
-				tree = remove_punc_tokens( parse_tokens( lexerize( buf )));
+			tree = remove_punc_tokens( parse_tokens( lexerize( buf )));
+
+			if ( tree ){
 				global_frame->ptr = tree;
 
 				eval_loop( global_frame, tree );
