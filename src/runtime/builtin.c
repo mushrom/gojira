@@ -150,8 +150,8 @@ token_t *builtin_lessthan( stack_frame_t *frame ){
 		op1 = frame->expr->next;
 		op2 = frame->expr->next->next;
 
-		val =	( op1->type      == op2->type      ) &&
-				( op1->smalldata <  op2->smalldata );
+		val =	( op1->type          == op2->type      ) &&
+				((int)op1->smalldata < (int)op2->smalldata );
 
 	} else {
 		printf( "[%s] Error: Expected 2 arguments to \"<\"\n", __func__ );
@@ -175,8 +175,8 @@ token_t *builtin_greaterthan( stack_frame_t *frame ){
 		op1 = frame->expr->next;
 		op2 = frame->expr->next->next;
 
-		val =	( op1->type      == op2->type      ) &&
-				( op1->smalldata >  op2->smalldata );
+		val =	( op1->type          == op2->type      ) &&
+				((int)op1->smalldata > (int)op2->smalldata );
 
 	} else {
 		printf( "[%s] Error: Expected 2 arguments to \">\"\n", __func__ );

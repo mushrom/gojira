@@ -9,44 +9,61 @@
 void stack_trace( st_frame_t *frame ){
 	st_frame_t *move = frame;
 	token_t *token = NULL;
-	token_t *func = NULL;
 	list_node_t *vars;
 	variable_t *var;
-	unsigned i;
+	unsigned i, k, limit = 5;
+	int start = 0, m;
 
 	printf( "[stack trace]\n" );
 	for ( move = frame, i = 0; move; move = move->last, i++ ){
 		printf( "[%u] ", i );
 
-		func = move->expr;
-		token = func;
+		token = move->expr;
+
 		if ( move->vars )
 			vars = move->vars->base;
 		else
 			vars = NULL;
 
+		start = move->ntokens - limit;
+
+		k = m = 0;
 		foreach_in_list( token ){
-			printf( "%s", type_str( token->type ));
+			if ( m >= start || m == 0 ){
+				printf( "%s", type_str( token->type ));
 
-			if ( token->type == TYPE_SYMBOL ){
-				char *name = token->data;
+				if ( token->type == TYPE_SYMBOL ){
+					char *name = token->data;
 
-				printf( " \"%s\"", name );
-				printf( " (at %p)", frame_find_var( frame, name ));
+					printf( " \"%s\"", name );
+					printf( " (at %p)", frame_find_var( frame, name ));
+				}
+
+				if ( token->next )
+					printf( " -> " );
+
+				k++;
+				m++;
+
+			} else {
+				printf( ".. " );
+				m++;
 			}
-
-			if ( token->next )
-				printf( " -> " );
 		}
 
 		printf( "\n" );
 
 		if ( vars ){
-			printf( " `- has variables " );
+			printf( " `- has variables: " );
+
+			k = 0;
 			foreach_in_list( vars ){
 				var = vars->data;
+				printf( "%-10s  ", var->key );
 
-				printf( "\"%s\" ", var->key );
+				k = (k + 1) % 8;
+				if ( !k )
+					printf( "\n                   " );
 			}
 
 			printf( "\n" );
