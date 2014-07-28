@@ -178,6 +178,6 @@
 	(print wut)
 
     (print "-== Squares of numbers from 0 to 30:")
-    (psquares 5000)))
+    (psquares 5)))
 
 (main)

@@ -13,6 +13,9 @@ void print_help( ){
 	printf( "Usage: gojira [-f filename] [-hi]\n" );
 }
 
+char *read_input_file( FILE *fp );
+char *read_with_parens( FILE *fp );
+
 int main( int argc, char *argv[] ){
 	int ret = 0;
 	char option;
@@ -33,7 +36,6 @@ int main( int argc, char *argv[] ){
 				case 'f':
 					fname = argv[++i];
 					interactive = false;
-					printf( "Have file \"%s\"\n", fname );
 					break;
 
 				case 'i':
@@ -60,15 +62,16 @@ int main( int argc, char *argv[] ){
 	init_global_frame( global_frame );
 
 	if ( fname ){
-		unsigned rsize = 0x1000;
 		char *buf;
 
+		if ( interactive )
+			printf( "Have file \"%s\"\n", fname );
+
 		input_file = fopen( fname, "r" );
-
 		if ( input_file ){
-			buf = malloc( rsize );
+			buf = read_input_file( input_file );
+			fclose( input_file );
 
-			fread( buf, rsize, 1, input_file );
 			tree = remove_punc_tokens( parse_tokens( lexerize( buf )));
 
 			global_frame->ptr = tree;
@@ -76,16 +79,18 @@ int main( int argc, char *argv[] ){
 
 			free_tokens( tree );
 			free( buf );
+
+		} else {
+			perror( fname );
 		}
 	}
 
 	if ( interactive ){
 		while ( 1 ){
 			printf( "> " );
-			char buf[128];
-			fgets( buf, 128, stdin );
+			char *buf = read_with_parens( stdin );
 
-			if ( strlen( buf ) > 1){
+			if ( strlen( buf ) > 1 ){
 				tree = remove_punc_tokens( parse_tokens( lexerize( buf )));
 				global_frame->ptr = tree;
 
@@ -94,6 +99,8 @@ int main( int argc, char *argv[] ){
 
 				free_tokens( tree );
 			}
+
+			free( buf );
 		}
 	}
 
@@ -101,3 +108,46 @@ int main( int argc, char *argv[] ){
 
 	return ret;
 } 
+
+char *read_input_file( FILE *fp ){
+	char *ret = NULL;
+	long size;
+
+	fseek( fp, 0, SEEK_END );
+	size = ftell( fp );
+	fseek( fp, 0, SEEK_SET );
+
+	ret = malloc( sizeof( char[ size + 1 ]));
+	fread( ret, 1, size, fp );
+
+	return ret;
+}
+
+
+char *read_with_parens( FILE *fp ){
+	unsigned pos, alloced, open;
+	char *ret = NULL;
+	char c = 0;
+
+	open = alloced = pos = 0;
+
+	for ( ; open || c != '\n'; pos++ ){
+		if ( pos + 1 >= alloced ){
+			alloced += 16;
+			ret = realloc( ret, sizeof( char[ alloced + 1]));
+		}
+		
+		c = fgetc( fp );
+
+		if      ( c == '(' ) open++;
+		else if ( c == ')' ) open--;
+		else if ( c == '\n' && open ) printf( "| " );
+
+		ret[pos] = c;
+	}
+
+	ret[pos] = 0;
+
+	return ret;
+}
+
