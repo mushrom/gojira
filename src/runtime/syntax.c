@@ -39,7 +39,6 @@ stack_frame_t *expand_procedure( stack_frame_t *frame, token_t *tokens ){
 					}
 
 					replace_symbol_safe( body, move, var_name );
-					//frame_add_var( ret, var_name, move );
 					move = move->next;
 
 				} else {
@@ -104,7 +103,6 @@ token_t *expand_syntax_rules( stack_frame_t *frame, token_t *tokens ){
 			template = cur->down->next;
 
 			if ( tokens_length( pattern ) == args ){
-				printf( "[%s] Have pattern with same number of tokens\n", __func__ );
 				matched = true;
 
 				ret = clone_token_tree( template );

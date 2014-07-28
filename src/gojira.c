@@ -22,6 +22,7 @@ int main( int argc, char *argv[] ){
 	FILE *input_file = NULL;
 
 	stack_frame_t *global_frame;
+	token_t *tree;
 
 	if ( argc < 2 ){
 		interactive = true;
@@ -59,9 +60,8 @@ int main( int argc, char *argv[] ){
 	init_global_frame( global_frame );
 
 	if ( fname ){
-		char *buf;
 		unsigned rsize = 0x1000;
-		token_t *tree;
+		char *buf;
 
 		input_file = fopen( fname, "r" );
 
@@ -70,37 +70,25 @@ int main( int argc, char *argv[] ){
 
 			fread( buf, rsize, 1, input_file );
 			tree = remove_punc_tokens( parse_tokens( lexerize( buf )));
-			//dump_tokens( tree, 0 );
 
 			global_frame->ptr = tree;
 			eval_loop( global_frame, tree );
 
 			free_tokens( tree );
-
-			//dump_tokens( eval_all_tokens( global_frame, tree ), 0 );
-			//eval_all_tokens( global_frame, tree );
-			//free( buf );
+			free( buf );
 		}
 	}
 
 	if ( interactive ){
-		// enter REPL
 		while ( 1 ){
-			token_t *tree;
-			// Debugging output, will be an actual REPL at some point.
 			printf( "> " );
 			char buf[128];
 			fgets( buf, 128, stdin );
 
 			if ( strlen( buf ) > 1){
-				//tree = parse_tokens( dump_tokens( lexerize( buf ), 0 ));
-				tree = parse_tokens( lexerize( buf ));
-				tree = remove_punc_tokens( tree );
-
-				//dump_tokens( tree, 0 );
+				tree = remove_punc_tokens( parse_tokens( lexerize( buf )));
 				global_frame->ptr = tree;
 
-				//dump_tokens( eval_all_tokens( global_frame, tree ), 0 );
 				eval_loop( global_frame, tree );
 				dump_tokens( global_frame->end, 0 );
 
@@ -110,7 +98,6 @@ int main( int argc, char *argv[] ){
 	}
 
 	frame_free( global_frame );
-
 
 	return ret;
 } 

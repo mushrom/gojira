@@ -5,6 +5,28 @@
     ((_ sym)
      (intern-set 'sym 0))))
 
+; this will do until proper elipsis expansion is implemented...
+(define-syntax begin
+  (syntax-rules ()
+	((_ expr moar)
+	 ((lambda () expr (begin moar))))
+	((_ expr)
+	 expr)
+	((_) #f)))
+
+(define-syntax while
+  (syntax-rules ()
+	((while condition body)
+	 (begin
+		(define loop
+		  (lambda ()
+			(if condition
+			  (begin
+				 body
+				 (loop))
+			  #f)))
+		(loop)))))
+
 (define help "To see the gojira scheme tutorial, visit http://example.com. To see the currently defined variables, try (stacktrace).")
 
 ; Recursive factorial function
@@ -73,24 +95,22 @@
 (define for
   (lambda (times f)
     (if (> times 0)
-	  ((lambda ()
+	  (begin
         (for (- times 1) f)
-		(f times)))
+		(f times))
 	  times)))
 
 ; repeatedly perform a function for "times", using iteration
 (define for-iter
   (lambda (times f)
-    ((lambda (iter)
-      (iter iter 1))
-
-     (lambda (self count)
-       (if (<= count times)
-         ((lambda ()
-           (f count)
-           (self self (seq count))
-           ))
-         count)))))
+	(define iter
+	  (lambda (count)
+		(if (<= count times)
+		  (begin
+			 (f count)
+			 (iter (seq count)))
+		  count)))
+	(iter 1)))
 
 ; Square a number
 (define square
@@ -129,9 +149,9 @@
   (lambda (x)
 	(if (null? x)
 	  x
-	  ((lambda ()
+	  (begin
 		(print (car x))
-		(asdf (cdr x)))))))
+		(asdf (cdr x))))))
 
 ; Calculate the sum of a function with inputs from 1 to n.
 (define sum
@@ -140,6 +160,13 @@
       (+ (f n)
          (sum (- n 1) f))
       0)))
+
+(define generator
+  (lambda (x)
+    (lambda ()
+      (display "Called ") (display x) (display " times")
+      (newline)
+      (generator (+ x 1)))))
 
 ; The main function, used as the entry point
 (define main
@@ -151,6 +178,6 @@
 	(print wut)
 
     (print "-== Squares of numbers from 0 to 30:")
-    (psquares 30)))
+    (psquares 5000)))
 
 (main)
