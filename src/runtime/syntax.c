@@ -23,11 +23,11 @@ stack_frame_t *expand_procedure( stack_frame_t *frame, token_t *tokens ){
 
 		if ( args && args->type == TYPE_LIST ){
 			body = clone_tokens( args->next );
+			move = tokens->next;
 			temp = args->down;
 
 			ret = frame_create( frame, body );
 			frame_add_token( ret, ext_proc_token( builtin_return_last ));
-			move = tokens->next;
 			
 			foreach_in_list( temp ){
 				if ( temp->type == TYPE_SYMBOL ){
@@ -38,7 +38,11 @@ stack_frame_t *expand_procedure( stack_frame_t *frame, token_t *tokens ){
 						break;
 					}
 
-					replace_symbol_safe( body, move, var_name );
+					token_t *add;
+					add = clone_token_tree( temp );
+					add->down = clone_token_tree( move );
+
+					replace_symbol_safe( body, add, var_name );
 					move = move->next;
 
 				} else {

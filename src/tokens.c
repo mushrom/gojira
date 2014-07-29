@@ -128,6 +128,14 @@ token_t *clone_token_tree( token_t *tree ){
 	return ret;
 }
 
+token_t *alloc_token( void ){
+	token_t *ret;
+
+	ret = calloc( 1, sizeof( token_t ));
+
+	return ret;
+}
+
 void free_tokens( token_t *tree ){
 	if ( tree ){
 		free_tokens( tree->down );

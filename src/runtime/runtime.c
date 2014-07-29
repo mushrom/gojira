@@ -59,31 +59,37 @@ bool eval_frame_subexpr( stack_frame_t **frame_ret, stack_frame_t *first ){
 			break;
 
 		case TYPE_SYMBOL:
-			// search for symbol in the highest scope, which has the
-			// most often used variables
-			move = frame_find_var( first, frame->ptr->data );
-
-			// didn't find it, start from top frame
-			if ( !move )
-				move = frame_find_var( frame, frame->ptr->data );
-
-			if ( move ){
-				frame_add_token( frame, move );
-
-				if ( move->type != TYPE_SYNTAX ){
-					frame->ptr = frame->ptr->next;
-
-				} else {
-					for ( frame->ptr = frame->ptr->next; frame->ptr; frame->ptr = frame->ptr->next )
-						frame_add_token( frame, frame->ptr );
-				}
+			if ( frame->ptr->down ){
+				frame_add_token( frame, frame->ptr->down );
+				frame->ptr = frame->ptr->next;
 
 			} else {
-				printf( "[%s] Error: undefined variable \"%s\"\n",
-						__func__, (char *)frame->ptr->data );
+				// search for symbol in the highest scope, which has the
+				// most often used variables
+				move = frame_find_var( first, frame->ptr->data );
 
-				stack_trace( frame );
-				ret = true;
+				// didn't find it, start from top frame
+				if ( !move )
+					move = frame_find_var( frame, frame->ptr->data );
+
+				if ( move ){
+					frame_add_token( frame, move );
+
+					if ( move->type != TYPE_SYNTAX ){
+						frame->ptr = frame->ptr->next;
+
+					} else {
+						for ( frame->ptr = frame->ptr->next; frame->ptr; frame->ptr = frame->ptr->next )
+							frame_add_token( frame, frame->ptr );
+					}
+
+				} else {
+					printf( "[%s] Error: undefined variable \"%s\"\n",
+							__func__, (char *)frame->ptr->data );
+
+					stack_trace( frame );
+					ret = true;
+				}
 			}
 
 			break;
