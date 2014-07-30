@@ -100,6 +100,7 @@ st_frame_t *frame_create( st_frame_t *cur_frame, token_t *ptr ){
 
 	ret->value = NULL;
 	ret->expr = NULL;
+	ret->status = TYPE_NULL;
 
 	return ret;
 }

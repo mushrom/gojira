@@ -168,6 +168,24 @@
       (newline)
       (generator (+ x 1)))))
 
+(define abc
+  (lambda (count)
+    (if (eq? count 0)
+      0
+      ((lambda ()
+        (stacktrace)
+        (print "abc")
+        (qwerty (- count 1)))))))
+
+(define qwerty
+  (lambda (count)
+    (if (eq? count 0)
+      0
+      ((lambda ()
+        (stacktrace)
+        (print "qwerty")
+        (abc (- count 1)))))))
+
 ; The main function, used as the entry point
 (define main
   (lambda ()

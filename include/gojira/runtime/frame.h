@@ -19,6 +19,7 @@ typedef struct stack_frame {
 	token_t *expr;        // Token list built during evaluation
 	token_t *end;         // Last token in the expression
 	unsigned ntokens;     // Number of tokens in expr
+	unsigned status;
 
 	token_t *value;       // value to return to last continuation
 } stack_frame_t;

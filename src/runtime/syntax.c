@@ -11,10 +11,12 @@ stack_frame_t *expand_procedure( stack_frame_t *frame, token_t *tokens ){
 	stack_frame_t *ret = NULL;
 	token_t *move;
 	token_t *temp;
+	token_t *orig_expr;
 
 	token_t *args;
 	token_t *body;
 	char *var_name;
+	bool is_tailcall = false;
 
 	if ( tokens->type == TYPE_PROCEDURE ){
 		move = tokens->down;
@@ -23,12 +25,9 @@ stack_frame_t *expand_procedure( stack_frame_t *frame, token_t *tokens ){
 
 		if ( args && args->type == TYPE_LIST ){
 			body = clone_tokens( args->next );
-			move = tokens->next;
+			move = clone_tokens( tokens->next );
 			temp = args->down;
 
-			ret = frame_create( frame, body );
-			frame_add_token( ret, ext_proc_token( builtin_return_last ));
-			
 			foreach_in_list( temp ){
 				if ( temp->type == TYPE_SYMBOL ){
 					var_name = temp->data;
@@ -42,13 +41,40 @@ stack_frame_t *expand_procedure( stack_frame_t *frame, token_t *tokens ){
 					add = clone_token_tree( temp );
 					add->down = clone_token_tree( move );
 
-					replace_symbol_safe( body, add, var_name );
+					body = replace_symbol_safe( body, add, var_name );
 					move = move->next;
 
 				} else {
-					printf( "[%s] Error: expected symbol in procedure definition, have \"%s\"\n", __func__, type_str( temp->type ));
+					printf( "[%s] Error: expected symbol in procedure definition, have \"%s\"\n",
+							__func__, type_str( temp->type ));
 					stack_trace( ret );
 				}
+			}
+
+			if ( /* frame->last && */ frame->last->ptr == NULL && frame->last->status == TYPE_PROCEDURE ){
+				//printf( "[%s] Have tail call\n", __func__ );
+				ret = frame->last;
+				is_tailcall = true;
+
+			} else {
+				/*
+				printf( "[%s] Don't have tail call, status = %s, frame->last->ptr = %p\n",
+						__func__, type_str( frame->last->status ), frame->last->ptr );
+				dump_tokens( frame->last->ptr, 2 );
+				*/
+				ret = frame;
+			}
+
+			//orig_expr = ret->expr;
+			free_tokens( ret->expr );
+			ret->expr = ret->end = NULL;
+			frame_add_token( ret, ext_proc_token( builtin_return_last ));
+
+			ret->ptr = body;
+
+			//free_tokens( orig_expr );
+			if ( is_tailcall ){
+				frame_free( frame );
 			}
 		}
 

@@ -55,7 +55,7 @@ bool eval_frame_subexpr( stack_frame_t **frame_ret, stack_frame_t *first ){
 				break;
 			}
 
-			*frame_ret = frame_create( frame, move->down );
+			frame = *frame_ret = frame_create( frame, move->down );
 			break;
 
 		case TYPE_SYMBOL:
@@ -153,6 +153,8 @@ bool eval_frame_expr( stack_frame_t **frame_ret, stack_frame_t *first ){
 	ext_proc_t *ext;
 	scheme_func handle;
 
+	frame->status = frame->expr->type;
+
 	switch ( frame->expr->type ){
 		case TYPE_EXTERN_PROC:
 			ext = frame->expr->data;
@@ -167,10 +169,7 @@ bool eval_frame_expr( stack_frame_t **frame_ret, stack_frame_t *first ){
 			break;
 
 		case TYPE_PROCEDURE:
-			// TODO: Change this, either reuse the current frame or make 
-			//       sure the frame is properly deallocated
-			temp_frame = expand_procedure( frame->last, frame->expr );
-			frame_free( frame );
+			temp_frame = expand_procedure( frame, frame->expr );
 			frame = *frame_ret = temp_frame;
 
 			apply = false;
@@ -192,14 +191,19 @@ bool eval_frame_expr( stack_frame_t **frame_ret, stack_frame_t *first ){
 				foo = clone_token_tree( frame->expr->down );
 			}
 
-			temp_frame = frame_create( frame->last, foo );
-			frame_add_token( temp_frame, ext_proc_token( builtin_return_first ));
+			free_tokens( frame->expr );
+			frame->expr = frame->end = NULL;
 
-			frame_free( frame );
-			*frame_ret = temp_frame;
+			if ( foo->type == TYPE_LIST ){
+				// If it's an expression, evaluate the tokens in the current frame.
+				// TODO: find a less hackish way to do this
+				frame->ptr = foo->down;
+			} else {
+				frame_add_token( frame, ext_proc_token( builtin_return_first ));
+				frame->ptr = foo;
+			}
 
 			apply = false;
-			//continue;
 			break;
 
 		case TYPE_DEF_SYNTAX:
