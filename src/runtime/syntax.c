@@ -1,6 +1,7 @@
 #include <gojira/runtime/syntax.h>
 #include <gojira/runtime/runtime.h>
 #include <gojira/runtime/builtin.h>
+#include <gojira/runtime/garbage.h>
 #include <gojira/parse_debug.h>
 
 #include <stdlib.h>
@@ -25,7 +26,7 @@ stack_frame_t *expand_procedure( stack_frame_t *frame, token_t *tokens ){
 
 		if ( args && args->type == TYPE_LIST ){
 			body = clone_tokens( args->next );
-			move = clone_tokens( tokens->next );
+			orig_expr = move = clone_tokens( tokens->next );
 			temp = args->down;
 
 			foreach_in_list( temp ){
@@ -38,8 +39,10 @@ stack_frame_t *expand_procedure( stack_frame_t *frame, token_t *tokens ){
 					}
 
 					token_t *add;
-					add = clone_token_tree( temp );
-					add->down = clone_token_tree( move );
+					add = frame_register_token( frame, clone_token_tree( temp ));
+					add->down = frame_register_token( frame, clone_token_tree( move ));
+
+					//frame_register_token( frame, add );
 
 					body = replace_symbol_safe( body, add, var_name );
 					move = move->next;
@@ -51,29 +54,28 @@ stack_frame_t *expand_procedure( stack_frame_t *frame, token_t *tokens ){
 				}
 			}
 
-			if ( /* frame->last && */ frame->last->ptr == NULL && frame->last->status == TYPE_PROCEDURE ){
-				//printf( "[%s] Have tail call\n", __func__ );
+			if ( frame->last->ptr == NULL && frame->last->status == TYPE_PROCEDURE ){
 				ret = frame->last;
 				is_tailcall = true;
-
 			} else {
-				/*
-				printf( "[%s] Don't have tail call, status = %s, frame->last->ptr = %p\n",
-						__func__, type_str( frame->last->status ), frame->last->ptr );
-				dump_tokens( frame->last->ptr, 2 );
-				*/
 				ret = frame;
 			}
 
-			//orig_expr = ret->expr;
-			free_tokens( ret->expr );
+			//free_tokens( ret->expr );
 			ret->expr = ret->end = NULL;
-			frame_add_token( ret, ext_proc_token( builtin_return_last ));
+
+			temp = ext_proc_token( builtin_return_last );
+			frame_add_token_noclone( ret, temp );
+
+			frame_register_token( ret, body );
+			frame_register_token( ret, orig_expr );
 
 			ret->ptr = body;
 
-			//free_tokens( orig_expr );
 			if ( is_tailcall ){
+				gc_sweep( frame->heap );
+				//frame_register_token( ret, frame->heap );
+
 				frame_free( frame );
 			}
 		}
@@ -94,10 +96,13 @@ token_t *expand_if_expr( stack_frame_t *frame, token_t *tokens ){
 
 	if ( len == 4 ){
 
-		move = calloc( 1, sizeof( token_t ));
+		//move = calloc( 1, sizeof( token_t ));
+		//move = frame_alloc_token( frame );
+		move = alloc_token( );
 		move->type = TYPE_IF;
 		move->down = frame->ptr->next->next;
-		move->next = clone_token_tree( frame->ptr->next );
+		move->next = frame_register_token( frame, clone_token_tree( frame->ptr->next ));
+		//move->next = clone_token_tree( frame->ptr->next );
 		ret = move;
 
 	} else {

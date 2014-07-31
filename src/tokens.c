@@ -141,6 +141,8 @@ void free_tokens( token_t *tree ){
 		free_tokens( tree->down );
 		free_tokens( tree->next );
 		free( tree );
+
+		// TODO: Free data field in tokens properly, will likely need reference tracking.
 	}
 }
 

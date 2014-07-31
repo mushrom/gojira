@@ -9,6 +9,7 @@ typedef struct ext_proc {
 	scheme_func handler;
 
 	unsigned flags;
+	unsigned references;
 } ext_proc_t;
 
 token_t *ext_proc_token( scheme_func handle );

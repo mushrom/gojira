@@ -22,6 +22,7 @@ typedef struct stack_frame {
 	unsigned status;
 
 	token_t *value;       // value to return to last continuation
+	token_t *heap;        // List of all tokens allocated in the frame
 } stack_frame_t;
 typedef stack_frame_t st_frame_t;
 
@@ -30,7 +31,11 @@ st_frame_t *frame_create( st_frame_t *cur_frame, token_t *ptr );
 st_frame_t *frame_free( st_frame_t *frame );
 variable_t *frame_add_var( st_frame_t *frame, char *key, token_t *token );
 token_t *frame_add_token( st_frame_t *frame, token_t *token );
+token_t *frame_add_token_noclone( st_frame_t *frame, token_t *token );
 token_t *frame_find_var( st_frame_t *frame, char *key );
+
+token_t *frame_register_token( st_frame_t *frame, token_t *token );
+token_t *frame_alloc_token( st_frame_t *frame );
 
 void stack_trace( st_frame_t *frame );
 

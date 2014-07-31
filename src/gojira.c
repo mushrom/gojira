@@ -7,6 +7,7 @@
 #include <gojira/config.h>
 #include <gojira/runtime/runtime.h>
 #include <gojira/runtime/builtin.h>
+#include <gojira/runtime/garbage.h>
 #include <gojira/libs/stack.h>
 
 void print_help( ){
@@ -73,6 +74,7 @@ int main( int argc, char *argv[] ){
 			fclose( input_file );
 
 			tree = remove_punc_tokens( parse_tokens( lexerize( buf )));
+			gc_unmark( tree );
 
 			global_frame->ptr = tree;
 			eval_loop( global_frame, tree );
@@ -91,6 +93,7 @@ int main( int argc, char *argv[] ){
 			char *buf = read_with_parens( stdin );
 
 			tree = remove_punc_tokens( parse_tokens( lexerize( buf )));
+			gc_unmark( tree );
 
 			if ( tree ){
 				global_frame->ptr = tree;
@@ -105,6 +108,7 @@ int main( int argc, char *argv[] ){
 		}
 	}
 
+	gc_sweep( global_frame->heap );
 	frame_free( global_frame );
 
 	return ret;

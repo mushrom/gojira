@@ -7,13 +7,14 @@
 
 token_t *ext_proc_token( scheme_func handle ){
 	token_t *ret = NULL;
-	ext_proc_t *ext;
+	//ext_proc_t *ext;
 
 	ret = calloc( 1, sizeof( token_t ));
-	ext = calloc( 1, sizeof( ext_proc_t ));
+	//ext = calloc( 1, sizeof( ext_proc_t ));
 
-	ext->handler = handle;
-	ret->data = ext;
+	//ext->handler = handle;
+	//ret->data = ext;
+	ret->data = handle;
 	ret->type = TYPE_EXTERN_PROC;
 
 	return ret;

@@ -2,6 +2,7 @@
 #include <gojira/runtime/frame.h>
 #include <gojira/runtime/syntax.h>
 #include <gojira/runtime/builtin.h>
+#include <gojira/runtime/garbage.h>
 #include <gojira/parse_debug.h>
 
 #include <stdlib.h>
@@ -111,7 +112,7 @@ bool eval_frame_subexpr( stack_frame_t **frame_ret, stack_frame_t *first ){
 			move->type = TYPE_SYNTAX;
 			move->down = frame->ptr;
 
-			frame_add_token( frame, ext_proc_token( builtin_return_first ));
+			frame_add_token_noclone( frame, ext_proc_token( builtin_return_first ));
 			frame_add_token( frame, move );
 
 			frame->ptr = NULL;
@@ -157,8 +158,9 @@ bool eval_frame_expr( stack_frame_t **frame_ret, stack_frame_t *first ){
 
 	switch ( frame->expr->type ){
 		case TYPE_EXTERN_PROC:
-			ext = frame->expr->data;
-			handle = ext->handler;
+			//ext = frame->expr->data;
+			//handle = ext->handler;
+			handle = frame->expr->data;
 
 			if ( handle )
 				frame->value = handle( frame );
@@ -176,7 +178,8 @@ bool eval_frame_expr( stack_frame_t **frame_ret, stack_frame_t *first ){
 			break;
 
 		case TYPE_LAMBDA:
-			foo = calloc( 1, sizeof( token_t ));
+			//foo = calloc( 1, sizeof( token_t ));
+			foo = frame_alloc_token( frame );
 			foo->type = TYPE_PROCEDURE;
 			foo->down = frame->expr;
 			frame->value = foo;
@@ -191,15 +194,17 @@ bool eval_frame_expr( stack_frame_t **frame_ret, stack_frame_t *first ){
 				foo = clone_token_tree( frame->expr->down );
 			}
 
-			free_tokens( frame->expr );
+			frame_register_token( frame, foo );
+			//free_tokens( frame->expr );
 			frame->expr = frame->end = NULL;
 
 			if ( foo->type == TYPE_LIST ){
 				// If it's an expression, evaluate the tokens in the current frame.
 				// TODO: find a less hackish way to do this
 				frame->ptr = foo->down;
+
 			} else {
-				frame_add_token( frame, ext_proc_token( builtin_return_first ));
+				frame_add_token_noclone( frame, ext_proc_token( builtin_return_first ));
 				frame->ptr = foo;
 			}
 
@@ -209,7 +214,8 @@ bool eval_frame_expr( stack_frame_t **frame_ret, stack_frame_t *first ){
 		case TYPE_DEF_SYNTAX:
 			frame_add_var( frame->last, frame->expr->next->data, frame->expr->next->next );
 
-			frame->value = calloc( 1, sizeof( token_t ));
+			//frame->value = calloc( 1, sizeof( token_t ));
+			frame->value = frame_alloc_token( frame );
 			frame->value->type = TYPE_NULL;
 
 			break;
@@ -220,7 +226,7 @@ bool eval_frame_expr( stack_frame_t **frame_ret, stack_frame_t *first ){
 			if ( foo ){
 				if ( foo->type == TYPE_LIST ){
 					frame->ptr = foo->down;
-					free_tokens( frame->expr );
+					//free_tokens( frame->expr );
 					frame->expr = NULL;
 					apply = false;
 
@@ -237,6 +243,7 @@ bool eval_frame_expr( stack_frame_t **frame_ret, stack_frame_t *first ){
 			break;
 
 		default:
+
 			printf( "[%s] Can't apply \"%s\"\n", __func__, type_str( frame->expr->type ));
 			stack_trace( frame );
 			ret = true;
@@ -245,7 +252,11 @@ bool eval_frame_expr( stack_frame_t **frame_ret, stack_frame_t *first ){
 
 	if ( apply && !ret ){
 		temp_frame = frame->last;
-		frame_add_token( temp_frame, frame->value );
+
+		gc_mark( frame->value );
+		frame->heap = gc_sweep( frame->heap );
+
+		frame_add_token_noclone( temp_frame, frame->value );
 
 		frame_free( frame );
 		*frame_ret = temp_frame;

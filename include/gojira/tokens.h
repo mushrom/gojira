@@ -38,8 +38,12 @@ typedef enum {
 
 typedef struct token {
 	type_t type;
+
+	// Used for rule reduction while parsing, and for garbage status
+	// during runtime.
 	unsigned status;
 
+	// token data
 	union {
 		void *data;
 		unsigned smalldata;
@@ -47,6 +51,9 @@ typedef struct token {
 
 	struct token *next;
 	struct token *down;
+
+	// Used in frames to keep (seperate) token list of all allocated tokens
+	struct token *gc_link;
 } token_t;
 
 token_t *dump_tokens( token_t *tokens, int level );

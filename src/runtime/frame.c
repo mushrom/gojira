@@ -1,5 +1,6 @@
 #include <gojira/runtime/frame.h>
 #include <gojira/runtime/builtin.h>
+#include <gojira/runtime/garbage.h>
 #include <gojira/parse_debug.h>
 
 #include <string.h>
@@ -72,21 +73,22 @@ void stack_trace( st_frame_t *frame ){
 }
 
 st_frame_t *init_global_frame( st_frame_t *frame ){
-	frame_add_var( frame, "+", ext_proc_token( builtin_add ));
-	frame_add_var( frame, "*", ext_proc_token( builtin_multiply ));
-	frame_add_var( frame, "-", ext_proc_token( builtin_subtract ));
-	frame_add_var( frame, "/", ext_proc_token( builtin_divide ));
-	frame_add_var( frame, "display", ext_proc_token( builtin_display ));
-	frame_add_var( frame, "newline", ext_proc_token( builtin_newline ));
-	frame_add_var( frame, "stacktrace", ext_proc_token( builtin_stacktrace ));
-	frame_add_var( frame, "eq?", ext_proc_token( builtin_equal ));
-	frame_add_var( frame, "<", ext_proc_token( builtin_lessthan ));
-	frame_add_var( frame, ">", ext_proc_token( builtin_greaterthan ));
-	frame_add_var( frame, "car", ext_proc_token( builtin_car ));
-	frame_add_var( frame, "cdr", ext_proc_token( builtin_cdr ));
-	frame_add_var( frame, "null?", ext_proc_token( builtin_is_null ));
+	// TODO: Clean this up
+	frame_add_var( frame, "+", frame_register_token( frame, ext_proc_token( builtin_add )));
+	frame_add_var( frame, "*", frame_register_token( frame, ext_proc_token( builtin_multiply )));
+	frame_add_var( frame, "-", frame_register_token( frame, ext_proc_token( builtin_subtract )));
+	frame_add_var( frame, "/", frame_register_token( frame, ext_proc_token( builtin_divide )));
+	frame_add_var( frame, "display", frame_register_token( frame, ext_proc_token( builtin_display )));
+	frame_add_var( frame, "newline", frame_register_token( frame, ext_proc_token( builtin_newline )));
+	frame_add_var( frame, "stacktrace", frame_register_token( frame, ext_proc_token( builtin_stacktrace )));
+	frame_add_var( frame, "eq?", frame_register_token( frame, ext_proc_token( builtin_equal )));
+	frame_add_var( frame, "<", frame_register_token( frame, ext_proc_token( builtin_lessthan )));
+	frame_add_var( frame, ">", frame_register_token( frame, ext_proc_token( builtin_greaterthan )));
+	frame_add_var( frame, "car", frame_register_token( frame, ext_proc_token( builtin_car )));
+	frame_add_var( frame, "cdr", frame_register_token( frame, ext_proc_token( builtin_cdr )));
+	frame_add_var( frame, "null?", frame_register_token( frame, ext_proc_token( builtin_is_null )));
 
-	frame_add_var( frame, "intern-set", ext_proc_token( builtin_intern_set ));
+	frame_add_var( frame, "intern-set", frame_register_token( frame, ext_proc_token( builtin_intern_set )));
 
 	return frame;
 }
@@ -115,15 +117,16 @@ st_frame_t *frame_free( st_frame_t *frame ){
 			move = frame->vars->base;
 			foreach_in_list( move ){
 				var = move->data;
-				free_tokens( var->token );
+				//free_tokens( var->token );
+				free( var->key );
 				free( var );
 			}
 
 			list_free( frame->vars );
 		}
 
-		free_tokens( frame->expr );
-		frame->expr = NULL;
+		//free_tokens( frame->expr );
+		//frame->expr = NULL;
 		free( frame );
 	}
 
@@ -135,9 +138,28 @@ token_t *frame_add_token( st_frame_t *frame, token_t *token ){
 
 	if ( !frame->expr ){
 		frame->expr = frame->end = clone_token_tree( token );
+		frame->end = frame_register_token( frame, frame->end );
 		
 	} else {
 		frame->end->next = clone_token_tree( token );
+		frame->end->next = frame_register_token( frame, frame->end->next );
+		frame->end = frame->end->next;
+	}
+
+	frame->ntokens++;
+
+	return ret;
+}
+
+token_t *frame_add_token_noclone( st_frame_t *frame, token_t *token ){
+	token_t *ret = token;
+
+	if ( !frame->expr ){
+		frame->expr = frame->end = token;
+		
+	} else {
+		frame->end->next = token;
+		frame->end->next = frame_register_token( frame, frame->end->next );
 		frame->end = frame->end->next;
 	}
 
@@ -182,7 +204,7 @@ variable_t *frame_add_var( st_frame_t *frame, char *key, token_t *token ){
 
 		new_var = calloc( 1, sizeof( variable_t ));
 		new_var->key = strdup( key );
-		new_var->token = clone_token_tree( token );
+		new_var->token = frame_register_token( frame, clone_token_tree( token ));
 
 		list_add_data( frame->vars, new_var );
 
@@ -192,4 +214,17 @@ variable_t *frame_add_var( st_frame_t *frame, char *key, token_t *token ){
 	}
 
 	return new_var;
+}
+
+token_t *frame_register_token( st_frame_t *frame, token_t *token ){
+	if ( token ){
+		token->gc_link = frame->heap;
+		frame->heap = token;
+	}
+
+	return token;
+}
+
+token_t *frame_alloc_token( st_frame_t *frame ){
+	return frame_register_token( frame, alloc_token( ));
 }

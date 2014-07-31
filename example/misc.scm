@@ -1,3 +1,5 @@
+; program to test the interpreter
+; (proper test suite coming soon(!))
 (define-syntax define
   (syntax-rules ()
     ((_ sym def)
@@ -173,7 +175,7 @@
     (if (eq? count 0)
       0
       ((lambda ()
-        (stacktrace)
+;       (stacktrace)
         (print "abc")
         (qwerty (- count 1)))))))
 
@@ -182,7 +184,7 @@
     (if (eq? count 0)
       0
       ((lambda ()
-        (stacktrace)
+;       (stacktrace)
         (print "qwerty")
         (abc (- count 1)))))))
 
@@ -196,6 +198,6 @@
 	(print wut)
 
     (print "-== Squares of numbers from 0 to 30:")
-    (psquares 5)))
+    (psquares 25)))
 
 (main)
