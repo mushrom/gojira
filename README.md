@@ -2,7 +2,7 @@ Gojira
 ======
 A scheme interpreter
 
-A work in progress, and is currently missing some major pieces of the language.
+A work in progress. Intended to be a minimal but entirely usable interpreter, for fun and for my pet OS project.
 
 To build
 - - - - -
@@ -20,5 +20,15 @@ To run a file,
 
 Status
 - - - -
-Currently does not support proper syntax definitions, (explicit) continuations, optimized tail calls, and a lot of the standard library.
-But it does print "Hello world".
+
+Currently supports:
+
+- Basic scheme interpreting with some standard operators (+, -, display, null?, etc)
+- Tail call elimination
+- (incomplete) macros/syntax extensions
+- (incomplete) garbage collection
+
+Coming soon:
+
+- First-class continuations
+- External (C function) linking
