@@ -122,7 +122,7 @@ bool eval_frame_subexpr( stack_frame_t **frame_ret, stack_frame_t *first ){
 			move = expand_if_expr( frame, frame->ptr );
 
 			if ( move ){
-				frame_add_token( frame, move );
+				frame_add_token_noclone( frame, move );
 				frame->ptr = move->next;
 
 			} else {
@@ -158,8 +158,6 @@ bool eval_frame_expr( stack_frame_t **frame_ret, stack_frame_t *first ){
 
 	switch ( frame->expr->type ){
 		case TYPE_EXTERN_PROC:
-			//ext = frame->expr->data;
-			//handle = ext->handler;
 			handle = frame->expr->data;
 
 			if ( handle )
@@ -178,7 +176,6 @@ bool eval_frame_expr( stack_frame_t **frame_ret, stack_frame_t *first ){
 			break;
 
 		case TYPE_LAMBDA:
-			//foo = calloc( 1, sizeof( token_t ));
 			foo = frame_alloc_token( frame );
 			foo->type = TYPE_PROCEDURE;
 			foo->down = frame->expr;
@@ -194,8 +191,8 @@ bool eval_frame_expr( stack_frame_t **frame_ret, stack_frame_t *first ){
 				foo = clone_token_tree( frame->expr->down );
 			}
 
+			gc_unmark( foo );
 			frame_register_token( frame, foo );
-			//free_tokens( frame->expr );
 			frame->expr = frame->end = NULL;
 
 			if ( foo->type == TYPE_LIST ){
@@ -214,7 +211,6 @@ bool eval_frame_expr( stack_frame_t **frame_ret, stack_frame_t *first ){
 		case TYPE_DEF_SYNTAX:
 			frame_add_var( frame->last, frame->expr->next->data, frame->expr->next->next );
 
-			//frame->value = calloc( 1, sizeof( token_t ));
 			frame->value = frame_alloc_token( frame );
 			frame->value->type = TYPE_NULL;
 
@@ -226,7 +222,6 @@ bool eval_frame_expr( stack_frame_t **frame_ret, stack_frame_t *first ){
 			if ( foo ){
 				if ( foo->type == TYPE_LIST ){
 					frame->ptr = foo->down;
-					//free_tokens( frame->expr );
 					frame->expr = NULL;
 					apply = false;
 
@@ -253,6 +248,7 @@ bool eval_frame_expr( stack_frame_t **frame_ret, stack_frame_t *first ){
 	if ( apply && !ret ){
 		temp_frame = frame->last;
 
+		//gc_dump( frame );
 		gc_mark( frame->value );
 		frame->heap = gc_sweep( frame->heap );
 

@@ -36,3 +36,21 @@ token_t *gc_sweep( token_t *tree ){
 
 	return ret;
 }
+
+void gc_dump_tokens( token_t *token ){
+	int i;
+	token_t *move;
+
+	for ( i = 0, move = token; move; move = move->gc_link, i++ ){
+		printf( "[%s] Token %d\n", __func__, i );
+		dump_tokens( move, 0 );
+	}
+}
+
+void gc_dump( stack_frame_t *frame ){
+	printf( "[%s] Garbage heap dump\n", __func__ );
+	if ( frame->last == NULL )
+		printf( "[%s] Is base frame\n", __func__ );
+
+	gc_dump_tokens( frame->heap );
+}

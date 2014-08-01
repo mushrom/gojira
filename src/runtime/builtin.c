@@ -1,4 +1,5 @@
 #include <gojira/runtime/runtime.h>
+#include <gojira/runtime/garbage.h>
 #include <gojira/runtime/builtin.h>
 #include <gojira/parse_debug.h>
 #include <stdbool.h>
@@ -7,13 +8,9 @@
 
 token_t *ext_proc_token( scheme_func handle ){
 	token_t *ret = NULL;
-	//ext_proc_t *ext;
 
 	ret = calloc( 1, sizeof( token_t ));
-	//ext = calloc( 1, sizeof( ext_proc_t ));
 
-	//ext->handler = handle;
-	//ret->data = ext;
 	ret->data = handle;
 	ret->type = TYPE_EXTERN_PROC;
 
@@ -63,7 +60,8 @@ token_t *builtin_car( stack_frame_t *frame ){
 	token_t *ret = move;
 
 	if ( move && move->type == TYPE_LIST && move->down ){
-		ret = move->down;
+		ret = clone_token_tree( move->down );
+		gc_unmark( ret );
 
 	} else {
 		printf( "[%s] Bad argument type \"%s\"\n", __func__, type_str( move->type ));
@@ -80,7 +78,8 @@ token_t *builtin_cdr( stack_frame_t *frame ){
 	if ( move && move->type == TYPE_LIST && move->down ){
 		ret = calloc( 1, sizeof( token_t ));
 		ret->type = TYPE_LIST;
-		ret->down = move->down->next;
+		ret->down = clone_tokens( move->down->next );
+		gc_unmark( ret );
 
 	} else {
 		printf( "[%s] Bad argument type \"%s\"\n", __func__, type_str( move->type ));

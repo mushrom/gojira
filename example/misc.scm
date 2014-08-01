@@ -108,9 +108,11 @@
 	(define iter
 	  (lambda (count)
 		(if (<= count times)
-		  (begin
+		  ;(begin
+          ((lambda ()
 			 (f count)
-			 (iter (seq count)))
+			 (iter (seq count))
+             ))
 		  count)))
 	(iter 1)))
 
@@ -175,7 +177,6 @@
     (if (eq? count 0)
       0
       ((lambda ()
-;       (stacktrace)
         (print "abc")
         (qwerty (- count 1)))))))
 
@@ -184,7 +185,6 @@
     (if (eq? count 0)
       0
       ((lambda ()
-;       (stacktrace)
         (print "qwerty")
         (abc (- count 1)))))))
 
@@ -198,6 +198,7 @@
 	(print wut)
 
     (print "-== Squares of numbers from 0 to 30:")
-    (psquares 25)))
+    (psquares 50)
+    (asdf '(a b c))))
 
 (main)

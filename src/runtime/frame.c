@@ -108,7 +108,6 @@ st_frame_t *frame_create( st_frame_t *cur_frame, token_t *ptr ){
 }
 
 st_frame_t *frame_free( st_frame_t *frame ){
-	//printf( "[%s] Freeing frame\n", __func__ );
 	list_node_t *move;
 	variable_t *var;
 
@@ -117,7 +116,6 @@ st_frame_t *frame_free( st_frame_t *frame ){
 			move = frame->vars->base;
 			foreach_in_list( move ){
 				var = move->data;
-				//free_tokens( var->token );
 				free( var->key );
 				free( var );
 			}
@@ -125,8 +123,6 @@ st_frame_t *frame_free( st_frame_t *frame ){
 			list_free( frame->vars );
 		}
 
-		//free_tokens( frame->expr );
-		//frame->expr = NULL;
 		free( frame );
 	}
 
@@ -135,14 +131,17 @@ st_frame_t *frame_free( st_frame_t *frame ){
 
 token_t *frame_add_token( st_frame_t *frame, token_t *token ){
 	token_t *ret = token;
+	token_t *meh;
 
 	if ( !frame->expr ){
-		frame->expr = frame->end = clone_token_tree( token );
-		frame->end = frame_register_token( frame, frame->end );
+		frame->expr = frame->end = meh = clone_token_tree( token );
+		frame_register_token( frame, meh );
+		meh->status = GC_UNMARKED;
 		
 	} else {
 		frame->end->next = clone_token_tree( token );
 		frame->end->next = frame_register_token( frame, frame->end->next );
+		frame->end->next->status = GC_UNMARKED;
 		frame->end = frame->end->next;
 	}
 
@@ -156,10 +155,13 @@ token_t *frame_add_token_noclone( st_frame_t *frame, token_t *token ){
 
 	if ( !frame->expr ){
 		frame->expr = frame->end = token;
+		frame_register_token( frame, token );
+		token->status = GC_UNMARKED;
 		
 	} else {
 		frame->end->next = token;
 		frame->end->next = frame_register_token( frame, frame->end->next );
+		frame->end->next->status = GC_UNMARKED;
 		frame->end = frame->end->next;
 	}
 

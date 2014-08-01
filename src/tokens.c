@@ -11,7 +11,7 @@ token_t *dump_tokens( token_t *tokens, int level ){
 		for ( i = 0; i < level * 4; i++ )
 			putchar( ' ' );
 
-		printf( "%s", type_str( tokens->type ));
+		printf( "%s: %d: %p", type_str( tokens->type ), tokens->status, tokens );
 		switch( tokens->type ){
 			case TYPE_SYMBOL:
 				printf( ": %s", (char *)tokens->data );
@@ -204,4 +204,3 @@ token_t *replace_symbol_safe( token_t *tokens, token_t *replace, char *name ){
 	
 	return ret;
 }
-

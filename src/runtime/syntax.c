@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <string.h>
 
 stack_frame_t *expand_procedure( stack_frame_t *frame, token_t *tokens ){
 	stack_frame_t *ret = NULL;
@@ -26,7 +27,7 @@ stack_frame_t *expand_procedure( stack_frame_t *frame, token_t *tokens ){
 
 		if ( args && args->type == TYPE_LIST ){
 			body = clone_tokens( args->next );
-			orig_expr = move = clone_tokens( tokens->next );
+			move = tokens->next;
 			temp = args->down;
 
 			foreach_in_list( temp ){
@@ -39,10 +40,11 @@ stack_frame_t *expand_procedure( stack_frame_t *frame, token_t *tokens ){
 					}
 
 					token_t *add;
-					add = frame_register_token( frame, clone_token_tree( temp ));
-					add->down = frame_register_token( frame, clone_token_tree( move ));
+					add = clone_token_tree( temp );
+					add->down = clone_token_tree( move );
 
-					//frame_register_token( frame, add );
+					gc_unmark( add );
+					frame_register_token( frame, add );
 
 					body = replace_symbol_safe( body, add, var_name );
 					move = move->next;
@@ -61,21 +63,22 @@ stack_frame_t *expand_procedure( stack_frame_t *frame, token_t *tokens ){
 				ret = frame;
 			}
 
-			//free_tokens( ret->expr );
 			ret->expr = ret->end = NULL;
 
 			temp = ext_proc_token( builtin_return_last );
 			frame_add_token_noclone( ret, temp );
 
+			gc_unmark( body );
+
 			frame_register_token( ret, body );
-			frame_register_token( ret, orig_expr );
+
+			for ( temp = body->next; temp; temp = temp->next )
+				frame_register_token( ret, temp );
 
 			ret->ptr = body;
 
 			if ( is_tailcall ){
 				gc_sweep( frame->heap );
-				//frame_register_token( ret, frame->heap );
-
 				frame_free( frame );
 			}
 		}
@@ -96,13 +99,12 @@ token_t *expand_if_expr( stack_frame_t *frame, token_t *tokens ){
 
 	if ( len == 4 ){
 
-		//move = calloc( 1, sizeof( token_t ));
-		//move = frame_alloc_token( frame );
 		move = alloc_token( );
 		move->type = TYPE_IF;
-		move->down = frame->ptr->next->next;
+		move->down = clone_tokens( frame->ptr->next->next );
 		move->next = frame_register_token( frame, clone_token_tree( frame->ptr->next ));
-		//move->next = clone_token_tree( frame->ptr->next );
+		gc_unmark( move );
+
 		ret = move;
 
 	} else {
@@ -130,7 +132,6 @@ token_t *expand_syntax_rules( stack_frame_t *frame, token_t *tokens ){
 	args = tokens_length( tokens );
 
 	if ( len >= 3 ){
-		// do stuff
 		cur = cur->next->next;
 
 		for ( ; cur; cur = cur->next ){
@@ -139,7 +140,6 @@ token_t *expand_syntax_rules( stack_frame_t *frame, token_t *tokens ){
 
 			if ( tokens_length( pattern ) == args ){
 				matched = true;
-
 				ret = clone_token_tree( template );
 
 				for ( move = pattern, foo = tokens; move && foo;
@@ -147,6 +147,9 @@ token_t *expand_syntax_rules( stack_frame_t *frame, token_t *tokens ){
 				{
 					ret = replace_symbol( ret, foo, move->data );
 				}
+
+				gc_unmark( ret );
+				frame_register_token( frame, ret );
 			}
 		}
 
