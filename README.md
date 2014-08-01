@@ -25,8 +25,8 @@ Currently supports:
 
 - Basic scheme interpreting with some standard operators (+, -, display, null?, etc)
 - Tail call elimination
+- garbage collection
 - (incomplete) macros/syntax extensions
-- (incomplete) garbage collection
 
 Coming soon:
 
