@@ -110,10 +110,11 @@ bool eval_frame_subexpr( stack_frame_t **frame_ret, stack_frame_t *first ){
 		case TYPE_SYNTAX_RULES:
 			move = calloc( 1, sizeof( token_t ));
 			move->type = TYPE_SYNTAX;
-			move->down = frame->ptr;
+			move->down = clone_tokens( frame->ptr );
 
+			gc_unmark( move );
 			frame_add_token_noclone( frame, ext_proc_token( builtin_return_first ));
-			frame_add_token( frame, move );
+			frame_add_token_noclone( frame, move );
 
 			frame->ptr = NULL;
 			break;
