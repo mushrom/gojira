@@ -108,7 +108,8 @@ bool eval_frame_subexpr( stack_frame_t **frame_ret, stack_frame_t *first ){
 			break;
 
 		case TYPE_SYNTAX_RULES:
-			move = calloc( 1, sizeof( token_t ));
+			//move = calloc( 1, sizeof( token_t ));
+			move = alloc_token( );
 			move->type = TYPE_SYNTAX;
 			move->down = clone_tokens( frame->ptr );
 

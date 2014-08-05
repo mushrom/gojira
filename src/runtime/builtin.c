@@ -9,7 +9,8 @@
 token_t *ext_proc_token( scheme_func handle ){
 	token_t *ret = NULL;
 
-	ret = calloc( 1, sizeof( token_t ));
+	//ret = calloc( 1, sizeof( token_t ));
+	ret = alloc_token( );
 
 	ret->data = handle;
 	ret->type = TYPE_EXTERN_PROC;
@@ -22,7 +23,8 @@ token_t *builtin_intern_set( stack_frame_t *frame ){
 	token_t *move;
 	token_t *var;
 
-	ret = calloc( 1, sizeof( token_t ));
+	//ret = calloc( 1, sizeof( token_t ));
+	ret = alloc_token( );
 	ret->type = TYPE_NULL;
 
 	move = frame->expr->next;
@@ -76,7 +78,8 @@ token_t *builtin_cdr( stack_frame_t *frame ){
 	token_t *ret = move;
 
 	if ( move && move->type == TYPE_LIST && move->down ){
-		ret = calloc( 1, sizeof( token_t ));
+		//ret = calloc( 1, sizeof( token_t ));
+		ret = alloc_token( );
 		ret->type = TYPE_LIST;
 		ret->down = clone_tokens( move->down->next );
 		gc_unmark( ret );
@@ -94,7 +97,8 @@ token_t *builtin_is_null( stack_frame_t *frame ){
 	token_t *move;
 	bool val = false;
 
-	ret = calloc( 1, sizeof( token_t ));
+	//ret = calloc( 1, sizeof( token_t ));
+	ret = alloc_token( );
 	ret->type = TYPE_BOOLEAN;
 
 	if ( frame->ntokens - 1 == 1 ){
@@ -117,7 +121,8 @@ token_t *builtin_equal( stack_frame_t *frame ){
 
 	token_t *op1, *op2;
 
-	ret = calloc( 1, sizeof( token_t ));
+	//ret = calloc( 1, sizeof( token_t ));
+	ret = alloc_token( );
 	ret->type = TYPE_BOOLEAN;
 
 	if ( frame->ntokens - 1 == 2 ){
@@ -143,7 +148,8 @@ token_t *builtin_lessthan( stack_frame_t *frame ){
 
 	token_t *op1, *op2;
 
-	ret = calloc( 1, sizeof( token_t ));
+	//ret = calloc( 1, sizeof( token_t ));
+	ret = alloc_token( );
 	ret->type = TYPE_BOOLEAN;
 
 	if ( frame->ntokens - 1 == 2 ){
@@ -168,7 +174,8 @@ token_t *builtin_greaterthan( stack_frame_t *frame ){
 
 	token_t *op1, *op2;
 
-	ret = calloc( 1, sizeof( token_t ));
+	//ret = calloc( 1, sizeof( token_t ));
+	ret = alloc_token( );
 	ret->type = TYPE_BOOLEAN;
 
 	if ( frame->ntokens - 1 == 2 ){
@@ -192,7 +199,8 @@ token_t *builtin_add( stack_frame_t *frame ){
 	token_t *move;
 	int sum = 0;
 
-	ret = calloc( 1, sizeof( token_t ));
+	//ret = calloc( 1, sizeof( token_t ));
+	ret = alloc_token( );
 	ret->type = TYPE_NUMBER;
 
 	move = frame->expr->next;
@@ -216,7 +224,8 @@ token_t *builtin_multiply( stack_frame_t *frame ){
 	token_t *move;
 	int sum = 1;
 
-	ret = calloc( 1, sizeof( token_t ));
+	//ret = calloc( 1, sizeof( token_t ));
+	ret = alloc_token( );
 	ret->type = TYPE_NUMBER;
 
 	move = frame->expr->next;
@@ -240,7 +249,8 @@ token_t *builtin_subtract( stack_frame_t *frame ){
 	token_t *move;
 	int sum = 0;
 
-	ret = calloc( 1, sizeof( token_t ));
+	//ret = calloc( 1, sizeof( token_t ));
+	ret = alloc_token( );
 	ret->type = TYPE_NUMBER;
 
 	move = frame->expr->next;
@@ -269,7 +279,8 @@ token_t *builtin_divide( stack_frame_t *frame ){
 	token_t *move;
 	int sum = 1;
 
-	ret = calloc( 1, sizeof( token_t ));
+	//ret = calloc( 1, sizeof( token_t ));
+	ret = alloc_token( );
 	ret->type = TYPE_NUMBER;
 
 	move = frame->expr->next;
@@ -297,7 +308,8 @@ token_t *builtin_display( stack_frame_t *frame ){
 	token_t *ret;
 	token_t *move;
 
-	ret = calloc( 1, sizeof( token_t ));
+	//ret = calloc( 1, sizeof( token_t ));
+	ret = alloc_token( );
 	ret->type = TYPE_NULL;
 
 	move = frame->expr->next;
@@ -325,7 +337,8 @@ token_t *builtin_display( stack_frame_t *frame ){
 token_t *builtin_newline( stack_frame_t *frame ){
 	token_t *ret;
 
-	ret = calloc( 1, sizeof( token_t ));
+	//ret = calloc( 1, sizeof( token_t ));
+	ret = alloc_token( );
 	ret->type = TYPE_NULL;
 
 	putchar( '\n' );
@@ -336,7 +349,8 @@ token_t *builtin_newline( stack_frame_t *frame ){
 token_t *builtin_stacktrace( stack_frame_t *frame ){
 	token_t *ret;
 
-	ret = calloc( 1, sizeof( token_t ));
+	//ret = calloc( 1, sizeof( token_t ));
+	ret = alloc_token( );
 	ret->type = TYPE_NULL;
 
 	stack_trace( frame );
