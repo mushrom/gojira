@@ -2,6 +2,7 @@
 #include <gojira/runtime/builtin.h>
 #include <gojira/runtime/garbage.h>
 #include <gojira/parse_debug.h>
+#include <gojira/libs/hashmap.h>
 
 #include <string.h>
 #include <stdlib.h>
@@ -170,7 +171,7 @@ token_t *frame_add_token_noclone( st_frame_t *frame, token_t *token ){
 	return ret;
 }
 
-token_t *frame_find_var( st_frame_t *frame, char *key ){
+token_t *frame_find_var_hash( st_frame_t *frame, unsigned hash ){
 	token_t *ret = NULL;
 	list_node_t *temp;
 	variable_t *var;
@@ -181,19 +182,29 @@ token_t *frame_find_var( st_frame_t *frame, char *key ){
 			foreach_in_list( temp ){
 				var = temp->data;
 
-				if ( strcmp( var->key, key ) == 0 ){
+				if ( hash == var->hash ){
 					ret = var->token;
 					break;
 				}
 			}
 
 			if ( !ret )
-				ret = frame_find_var( frame->last, key );
+				ret = frame_find_var_hash( frame->last, hash );
 
 		} else {
-			ret = frame_find_var( frame->last, key );
+			ret = frame_find_var_hash( frame->last, hash );
 		}
 	}
+	return ret;
+}
+
+token_t *frame_find_var( st_frame_t *frame, char *key ){
+	token_t *ret = NULL;
+	unsigned hash;
+
+	hash = hash_string( key );
+	ret = frame_find_var_hash( frame, hash );
+
 	return ret;
 }
 
@@ -206,6 +217,7 @@ variable_t *frame_add_var( st_frame_t *frame, char *key, token_t *token ){
 
 		new_var = calloc( 1, sizeof( variable_t ));
 		new_var->key = strdup( key );
+		new_var->hash = hash_string( key );
 		new_var->token = frame_register_token( frame, clone_token_tree( token ));
 
 		list_add_data( frame->vars, new_var );

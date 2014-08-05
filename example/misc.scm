@@ -45,25 +45,30 @@
 
 (define not
   (lambda (x)
-    (if (eq? x #f)
-      #t
-      #f)))
+    (if x
+      #f
+      #t)))
 
-(define or
-  (lambda (a b)
-	(if a
-	  #t
-	  (if b
-		#t
-		#f))))
+; TODO: Fix symbol clashes between procedures and macro expansion
+(define-syntax or
+  (syntax-rules ()
+    ((_ _op1_ _op2_)
+     (if _op1_
+       #t
+       (if _op2_
+         #t
+         #f)))))
 
-(define and
-  (lambda (a b)
-	(if a
-	  (if b
-		#t
-		#f)
-	  #f)))
+(define-syntax and
+  (syntax-rules ()
+    ((_ _op1_ _op2_)
+     (if _op1_
+       (if _op2_
+         #t
+         #f)
+       #f))))
+
+(define = eq?)
 
 (define <=
   (lambda (a b)
@@ -188,17 +193,27 @@
         (print "qwerty")
         (abc (- count 1)))))))
 
+(define meh
+  (lambda (y)
+    (define even? 
+      (lambda (x)
+        (or (eq? x 0) (odd? (- x 1)))))
+ 
+    (define-syntax odd?
+      (syntax-rules ()
+        ((_ x) (not (even? x)))))
+ 
+    (even? y)))
+
 ; The main function, used as the entry point
 (define main
   (lambda ()
-    ;(clear)
 	(print "Hello, world!")
 
     (print "-== Factorial of 6:")
 	(print wut)
 
     (print "-== Squares of numbers from 0 to 30:")
-    (psquares 50)
-    (asdf '(a b c))))
+    (psquares 30)))
 
 (main)

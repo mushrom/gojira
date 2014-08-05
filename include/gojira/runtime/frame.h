@@ -8,6 +8,7 @@ typedef struct variable {
 	char *key;
 
 	unsigned references;
+	unsigned hash;
 } variable_t;
 
 typedef struct stack_frame {
