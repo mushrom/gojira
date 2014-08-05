@@ -110,6 +110,7 @@ int main( int argc, char *argv[] ){
 
 	gc_sweep( global_frame->heap );
 	frame_free( global_frame );
+	destroy_token_cache( );
 
 	return ret;
 } 
