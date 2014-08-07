@@ -2,7 +2,12 @@
 #include <gojira/tokens.h>
 #include <stdlib.h>
 
+enum alloc_config {
+	MAX_TOKEN_CACHE = 0xffff,
+};
+
 token_t *nodeheap = NULL;
+unsigned avail_tokens = 0;
 
 token_t *alloc_token( void ){
 	token_t *ret;
@@ -13,6 +18,7 @@ token_t *alloc_token( void ){
 
 		ret->down = ret->gc_link = NULL;
 		ret->status = 0;
+		avail_tokens--;
 
 	} else {
 		ret = calloc( 1, sizeof( token_t ));
@@ -24,15 +30,26 @@ token_t *alloc_token( void ){
 void cache_token( token_t *token ){
 	token->next = NULL;
 	token->down = nodeheap;
+	avail_tokens++;
 
 	nodeheap = token;
+}
+
+void print_avail( void ){
+	printf( "Cached tokens: %u\n", avail_tokens );
 }
 
 void free_tokens( token_t *tree ){
 	if ( tree ){
 		free_tokens( tree->down );
 		free_tokens( tree->next );
-		cache_token( tree );
+
+		if ( avail_tokens < MAX_TOKEN_CACHE ){
+			cache_token( tree );
+
+		} else {
+			free( tree );
+		}
 
 		// TODO: Free data field in tokens properly,
 		// will likely need reference tracking.

@@ -105,8 +105,8 @@ token_t *clone_tokens( token_t *tree ){
 	if ( tree ){
 		//ret = calloc( 1, sizeof( token_t ));
 		ret = alloc_token( );
-		// TODO: copy tree->data or tree->smalldata depending on the type
-		memcpy( ret, tree, sizeof( token_t ));
+		*ret = *tree;
+		// TODO: copy tree->data depending on the type
 
 		ret->down = clone_tokens( tree->down );
 		ret->next = clone_tokens( tree->next );
