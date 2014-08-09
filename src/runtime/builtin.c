@@ -107,10 +107,29 @@ token_t *builtin_is_null( stack_frame_t *frame ){
 		val = move->type == TYPE_LIST && move->down == NULL;
 
 	} else {
-		printf( "[%s] Error: Expected 2 arguments to \"eq?\"\n", __func__ );
+		printf( "[%s] Error: Expected 2 arguments to \"null?\"\n", __func__ );
 	}
 
 	ret->smalldata = val;
+
+	return ret;
+}
+
+token_t *builtin_is_list( stack_frame_t *frame ){
+	token_t *ret = NULL;
+	token_t *move;
+	bool val = false;
+
+	if ( frame->ntokens - 1 == 1 ){
+		ret = alloc_token( );
+		ret->type = TYPE_BOOLEAN;
+
+		move = frame->expr->next;
+		ret->smalldata = move->type == TYPE_LIST;
+
+	} else {
+		printf( "[%s] Error: Expected 2 arguments to \"list?\"\n", __func__ );
+	}
 
 	return ret;
 }

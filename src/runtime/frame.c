@@ -88,6 +88,7 @@ st_frame_t *init_global_frame( st_frame_t *frame ){
 	frame_add_var( frame, "car", frame_register_token( frame, ext_proc_token( builtin_car )));
 	frame_add_var( frame, "cdr", frame_register_token( frame, ext_proc_token( builtin_cdr )));
 	frame_add_var( frame, "null?", frame_register_token( frame, ext_proc_token( builtin_is_null )));
+	frame_add_var( frame, "list?", frame_register_token( frame, ext_proc_token( builtin_is_list )));
 
 	frame_add_var( frame, "intern-set", frame_register_token( frame, ext_proc_token( builtin_intern_set )));
 
