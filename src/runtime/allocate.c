@@ -1,6 +1,7 @@
 #include <gojira/runtime/allocate.h>
 #include <gojira/tokens.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 enum alloc_config {
 	MAX_TOKEN_CACHE = 0xffff,

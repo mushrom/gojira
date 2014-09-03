@@ -62,10 +62,8 @@ token_t *baseline( token_t *tokens, rule_t *rules ){
 	token_t	*ret,
 			*move,
 			*temp;
-	rule_t		*rmove;
 
 	ret = move = tokens;
-	rmove = rules;
 
 	move = baseline_iter( move, rules );
 

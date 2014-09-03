@@ -153,7 +153,6 @@ bool eval_frame_expr( stack_frame_t **frame_ret, stack_frame_t *first ){
 	stack_frame_t *frame = *frame_ret;
 	stack_frame_t *temp_frame;
 	token_t *foo;
-	ext_proc_t *ext;
 	scheme_func handle;
 
 	frame->status = frame->expr->type;

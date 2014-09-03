@@ -13,7 +13,6 @@ stack_frame_t *expand_procedure( stack_frame_t *frame, token_t *tokens ){
 	stack_frame_t *ret = NULL;
 	token_t *move;
 	token_t *temp;
-	token_t *orig_expr;
 
 	token_t *args;
 	token_t *body;
@@ -117,7 +116,6 @@ token_t *expand_if_expr( stack_frame_t *frame, token_t *tokens ){
 token_t *expand_syntax_rules( stack_frame_t *frame, token_t *tokens ){
 	token_t *ret = NULL;
 
-	token_t *keywords;
 	token_t *cur;
 	token_t *pattern;
 	token_t *template;

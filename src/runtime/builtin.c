@@ -118,7 +118,6 @@ token_t *builtin_is_null( stack_frame_t *frame ){
 token_t *builtin_is_list( stack_frame_t *frame ){
 	token_t *ret = NULL;
 	token_t *move;
-	bool val = false;
 
 	if ( frame->ntokens - 1 == 1 ){
 		ret = alloc_token( );
