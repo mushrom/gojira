@@ -92,6 +92,35 @@ token_t *builtin_cdr( stack_frame_t *frame ){
 	return ret;
 }
 
+token_t *builtin_cons( stack_frame_t *frame ){
+	token_t *move = frame->expr->next;
+	token_t *temp;
+	token_t *ret = NULL;
+
+	if ( move && move->next ){
+		if ( move->next->type == TYPE_LIST ){
+			temp = clone_token_tree( move );
+			temp->next = frame_register_token( frame, clone_token_tree( move->next->down ));
+
+			ret = alloc_token( );
+			ret->type = TYPE_LIST;
+			ret->down = temp;
+			ret->next = NULL;
+			gc_unmark( ret );
+
+		} else {
+			printf( "[%s] Bad argument type \"%s\", expected list\n", __func__, type_str( move->next->type ));
+			stack_trace( frame );
+		}
+
+	} else {
+			printf( "[%s] Expected 2 arguments, have %d\n", __func__, tokens_length( move ));
+			stack_trace( frame );
+	}
+
+	return ret;
+}
+
 token_t *builtin_is_null( stack_frame_t *frame ){
 	token_t *ret;
 	token_t *move;

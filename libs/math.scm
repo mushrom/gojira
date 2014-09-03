@@ -13,7 +13,7 @@
 ; Calculate the sum of a function with inputs from 1 to n.
 (define sum
   (lambda (n f)
-    (if (> n 1)
+    (if (>= n 1)
       (+ (f n)
          (sum (- n 1) f))
       0)))
@@ -21,7 +21,7 @@
 ; Calculate the sum of a function with inputs from k to n.
 (define sigma
   (lambda (n k f)
-    (if (> n k)
+    (if (>= n k)
       (+ (f n)
          (sigma (- n 1) k f))
       0)))

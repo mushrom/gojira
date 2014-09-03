@@ -36,5 +36,6 @@ token_t *builtin_return_first( stack_frame_t *frame );
 token_t *builtin_intern_set( stack_frame_t *frame );
 
 token_t *builtin_read_char( stack_frame_t *frame );
+token_t *builtin_cons( stack_frame_t *frame );
 
 #endif

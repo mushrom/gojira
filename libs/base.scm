@@ -43,6 +43,12 @@
 	  (< a b)
 	  (eq? a b))))
 
+(define >=
+  (lambda (a b)
+	(or
+	  (> a b)
+	  (eq? a b))))
+
 (define caar
   (lambda (x)
 	(car (car x))))
