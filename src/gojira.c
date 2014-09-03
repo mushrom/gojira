@@ -11,7 +11,7 @@
 #include <gojira/libs/stack.h>
 
 void print_help( ){
-	printf( "Usage: gojira [-f filename] [-hi]\n" );
+	printf( "Usage: gojira [-hi] [files]\n" );
 }
 
 char *read_input_file( FILE *fp );
@@ -21,7 +21,9 @@ int main( int argc, char *argv[] ){
 	int ret = 0;
 	char option;
 	int i = 0;
+	int lastopt = 0;
 	bool interactive = false;
+
 	char *fname = NULL;
 	FILE *input_file = NULL;
 
@@ -32,7 +34,9 @@ int main( int argc, char *argv[] ){
 		interactive = true;
 
 	} else {
-		while (( option = getopt( argc, argv, "f:hi" )) != -1 && i++ < argc ){
+		lastopt = 1;
+
+		while (( option = getopt( argc, argv, "hi" )) != -1 && i++ < argc ){
 			switch ( option ){
 				case 'f':
 					fname = argv[++i];
@@ -56,34 +60,39 @@ int main( int argc, char *argv[] ){
 					exit( 1 );
 					break;
 			}
+
+			lastopt = i + 1;
 		}
 	}
 
 	global_frame = frame_create( NULL, NULL );
 	init_global_frame( global_frame );
 
-	if ( fname ){
-		char *buf;
+	if ( lastopt ){
+		for ( i = lastopt; i < argc; i++ ){
+			char *buf;
+			fname = argv[i];
 
-		if ( interactive )
-			printf( "Have file \"%s\"\n", fname );
+			if ( interactive )
+				printf( "Have file \"%s\"\n", fname );
 
-		input_file = fopen( fname, "r" );
-		if ( input_file ){
-			buf = read_input_file( input_file );
-			fclose( input_file );
+			input_file = fopen( fname, "r" );
+			if ( input_file ){
+				buf = read_input_file( input_file );
+				fclose( input_file );
 
-			tree = remove_punc_tokens( parse_tokens( lexerize( buf )));
-			gc_unmark( tree );
+				tree = remove_punc_tokens( parse_tokens( lexerize( buf )));
+				gc_unmark( tree );
 
-			global_frame->ptr = tree;
-			eval_loop( global_frame, tree );
+				global_frame->ptr = tree;
+				eval_loop( global_frame, tree );
 
-			free_tokens( tree );
-			free( buf );
+				free_tokens( tree );
+				free( buf );
 
-		} else {
-			perror( fname );
+			} else {
+				perror( fname );
+			}
 		}
 	}
 
