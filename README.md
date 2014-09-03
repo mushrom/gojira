@@ -13,10 +13,13 @@ After cloning the repository,
 
 To run a file,
 
-    ./out/gojira -f example/misc.scm
+    ./out/gojira example/hello.scm
+
+    # To run multiple files in the same environment:
+    ./out/gojira libs/base.scm libs/math.scm example/misc.scm
 
     # To continue interpreting after finished running:
-    ./out/gojira -f example/misc.scm -i
+    ./out/gojira -i example/hello.scm
 
 Status
 - - - -
