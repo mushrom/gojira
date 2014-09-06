@@ -8,6 +8,15 @@
     ((_ sym)
      (intern-set 'sym 0))))
 
+; this will do until proper elipsis expansion is implemented...
+(define-syntax begin
+  (syntax-rules ()
+	((_ expr moar)
+	 ((lambda () expr (begin moar))))
+	((_ expr)
+	 expr)
+	((_) #f)))
+
 (define help "To see the gojira scheme tutorial, visit http://example.com. To see the currently defined variables, try (stacktrace).")
 
 (define not
