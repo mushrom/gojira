@@ -60,8 +60,10 @@ token_t *dump_tokens( token_t *tokens, int level );
 token_t *strip_token( token_t *tokens, type_t type );
 token_t *remove_punc_tokens( token_t *tokens );
 
-token_t *clone_token_tree( token_t *tree );
+token_t *clone_token( token_t *token );
 token_t *clone_tokens( token_t *tree );
+token_t *clone_token_tree( token_t *tree );
+token_t *clone_token_spine( token_t *tree );
 
 unsigned tokens_length( token_t *tree );
 token_t *replace_symbol( token_t *tokens, token_t *replace, char *name );
