@@ -30,3 +30,12 @@
 (define every
   (lambda (func xs)
     (not (member? #f (map func xs)))))
+
+(define assq
+  (lambda (key xs)
+	(if (or (null? xs)
+			(not (list? (car xs))))
+	  #f
+	  (if (eq? key (caar xs))
+		(car (cdr (car xs)))
+		(assq key (cdr xs))))))

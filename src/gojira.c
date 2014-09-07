@@ -134,6 +134,7 @@ char *read_input_file( FILE *fp ){
 
 	ret = malloc( sizeof( char[ size + 1 ]));
 	fread( ret, 1, size, fp );
+	ret[size] = 0;
 
 	return ret;
 }
