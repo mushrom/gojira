@@ -81,12 +81,12 @@
         (func (car set))
         (map func (cdr set))))))
 
-(define member
+(define member?
   (lambda (obj xs)
     (if (not (null? xs))
       (if (eq? obj (car xs))
         #t
-        (member obj (cdr xs)))
+        (member? obj (cdr xs)))
       #f)))
 
 (define append

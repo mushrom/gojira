@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 token_t *ext_proc_token( scheme_func handle ){
 	token_t *ret = NULL;
@@ -183,9 +184,15 @@ token_t *builtin_equal( stack_frame_t *frame ){
 		op1 = frame->expr->next;
 		op2 = frame->expr->next->next;
 
-		val =	( op1->type      == op2->type      ) &&
-				( op1->smalldata == op2->smalldata ) &&
-				( op1->down      == op2->down      );
+		if ( op1->type == TYPE_SYMBOL && op2->type == TYPE_SYMBOL ){
+			// symbols are supposed to compare true if they represent the same symbol.
+			val = strcmp( op1->data, op2->data ) == 0;
+
+		} else {
+			val =	( op1->type      == op2->type      ) &&
+					( op1->smalldata == op2->smalldata ) &&
+					( op1->down      == op2->down      );
+		}
 
 	} else {
 		printf( "[%s] Error: Expected 2 arguments to \"eq?\"\n", __func__ );

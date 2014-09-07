@@ -1,3 +1,5 @@
+; see http://srfi.schemers.org/srfi-1/srfi-1.html#TheProcedures
+
 (define-syntax iota
   (syntax-rules ()
     ((_ count)
@@ -20,3 +22,11 @@
           xs)))
 
     (iter 0 start '())))
+
+(define any
+  (lambda (func xs)
+    (member? #t (map func xs))))
+
+(define every
+  (lambda (func xs)
+    (not (member? #f (map func xs)))))
