@@ -68,5 +68,57 @@
 
 (define print
   (lambda (x)
-	(display x)
+    (if (list? x)
+      (pprint-list x)
+      (display x))
 	(newline)))
+
+(define map
+  (lambda (func set)
+    (if (null? set)
+      '()
+      (cons
+        (func (car set))
+        (map func (cdr set))))))
+
+(define member
+  (lambda (obj xs)
+    (if (not (null? xs))
+      (if (eq? obj (car xs))
+        #t
+        (member obj (cdr xs)))
+      #f)))
+
+(define append
+  (lambda (xs obj)
+    (if (null? xs)
+      obj
+    (if (null? (cdr xs))
+      (cons (car xs) obj)
+      (cons (car xs) (append (cdr xs) obj))))))
+
+(define pprint-list
+  (lambda (ls)
+    (define iter
+      (lambda (x indent)
+        (if (null? x)
+          x
+          (if (list? (car x))
+            ((lambda ()
+               (display "(")
+               (iter (car x) (+ indent 4))
+               (if (null? (cdr x))
+                  (display ")")
+                  (display ") "))
+               (iter (cdr x) indent)))
+            ((lambda ()
+              ;(for indent (lambda (y) (display " ")))
+              (display (car x))
+              (if (null? (cdr x))
+                 #f
+                 (display " "))
+              (iter (cdr x) indent)))))))
+
+    (display "(")
+    (iter ls 0)
+    (display ")")))

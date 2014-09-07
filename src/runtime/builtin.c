@@ -86,8 +86,9 @@ token_t *builtin_cons( stack_frame_t *frame ){
 	if ( move && move->next ){
 		if ( move->next->type == TYPE_LIST ){
 			temp = clone_token_tree( move );
-			temp->next = frame_register_token( frame, clone_tokens( move->next->down ));
-			//temp->next = frame_register_token( frame, move->next->down );
+			// TODO: Find a faster to append the element, there seems to be an issue with the garbage collector
+			//       freeing the last element of the list if not cloned.
+			temp->next = frame_register_token( frame, clone_token_spine( move->next->down ));
 
 			ret = alloc_token( );
 			ret->type = TYPE_LIST;
