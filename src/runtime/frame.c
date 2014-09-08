@@ -7,6 +7,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 void stack_trace( st_frame_t *frame ){
 	st_frame_t *move = frame;
@@ -175,8 +176,8 @@ token_t *frame_add_token_noclone( st_frame_t *frame, token_t *token ){
 	return ret;
 }
 
-token_t *frame_find_var_hash( st_frame_t *frame, unsigned hash ){
-	token_t *ret = NULL;
+variable_t *frame_find_var_struct_hash( st_frame_t *frame, unsigned hash ){
+	variable_t *ret = NULL;
 	list_node_t *temp;
 	variable_t *var;
 
@@ -187,18 +188,31 @@ token_t *frame_find_var_hash( st_frame_t *frame, unsigned hash ){
 				var = temp->data;
 
 				if ( hash == var->hash ){
-					ret = var->token;
+					ret = var;
 					break;
 				}
 			}
 
 			if ( !ret )
-				ret = frame_find_var_hash( frame->last, hash );
+				ret = frame_find_var_struct_hash( frame->last, hash );
 
 		} else {
-			ret = frame_find_var_hash( frame->last, hash );
+			ret = frame_find_var_struct_hash( frame->last, hash );
 		}
 	}
+
+	return ret;
+}
+
+token_t *frame_find_var_hash( st_frame_t *frame, unsigned hash ){
+	token_t *ret = NULL;
+	variable_t *var;
+
+	var = frame_find_var_struct_hash( frame, hash );
+	if ( var ){
+		ret = var->token;
+	}
+
 	return ret;
 }
 
@@ -212,19 +226,38 @@ token_t *frame_find_var( st_frame_t *frame, char *key ){
 	return ret;
 }
 
+variable_t *frame_find_var_struct( st_frame_t *frame, char *key ){
+	variable_t *ret = NULL;
+	unsigned hash;
+
+	hash = hash_string( key );
+	ret = frame_find_var_struct_hash( frame, hash );
+
+	return ret;
+}
+
 variable_t *frame_add_var( st_frame_t *frame, char *key, token_t *token ){
 	variable_t *new_var = NULL;
+	bool add_var = false;
 
 	if ( frame ){
 		if ( !frame->vars )
 			frame->vars = list_create( 0 );
 
-		new_var = calloc( 1, sizeof( variable_t ));
-		new_var->key = strdup( key );
-		new_var->hash = hash_string( key );
+		new_var = frame_find_var_struct( frame, key );
+
+		if ( !new_var ){
+			new_var = calloc( 1, sizeof( variable_t ));
+			new_var->key = strdup( key );
+			new_var->hash = hash_string( key );
+			add_var = true;
+		}
+
 		new_var->token = frame_register_token( frame, clone_token_tree( token ));
 
-		list_add_data( frame->vars, new_var );
+		if ( add_var ){
+			list_add_data( frame->vars, new_var );
+		}
 
 	} else {
 		printf( "[%s] Warning: Got null frame, can't add variable \"%s\"\n",
