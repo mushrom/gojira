@@ -1,6 +1,19 @@
 ; program to test the interpreter
 ; (proper test suite coming soon(!))
 
+; quick unicode reference:
+;   ¬ = U+ac
+;   λ = U+3bb
+;   ∀ = U+2200
+;   ∁ = U+2201
+;   ∂ = U+2202
+;   ∃ = U+2203
+;   ∈ = U+2208
+;   ∑ = U+2211
+;   ∧ = U+2227
+;   ∨ = U+2228
+
+
 (define-syntax define
   (syntax-rules ()
     ((_ sym def)
@@ -88,6 +101,7 @@
         #t
         (member? obj (cdr xs)))
       #f)))
+(define ∈ member?)
 
 (define append
   (lambda (xs obj)

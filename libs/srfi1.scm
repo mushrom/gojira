@@ -26,10 +26,12 @@
 (define any
   (lambda (func xs)
     (member? #t (map func xs))))
+(define ∃ any)
 
 (define every
   (lambda (func xs)
     (not (member? #f (map func xs)))))
+(define ∀ every)
 
 (define assq
   (lambda (key xs)

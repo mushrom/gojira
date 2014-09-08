@@ -25,6 +25,7 @@
       (+ (f n)
          (sigma (- n 1) k f))
       0)))
+(define ∑ sigma)
 
 ; repeatedly perform a function for "times", using recursion
 (define for
@@ -53,3 +54,11 @@
 (define square
   (lambda (x)
     (* x x)))
+
+(define even?
+  (lambda (n)
+    (eq? (modulo n 2) 0)))
+
+(define odd?
+  (lambda (n)
+    (not (even? n))))
