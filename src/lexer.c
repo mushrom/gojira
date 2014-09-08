@@ -144,10 +144,11 @@ static token_return_t get_token_from_str( char *string ){
 			for ( i = 0; string[i] && string[i] != '\n'; i++ );
 			ret = get_token_from_str( string + i );
 
-		} else if ( strchr( DIGITS, *string )){
+		} else if ( strchr( DIGITS, *string ) ||
+				( *string == '-' && strchr( DIGITS, *(string + 1)))) {
 			// TODO: Handle negative numbers
 
-			i = strspn( string, DIGITS );
+			i = strspn( string, "-"DIGITS );
 			temp = malloc( sizeof( char[i + 1]));
 			strncpy( temp, string, i );
 

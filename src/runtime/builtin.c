@@ -328,6 +328,32 @@ token_t *builtin_lessthan( stack_frame_t *frame ){
 	return ret;
 }
 
+token_t *builtin_modulo( stack_frame_t *frame ){
+	token_t *ret = NULL;
+	token_t *op1, *op2;
+
+	if ( frame->ntokens - 1 == 2 ){
+		op1 = frame->expr->next;
+		op2 = frame->expr->next->next;
+
+		if ( op1->type == TYPE_NUMBER && op2->type == TYPE_NUMBER ){
+			ret = alloc_token( );
+			ret->type = TYPE_NUMBER;
+
+			ret->smalldata = op1->smalldata % op2->smalldata;
+
+		} else {
+			printf( "[%s] Error: Expected number, but have \"%s\" and \"%s\"", __func__,
+					type_str( op1->type  ), type_str( op2->type ));
+		}
+
+	} else {
+		printf( "[%s] Error: Expected 2 arguments to \"<\"\n", __func__ );
+	}
+
+	return ret;
+}
+
 token_t *builtin_multiply( stack_frame_t *frame ){
 	token_t *ret;
 	token_t *move;

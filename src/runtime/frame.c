@@ -77,6 +77,7 @@ st_frame_t *init_global_frame( st_frame_t *frame ){
 	// TODO: Clean this up
 	frame_add_var( frame, "+", frame_register_token( frame, ext_proc_token( builtin_add )));
 	frame_add_var( frame, "*", frame_register_token( frame, ext_proc_token( builtin_multiply )));
+	frame_add_var( frame, "modulo", frame_register_token( frame, ext_proc_token( builtin_modulo )));
 	frame_add_var( frame, "-", frame_register_token( frame, ext_proc_token( builtin_subtract )));
 	frame_add_var( frame, "/", frame_register_token( frame, ext_proc_token( builtin_divide )));
 	frame_add_var( frame, "display", frame_register_token( frame, ext_proc_token( builtin_display )));
