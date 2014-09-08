@@ -4,12 +4,21 @@
 #include <stdbool.h>
 #include <gojira/lexer.h>
 
+#define ALPHABET	"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#define DIGITS		"0123456789"
+#define ALPHANUM	ALPHABET DIGITS
+#define DELIMITER	"()[]{} "
+#define IDENTIFIER	ALPHANUM "!@#$%^&*_-=+/?<>."
+#define SEPERATOR	" \t\n\r"
+
 /* Used to return multiple values from get_token_from_str */
 typedef struct token_return {
 	token_t *token;
 	char *string;
 	bool found;
 } token_return_t;
+
+typedef bool (*char_pred)( char );
 
 static token_return_t get_token_from_str( char *string );
 
@@ -36,12 +45,22 @@ token_t *lexerize( char *string ){
 	return temp.next;
 }
 
-#define ALPHABET	"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-#define DIGITS		"0123456789"
-#define ALPHANUM	ALPHABET DIGITS
-#define DELIMITER	"()[]{} "
-#define IDENTIFIER	ALPHANUM "!@#$%^&*_-=+/?<>."
-#define SEPERATOR	" \t\n\r"
+static inline bool is_identifier_char( char c ){
+	bool ret = false;
+
+	ret = (c & 0x80) || // Check for utf8 chars
+		( strchr( IDENTIFIER, c )) != NULL;
+
+	return ret;
+}
+
+static inline unsigned spanchars( char_pred predicate, char *s ){
+	unsigned ret;
+
+	for ( ret = 0; s[ret] && predicate( s[ret] ); ret++ );
+
+	return ret;
+}
 
 static token_return_t get_token_from_str( char *string ){
 	token_return_t ret;
@@ -139,8 +158,8 @@ static token_return_t get_token_from_str( char *string ){
 
 			free( temp );
 
-		} else if ( strchr( IDENTIFIER, *string )){
-			i = strspn( string, IDENTIFIER );
+		} else if ( is_identifier_char( *string )){
+			i = spanchars( is_identifier_char, string );
 
 			ret.string = string + i;
 			ret.token->type = TYPE_SYMBOL;
@@ -152,7 +171,7 @@ static token_return_t get_token_from_str( char *string ){
 
 			//printf( "> Have identifier \"%s\"\n", temp );
 
-			if ( strcmp( temp, "lambda" ) == 0 ){
+			if ( strcmp( temp, "lambda" ) == 0 || strcmp( temp, "λ" ) == 0 ){
 				ret.token->type = TYPE_LAMBDA;
 
 			} else if ( strcmp( temp, "if" ) == 0 ){
