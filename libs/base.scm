@@ -111,6 +111,12 @@
       (cons (car xs) obj)
       (cons (car xs) (append (cdr xs) obj))))))
 
+(define length
+  (lambda (ls)
+    (if (null? ls)
+      0
+      (seq (length (cdr ls))))))
+
 (define pprint-list
   (lambda (ls)
     (define iter

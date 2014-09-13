@@ -155,12 +155,31 @@
 
 ; print every element in a list
 (define asdf
-  (lambda (x)
-	(if (null? x)
-	  x
-	  (begin
-		(print (car x))
-		(asdf (cdr x))))))
+  (lambda (ls)
+    (define iter
+      (lambda (x indent)
+        (if (null? x)
+          x
+          (if (list? (car x))
+            ((lambda ()
+               (display "(")
+               (iter (car x) (+ indent 4))
+               (if (null? (cdr x))
+                  (display ")")
+                  (display ") "))
+               (iter (cdr x) indent)))
+            ((lambda ()
+              ;(for indent (lambda (y) (display " ")))
+              (display (car x))
+              (if (null? (cdr x))
+                 #f
+                 (display " "))
+              (iter (cdr x) indent)))))))
+
+    (display "(")
+    (iter ls 0)
+    (display ")")
+    (print "")))
 
 ; Calculate the sum of a function with inputs from 1 to n.
 (define sum
@@ -205,6 +224,17 @@
  
     (even? y)))
 
+(define beer
+  (lambda (x)
+    (if (> x 0)
+      ((lambda ()
+        (display x) (print " bottles of beer on the wall")
+        (display x) (print " bottles of beer")
+        (print "Take one down, pass it around")
+        (display (- x 1)) (print " bottles of beer on the wall")
+        (beer (- x 1))))
+      #f)))
+
 ; The main function, used as the entry point
 (define main
   (lambda ()
@@ -213,7 +243,7 @@
     (print "-== Factorial of 6:")
 	(print wut)
 
-    (print "-== Squares of numbers from 0 to 30:")
+    (print "-== Squares of numbers from 1 to 30:")
     (psquares 30)))
 
 (main)
