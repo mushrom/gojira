@@ -29,6 +29,7 @@ Currently supports:
 - Basic scheme interpreting with some standard operators (+, -, display, null?, etc)
 - Tail call elimination
 - garbage collection
+- utf8 variable names
 - (incomplete) macros/syntax extensions
 
 Coming soon:
