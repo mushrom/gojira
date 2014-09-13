@@ -22,6 +22,8 @@ typedef bool (*char_pred)( char );
 
 static token_return_t get_token_from_str( char *string );
 
+// Extracts all possible tokens from the given string, returning a token tree
+// with all "next" fields pointing to the next token (so no "down" fields will be set)
 token_t *lexerize( char *string ){
 	token_t *move;
 	token_t temp;
@@ -34,7 +36,6 @@ token_t *lexerize( char *string ){
 	while ( foo.found ){
 		move->next = foo.token;
 		move = move->next;
-		//printf( ": %s", foo.string );
 
 		foo = get_token_from_str( foo.string );
 	}
@@ -45,15 +46,18 @@ token_t *lexerize( char *string ){
 	return temp.next;
 }
 
+// Checks whether the given character is part of an identifier
 static inline bool is_identifier_char( char c ){
 	bool ret = false;
 
-	ret = (c & 0x80) || // Check for utf8 chars
-		( strchr( IDENTIFIER, c )) != NULL;
+	ret = (c & 0x80) ||                     // Check for utf8 chars
+		( strchr( IDENTIFIER, c )) != NULL; // otherwise check for an ascii identifier char
 
 	return ret;
 }
 
+// like strspn, except instead of testing for chars in "accept", it tests for chars
+// for which predicate( char ) returns true.
 static inline unsigned spanchars( char_pred predicate, char *s ){
 	unsigned ret;
 
@@ -62,6 +66,13 @@ static inline unsigned spanchars( char_pred predicate, char *s ){
 	return ret;
 }
 
+/* returns a token_return_t struct giving information about the lexer's state.
+ * If a token was found, the "token" field will point to a valid token, "found" will be true,
+ *    and "string" will point to the next position after the returned token.
+ * If a token wasn't found, "token" will be undefined, "found" will be false, and "string" undefined.
+ *
+ * TODO: possibly find a cleaner and less cumbersome way to return tokens.
+ */
 static token_return_t get_token_from_str( char *string ){
 	token_return_t ret;
 	char *temp, *foo;
@@ -76,6 +87,7 @@ static token_return_t get_token_from_str( char *string ){
 	for ( ; *string && strchr( SEPERATOR, *string ); string++ );
 
 	if ( *string ){
+		// Check for parenthesis
 		if ( *string == '(' ){
 			ret.string = string + 1;
 			ret.token->type = TYPE_OPEN_PAREN;
@@ -86,16 +98,19 @@ static token_return_t get_token_from_str( char *string ){
 			ret.token->type = TYPE_CLOSE_PAREN;
 			ret.found = true;
 
+		// Check for quoted things
 		} else if ( *string == '\'' ){
 			ret.string = string + 1;
 			ret.token->type = TYPE_APOSTR;
 			ret.found = true;
 
+		// Check for periods and special conditions ("." signifies a pair, while ".." is an identifier)
 		} else if ( *string == '.' && strchr( SEPERATOR, string[1])){
 			ret.string = string + 1;
 			ret.token->type = TYPE_PERIOD;
 			ret.found = true;
 
+		// Check for strings
 		} else if ( *string == '"' ){
 			//ret.string = strchr( string + 1, '"' );
 			ret.string = temp = string + 1;
@@ -118,35 +133,42 @@ static token_return_t get_token_from_str( char *string ){
 			}
 
 		} else if ( *string == '#' ){
-			// could be either vector, boolean or character
-			//
-			// vectors are parsed after lexing, so just leave
-			// the octothorpe if it's not a boolean or character.
+			/* could be either vector, boolean or character
+			 *
+			 * vectors are parsed after lexing, so just leave
+			 * the octothorpe if it's not a boolean or character.
+			 */
+
+			// Check for booleans
 			if ( string[1] == 'f' || string[1] == 't' ){
 				ret.string = string + 2;
 				ret.token->type = TYPE_BOOLEAN;
 				ret.token->smalldata = (string[1] == 't')? true : false;
 				ret.found = true;
 
+			// Check for characters
 			} else if ( string[1] == '\\' && string[2] ){
 				ret.string = string + 3;
 				ret.token->type = TYPE_CHAR;
 				ret.token->smalldata = string[2];
 				ret.found = true;
 
+			// Otherwise just leave everything
 			} else {
 				ret.string = string + 1;
 				ret.token->type = TYPE_OCTOTHORPE;
 				ret.found = true;
 			}
 
+		// Check for comments
 		} else if ( *string == ';' ){
+			// FIXME: Segfaults if there's a comment at the end of the file/input
 			for ( i = 0; string[i] && string[i] != '\n'; i++ );
 			ret = get_token_from_str( string + i );
 
+		// Check for numbers
 		} else if ( strchr( DIGITS, *string ) ||
 				( *string == '-' && strchr( DIGITS, *(string + 1)))) {
-			// TODO: Handle negative numbers
 
 			i = strspn( string, "-"DIGITS );
 			temp = malloc( sizeof( char[i + 1]));
@@ -159,6 +181,7 @@ static token_return_t get_token_from_str( char *string ){
 
 			free( temp );
 
+		// Check for an identifier
 		} else if ( is_identifier_char( *string )){
 			i = spanchars( is_identifier_char, string );
 
@@ -187,6 +210,7 @@ static token_return_t get_token_from_str( char *string ){
 		}
 	}
 
+	// If no token is found, clean up
 	if ( !ret.found )
 		free( ret.token );
 

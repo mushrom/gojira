@@ -10,10 +10,8 @@
 #include <gojira/runtime/garbage.h>
 #include <gojira/libs/stack.h>
 
-void print_help( ){
-	printf( "Usage: gojira [-hi] [files]\n" );
-}
-
+// Some function definitions used only in this file.
+void print_help( );
 char *read_input_file( FILE *fp );
 char *read_with_parens( FILE *fp );
 
@@ -31,9 +29,11 @@ int main( int argc, char *argv[] ){
 	token_t *tree;
 
 	if ( argc < 2 ){
+		// By default, go into an REPL
 		interactive = true;
 
 	} else {
+		// otherwise parse options
 		lastopt = 1;
 
 		while (( option = getopt( argc, argv, "hi" )) != -1 && i++ < argc ){
@@ -61,33 +61,44 @@ int main( int argc, char *argv[] ){
 					break;
 			}
 
+			/* This keeps track of where the argument after the current argument is,
+			   in order to find the filenames after option parsing is done.          */
 			lastopt = i + 1;
 		}
 	}
 
+	// Initialize the global interpreter state
 	global_frame = frame_create( NULL, NULL );
 	init_global_frame( global_frame );
 
+	// If there were files passed, interpet them
 	if ( lastopt ){
 		for ( i = lastopt; i < argc; i++ ){
 			char *buf;
 			fname = argv[i];
 
+			// Let the user know what files are being interpreted, if in an REPL
 			if ( interactive )
 				printf( "Have file \"%s\"\n", fname );
 
+			// Begin parsing the file
 			input_file = fopen( fname, "r" );
 			if ( input_file ){
 				buf = read_input_file( input_file );
 				fclose( input_file );
 
+				// generate a parse tree, and make sure all tokens are "clean" for the GC
 				tree = remove_punc_tokens( parse_tokens( lexerize( buf )));
 				gc_unmark( tree );
 
-				global_frame->ptr = tree;
-				eval_loop( global_frame, tree );
+				// Interpret the tree, if there is one
+				if ( tree ){
+					global_frame->ptr = tree;
+					eval_loop( global_frame, tree );
+					free_tokens( tree );
+				}
 
-				free_tokens( tree );
+				// Clean up the file buffer
 				free( buf );
 
 			} else {
@@ -96,14 +107,18 @@ int main( int argc, char *argv[] ){
 		}
 	}
 
+	// Go into the REPL if the interpreter flag is set
 	if ( interactive ){
 		while ( 1 ){
+			// Read a statement
 			printf( "> " );
 			char *buf = read_with_parens( stdin );
 
+			// generate a parse tree, and make sure all tokens are "clean" for the GC
 			tree = remove_punc_tokens( parse_tokens( lexerize( buf )));
 			gc_unmark( tree );
 
+			// Only interpret the tree if there is a tree
 			if ( tree ){
 				global_frame->ptr = tree;
 
@@ -113,10 +128,12 @@ int main( int argc, char *argv[] ){
 				free_tokens( tree );
 			}
 
+			// Free the statement that was read
 			free( buf );
 		}
 	}
 
+	// Clean up the global frame, and free all tokens left in the token cache
 	gc_sweep( global_frame->heap );
 	frame_free( global_frame );
 	destroy_token_cache( );
@@ -124,6 +141,12 @@ int main( int argc, char *argv[] ){
 	return ret;
 } 
 
+// Displays the handy help message dialog
+void print_help( ){
+	printf( "Usage: gojira [-hi] [files]\n" );
+}
+
+// Allocates a buffer, reads the entire file into it, and returns the buffer
 char *read_input_file( FILE *fp ){
 	char *ret = NULL;
 	long size;
@@ -139,7 +162,8 @@ char *read_input_file( FILE *fp ){
 	return ret;
 }
 
-
+// Allocates a buffer, reads a complete (meaning with matching parenthesis) statement into it,
+// and returns the buffer.
 char *read_with_parens( FILE *fp ){
 	unsigned pos, alloced, open;
 	char *ret = NULL;

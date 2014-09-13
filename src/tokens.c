@@ -5,6 +5,8 @@
 #include <stdbool.h>
 #include <string.h>
 
+// Prints all the tokens in a given tree, for debugging purposes.
+// "level" specifies the initial indentation level.
 token_t *dump_tokens( token_t *tokens, int level ){
 	if ( tokens ){
 		int i;
@@ -34,7 +36,6 @@ token_t *dump_tokens( token_t *tokens, int level ){
 				break;
 		}
 		printf( "\n" );
-		//printf( "Token, type: %d\n", tokens->type );
 		dump_tokens( tokens->down, level + 1 );
 		dump_tokens( tokens->next, level );
 	}
@@ -77,6 +78,7 @@ token_t *strip_token( token_t *tokens, type_t type ){
 	return ret;
 }
 
+// Removes all "punctuation" tokens from a tree, which are unneeded after parsing is done
 token_t *remove_punc_tokens( token_t *tokens ){
 	token_t *ret = tokens;
 	type_t remove[] = {
@@ -115,6 +117,7 @@ token_t *clone_tokens( token_t *tree ){
 	return ret;
 }
 
+// Clones a single token
 token_t *clone_token( token_t *token ){
 	token_t *ret = NULL;
 
@@ -147,7 +150,6 @@ token_t *clone_token_spine( token_t *tree ){
 	token_t *ret = NULL;
 
 	if ( tree ){
-		//ret = calloc( 1, sizeof( token_t ));
 		ret = alloc_token( );
 		memcpy( ret, tree, sizeof( token_t ));
 
@@ -158,6 +160,7 @@ token_t *clone_token_spine( token_t *tree ){
 	return ret;
 }
 
+// Returns the "horizontal" length of a tree, or how many "next" tokens there are
 unsigned tokens_length( token_t *tree ){
 	unsigned ret;
 	token_t *move = tree;
@@ -167,6 +170,7 @@ unsigned tokens_length( token_t *tree ){
 	return ret;
 }
 
+// Recursively replaces all symbol-type tokens named "name" with the "replace" token
 token_t *replace_symbol( token_t *tokens, token_t *replace, char *name ){
 	token_t *ret = tokens;
 
