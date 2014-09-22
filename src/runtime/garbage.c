@@ -43,7 +43,7 @@ void gc_dump_tokens( token_t *token ){
 
 	for ( i = 0, move = token; move; move = move->gc_link, i++ ){
 		printf( "[%s] Token %d\n", __func__, i );
-		dump_tokens( move, 0 );
+		dump_tokens( move );
 	}
 }
 

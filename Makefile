@@ -1,6 +1,7 @@
-SRC=${wildcard src/*.c} ${wildcard src/libs/*.c} ${wildcard src/runtime/*.c}
-OBJ=${SRC:.c=.o}
-CFLAGS=-I"${shell pwd}"/include -p -g -Wall -O3
+SRC = ${wildcard src/*.c} ${wildcard src/libs/*.c} ${wildcard src/runtime/*.c}
+SRC+= ${wildcard linenoise/linenoise.c}
+OBJ = ${SRC:.c=.o}
+CFLAGS=-I"${shell pwd}"/include -I. -p -g -Wall -O3
 
 .c.o:
 	@echo CC -c $< -o $@

@@ -56,7 +56,8 @@ typedef struct token {
 	struct token *gc_link;
 } token_t;
 
-token_t *dump_tokens( token_t *tokens, int level );
+void print_token( token_t *token );
+token_t *dump_tokens( token_t *tokens );
 token_t *strip_token( token_t *tokens, type_t type );
 token_t *remove_punc_tokens( token_t *tokens );
 

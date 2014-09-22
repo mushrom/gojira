@@ -5,39 +5,39 @@
 #include <stdbool.h>
 #include <string.h>
 
-// Prints all the tokens in a given tree, for debugging purposes.
-// "level" specifies the initial indentation level.
-token_t *dump_tokens( token_t *tokens, int level ){
-	if ( tokens ){
-		int i;
-		for ( i = 0; i < level * 4; i++ )
-			putchar( ' ' );
-
-		//printf( "%s: %d: %p", type_str( tokens->type ), tokens->status, tokens );
-		printf( "%s", type_str( tokens->type ));
-		switch( tokens->type ){
-			case TYPE_SYMBOL:
-				printf( ": %s", (char *)tokens->data );
-				break;
-			case TYPE_CHAR:
-				printf( ": %c", tokens->smalldata );
-				break;
+void print_token( token_t *token ){
+	if ( token ){
+		switch ( token->type ){
 			case TYPE_NUMBER:
-				printf( ": %d", tokens->smalldata );
+				printf( "%d", token->smalldata );
 				break;
 			case TYPE_BOOLEAN:
-				printf( ": %c", (tokens->smalldata == true)? 't' : 'f' );
+				printf( "#%c", (token->smalldata == true)? 't' : 'f' );
 				break;
 			case TYPE_STRING:
-				printf( ": \"%s\"", (char *)tokens->data );
+			case TYPE_SYMBOL:
+				printf( "%s", (char *)token->data );
 				break;
-
+			case TYPE_LIST:
+				putchar( '(' );
+				dump_tokens( token->down );
+				putchar( ')' );
+				break;
 			default:
+				printf( "#<%s>", type_str( token->type ));
 				break;
 		}
-		printf( "\n" );
-		dump_tokens( tokens->down, level + 1 );
-		dump_tokens( tokens->next, level );
+	}
+}
+
+// Prints all the tokens in a given tree
+token_t *dump_tokens( token_t *tokens ){
+	token_t *move;
+
+	for ( move = tokens; move; move = move->next ){
+		print_token( move );
+		if ( move->next )
+			putchar( ' ' );
 	}
 
 	return tokens;

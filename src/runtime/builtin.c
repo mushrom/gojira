@@ -151,21 +151,7 @@ token_t *builtin_display( stack_frame_t *frame ){
 
 	move = frame->expr->next;
 	if ( move ){
-		switch ( move->type ){
-			case TYPE_NUMBER:
-				printf( "%d", move->smalldata );
-				break;
-			case TYPE_BOOLEAN:
-				printf( "#%c", (move->smalldata == true)? 't' : 'f' );
-				break;
-			case TYPE_STRING:
-			case TYPE_SYMBOL:
-				printf( "%s", (char *)move->data );
-				break;
-			default:
-				printf( "#<%s>", type_str( move->type ));
-				break;
-		}
+		print_token( move );
 	}
 
 	return ret;

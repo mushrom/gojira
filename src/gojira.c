@@ -123,7 +123,8 @@ int main( int argc, char *argv[] ){
 				global_frame->ptr = tree;
 
 				eval_loop( global_frame, tree );
-				dump_tokens( global_frame->end, 0 );
+				print_token( global_frame->end );
+				putchar( '\n' );
 
 				free_tokens( tree );
 			}
