@@ -9,12 +9,33 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+int utf8len( char *str ){
+	int ret = 0;
+	unsigned i;
+	bool in_utf = false;
+
+	for ( i = 0; str[i]; i++ ){
+		if ( str[i] & 0x80 ){
+			if ( !in_utf ){
+				in_utf = true;
+				ret++;
+			}
+
+		} else {
+			in_utf = false;
+			ret++;
+		}
+	}
+
+	return ret;
+}
+
 void stack_trace( st_frame_t *frame ){
 	st_frame_t *move = frame;
 	token_t *token = NULL;
 	list_node_t *vars;
 	variable_t *var;
-	unsigned i, k, limit = 5;
+	unsigned i, k, limit = 3;
 	int start = 0, m;
 
 	printf( "[stack trace]\n" );
@@ -33,14 +54,7 @@ void stack_trace( st_frame_t *frame ){
 		k = m = 0;
 		foreach_in_list( token ){
 			if ( m >= start || m == 0 ){
-				printf( "%s", type_str( token->type ));
-
-				if ( token->type == TYPE_SYMBOL ){
-					char *name = token->data;
-
-					printf( " \"%s\"", name );
-					printf( " (at %p)", frame_find_var( frame, name ));
-				}
+				print_token( token );
 
 				if ( token->next )
 					printf( " -> " );
@@ -48,8 +62,12 @@ void stack_trace( st_frame_t *frame ){
 				k++;
 				m++;
 
+			} else if ( m == 1 ){
+				printf( "(%d truncated) -> ", start - 1);
+				m++;
+
 			} else {
-				printf( ".. " );
+				//printf( ".. " );
 				m++;
 			}
 		}
@@ -57,16 +75,16 @@ void stack_trace( st_frame_t *frame ){
 		printf( "\n" );
 
 		if ( vars ){
-			printf( " `- has variables: " );
+			printf( " `- has variables:\n    " );
 
 			k = 0;
 			foreach_in_list( vars ){
 				var = vars->data;
-				printf( "%-10s  ", var->key );
+				printf( "%s%*s", var->key, 12 - utf8len( var->key ), "" );
 
-				k = (k + 1) % 8;
+				k = (k + 1) % 6;
 				if ( !k )
-					printf( "\n                   " );
+					printf( "\n    " );
 			}
 
 			printf( "\n" );
