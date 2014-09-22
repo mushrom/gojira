@@ -9,6 +9,7 @@
 #include <gojira/runtime/builtin.h>
 #include <gojira/runtime/garbage.h>
 #include <gojira/libs/stack.h>
+#include <linenoise/linenoise.h>
 
 // Some function definitions used only in this file.
 void print_help( );
@@ -109,24 +110,31 @@ int main( int argc, char *argv[] ){
 
 	// Go into the REPL if the interpreter flag is set
 	if ( interactive ){
-		while ( 1 ){
+		linenoiseSetMultiLine( 1 );
+		char *buf = "";
+
+		while ( buf ){
 			// Read a statement
-			printf( "> " );
-			char *buf = read_with_parens( stdin );
+			//printf( "> " );
+			//char *buf = read_with_parens( stdin );
+			buf = linenoise( "> " );
 
-			// generate a parse tree, and make sure all tokens are "clean" for the GC
-			tree = remove_punc_tokens( parse_tokens( lexerize( buf )));
-			gc_unmark( tree );
+			if ( buf ){
+				// generate a parse tree, and make sure all tokens are "clean" for the GC
+				tree = remove_punc_tokens( parse_tokens( lexerize( buf )));
+				gc_unmark( tree );
 
-			// Only interpret the tree if there is a tree
-			if ( tree ){
-				global_frame->ptr = tree;
+				// Only interpret the tree if there is a tree
+				if ( tree ){
+					linenoiseHistoryAdd( buf );
+					global_frame->ptr = tree;
 
-				eval_loop( global_frame, tree );
-				print_token( global_frame->end );
-				putchar( '\n' );
+					eval_loop( global_frame, tree );
+					print_token( global_frame->end );
+					putchar( '\n' );
 
-				free_tokens( tree );
+					free_tokens( tree );
+				}
 			}
 
 			// Free the statement that was read
@@ -165,6 +173,7 @@ char *read_input_file( FILE *fp ){
 
 // Allocates a buffer, reads a complete (meaning with matching parenthesis) statement into it,
 // and returns the buffer.
+// Currently unused, leaving here in case it's useful in the future.
 char *read_with_parens( FILE *fp ){
 	unsigned pos, alloced, open;
 	char *ret = NULL;
@@ -191,4 +200,3 @@ char *read_with_parens( FILE *fp ){
 
 	return ret;
 }
-
