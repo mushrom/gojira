@@ -9,6 +9,48 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+// array of all builtin functions added by default
+struct global_builtin {
+	char        *name;
+	scheme_func  handle;
+} global_builtins[] = {
+	{ "+",          builtin_add },
+	{ "*",          builtin_multiply },
+	{ "modulo",     builtin_modulo },
+	{ "modulo",     builtin_modulo },
+	{ "-",          builtin_subtract },
+	{ "/",          builtin_divide },
+	{ "display",    builtin_display },
+	{ "newline",    builtin_newline },
+	{ "stacktrace", builtin_stacktrace },
+	{ "eq?",        builtin_equal },
+	{ "<",          builtin_lessthan },
+	{ ">",          builtin_greaterthan },
+	{ "car",        builtin_car },
+	{ "cdr",        builtin_cdr },
+	{ "cons",       builtin_cons },
+	{ "null?",      builtin_is_null },
+	{ "list?",      builtin_is_list },
+	{ "read-char",  builtin_read_char },
+	{ "intern-set", builtin_intern_set },
+};
+
+// Internal helper function for init_global_frame
+// Adds an "external function" to a frame, and handles registering the tokens for garbage collection
+static inline variable_t *global_add_func( st_frame_t *frame, char *name, scheme_func handle ){
+	return frame_add_var( frame, name, frame_register_token( frame, ext_proc_token( handle )));
+}
+
+st_frame_t *init_global_frame( st_frame_t *frame ){
+	int i;
+
+	for ( i = 0; i < sizeof( global_builtins ) / sizeof( struct global_builtin ); i++ )
+		global_add_func( frame, global_builtins[i].name, global_builtins[i].handle );
+
+	return frame;
+}
+
+// TODO: move this to a more appropriate location
 int utf8len( char *str ){
 	int ret = 0;
 	unsigned i;
@@ -90,31 +132,6 @@ void stack_trace( st_frame_t *frame ){
 			printf( "\n" );
 		}
 	}
-}
-
-st_frame_t *init_global_frame( st_frame_t *frame ){
-	// TODO: Clean this up
-	frame_add_var( frame, "+", frame_register_token( frame, ext_proc_token( builtin_add )));
-	frame_add_var( frame, "*", frame_register_token( frame, ext_proc_token( builtin_multiply )));
-	frame_add_var( frame, "modulo", frame_register_token( frame, ext_proc_token( builtin_modulo )));
-	frame_add_var( frame, "-", frame_register_token( frame, ext_proc_token( builtin_subtract )));
-	frame_add_var( frame, "/", frame_register_token( frame, ext_proc_token( builtin_divide )));
-	frame_add_var( frame, "display", frame_register_token( frame, ext_proc_token( builtin_display )));
-	frame_add_var( frame, "newline", frame_register_token( frame, ext_proc_token( builtin_newline )));
-	frame_add_var( frame, "stacktrace", frame_register_token( frame, ext_proc_token( builtin_stacktrace )));
-	frame_add_var( frame, "eq?", frame_register_token( frame, ext_proc_token( builtin_equal )));
-	frame_add_var( frame, "<", frame_register_token( frame, ext_proc_token( builtin_lessthan )));
-	frame_add_var( frame, ">", frame_register_token( frame, ext_proc_token( builtin_greaterthan )));
-	frame_add_var( frame, "car", frame_register_token( frame, ext_proc_token( builtin_car )));
-	frame_add_var( frame, "cdr", frame_register_token( frame, ext_proc_token( builtin_cdr )));
-	frame_add_var( frame, "cons", frame_register_token( frame, ext_proc_token( builtin_cons )));
-	frame_add_var( frame, "null?", frame_register_token( frame, ext_proc_token( builtin_is_null )));
-	frame_add_var( frame, "list?", frame_register_token( frame, ext_proc_token( builtin_is_list )));
-	frame_add_var( frame, "read-char", frame_register_token( frame, ext_proc_token( builtin_read_char )));
-
-	frame_add_var( frame, "intern-set", frame_register_token( frame, ext_proc_token( builtin_intern_set )));
-
-	return frame;
 }
 
 st_frame_t *frame_create( st_frame_t *cur_frame, token_t *ptr ){
