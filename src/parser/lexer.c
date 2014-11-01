@@ -8,7 +8,7 @@
 #define DIGITS		"0123456789"
 #define ALPHANUM	ALPHABET DIGITS
 #define DELIMITER	"()[]{} "
-#define IDENTIFIER	ALPHANUM "!@#$%^&*_-=+/?<>."
+#define IDENTIFIER	ALPHANUM "!@#$%^&*_-=+/?<>.~:"
 #define SEPERATOR	" \t\n\r"
 
 /* Used to return multiple values from get_token_from_str */

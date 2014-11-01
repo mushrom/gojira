@@ -33,11 +33,11 @@ struct global_builtin {
 	{ "list?",      builtin_is_list },
 	{ "read-char",  builtin_read_char },
 	{ "intern-set", builtin_intern_set },
+	{ "intern-set!",builtin_intern_set_global },
 };
 
-// Internal helper function for init_global_frame
 // Adds an "external function" to a frame, and handles registering the tokens for garbage collection
-static inline variable_t *global_add_func( st_frame_t *frame, char *name, scheme_func handle ){
+variable_t *global_add_func( st_frame_t *frame, char *name, scheme_func handle ){
 	return frame_add_var( frame, name, frame_register_token( frame, ext_proc_token( handle )));
 }
 

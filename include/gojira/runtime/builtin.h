@@ -1,5 +1,9 @@
 #ifndef _GOJIRA_RUNTIME_BUILTIN_H
 #define _GOJIRA_RUNTIME_BUILTIN_H
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <gojira/runtime/runtime.h>
 #include <gojira/tokens.h>
 
@@ -35,8 +39,12 @@ token_t *builtin_is_list( stack_frame_t *frame );
 token_t *builtin_return_last( stack_frame_t *frame );
 token_t *builtin_return_first( stack_frame_t *frame );
 token_t *builtin_intern_set( stack_frame_t *frame );
+token_t *builtin_intern_set_global( stack_frame_t *frame );
 
 token_t *builtin_read_char( stack_frame_t *frame );
 token_t *builtin_cons( stack_frame_t *frame );
 
+#ifdef __cplusplus
+}
+#endif
 #endif

@@ -1,5 +1,8 @@
 #ifndef _GOJIRA_TOKENS_H
 #define _GOJIRA_TOKENS_H 1
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef enum {
 	TYPE_NULL,
@@ -72,4 +75,7 @@ token_t *replace_symbol_safe( token_t *tokens, token_t *replace, char *name );
 
 #include <gojira/runtime/allocate.h>
 
+#ifdef __cplusplus
+}
+#endif
 #endif

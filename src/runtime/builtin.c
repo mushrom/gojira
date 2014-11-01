@@ -247,6 +247,40 @@ token_t *builtin_intern_set( stack_frame_t *frame ){
 	return ret;
 }
 
+token_t *builtin_intern_set_global( stack_frame_t *frame ){
+	token_t *ret;
+	token_t *move;
+	token_t *var;
+	st_frame_t *first;
+
+	//ret = calloc( 1, sizeof( token_t ));
+	ret = alloc_token( );
+	ret->type = TYPE_NULL;
+
+	move = frame->expr->next;
+
+	if ( move ){
+		if ( move->type == TYPE_SYMBOL ){
+			var = move;
+
+			if ( move->next ){
+				for ( first = frame; first->last; first = first->last );
+
+				frame_add_var( first, var->data, move->next );
+			} else {
+				printf( "[%s] Error: Invalid set, expected value after symbol\n", __func__ );
+			}
+
+		} else {
+			printf( "[%s] Error: expected symbol, but got \"%s\"\n", __func__, type_str( move->type ));
+		}
+	} else {
+		printf( "[%s] Error: expected symbol, but have no arguments.\n", __func__ );
+	}
+
+	return ret;
+}
+
 token_t *builtin_is_list( stack_frame_t *frame ){
 	token_t *ret = NULL;
 	token_t *move;

@@ -1,5 +1,9 @@
 #ifndef _parse_h
 #define _parse_h
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -25,4 +29,7 @@ token_t *reduce( token_t *, type_t );
 type_t predict( token_t * );
 rule_t *gen_cminus_rules( );
 
+#ifdef __cplusplus
+}
+#endif
 #endif

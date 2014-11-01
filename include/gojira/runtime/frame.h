@@ -1,7 +1,12 @@
 #ifndef _GOJIRA_RUNTIME_FRAME_H
 #define _GOJIRA_RUNTIME_FRAME_H 1
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <gojira/tokens.h>
 #include <gojira/libs/list.h>
+
 
 typedef struct variable {
 	token_t *token;
@@ -26,7 +31,9 @@ typedef struct stack_frame {
 	token_t *heap;        // List of all tokens allocated in the frame
 } stack_frame_t;
 typedef stack_frame_t st_frame_t;
+typedef token_t *(*scheme_func)( stack_frame_t * );
 
+variable_t *global_add_func( st_frame_t *frame, char *name, scheme_func handle );
 st_frame_t *init_global_frame( st_frame_t *frame );
 st_frame_t *frame_create( st_frame_t *cur_frame, token_t *ptr );
 st_frame_t *frame_free( st_frame_t *frame );
@@ -40,4 +47,7 @@ token_t *frame_alloc_token( st_frame_t *frame );
 
 void stack_trace( st_frame_t *frame );
 
+#ifdef __cplusplus
+}
+#endif
 #endif

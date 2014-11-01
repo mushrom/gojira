@@ -10,13 +10,48 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+typedef enum {
+	EVAL_STATUS_NONE,
+	EVAL_STATUS_ERROR,
+	EVAL_STATUS_RUNNING,
+} eval_ret_t;
+
+eval_ret_t eval_step( stack_frame_t *base, stack_frame_t **frame, token_t *tokens ){
+	eval_ret_t ret = EVAL_STATUS_RUNNING;
+
+	// Evaluate sub-expressions
+	if ( (*frame)->ptr ){
+		//have_error = eval_frame_subexpr( &frame, base );
+		if ( eval_frame_subexpr( frame, base ) == true )
+			ret = EVAL_STATUS_ERROR;
+
+	// Evaluation finished, apply function
+	} else {
+		if ( (*frame)->last ){
+			//have_error = eval_frame_expr( &frame, base );
+			if ( eval_frame_expr( frame, base ) == true )
+				ret = EVAL_STATUS_ERROR;
+
+		} else {
+			//running = false;
+			ret = EVAL_STATUS_NONE;
+		}
+	}
+
+	return ret;
+}
+
 token_t *eval_loop( stack_frame_t *base, token_t *tokens ){
 	stack_frame_t *frame = base;
 	token_t *ret = tokens;
 
-	bool running = true;
-	bool have_error = false;
+	eval_ret_t status = EVAL_STATUS_RUNNING;
 
+	while ( status == EVAL_STATUS_RUNNING ){
+		status = eval_step( base, &frame, tokens );
+	}
+
+	/*
 	while ( running && !have_error ){
 		// Evaluate sub-expressions
 		if ( frame->ptr ){
@@ -31,6 +66,24 @@ token_t *eval_loop( stack_frame_t *base, token_t *tokens ){
 				running = false;
 			}
 		}
+	}
+	*/
+
+	ret = base->expr;
+
+	return ret;
+}
+
+token_t *eval_loop_timed( stack_frame_t *base, token_t *tokens, unsigned limit ){
+	stack_frame_t *frame = base;
+	token_t *ret = tokens;
+
+	eval_ret_t status = EVAL_STATUS_RUNNING;
+	unsigned cycles = 0;
+
+	while ( status == EVAL_STATUS_RUNNING && cycles < limit ){
+		status = eval_step( base, &frame, tokens );
+		cycles++;
 	}
 
 	ret = base->expr;

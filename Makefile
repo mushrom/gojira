@@ -1,6 +1,5 @@
 SRC = ${wildcard src/*.c} ${wildcard src/libs/*.c} ${wildcard src/runtime/*.c} ${wildcard src/parser/*.c}
-SRC+= ${wildcard linenoise/linenoise.c}
-MAINSRC = ${wildcard src/main/*.c} ${SRC}
+MAINSRC = ${wildcard src/main/*.c} ${SRC} ${wildcard linenoise/linenoise.c}
 OBJ = ${SRC:.c=.o}
 MAINOBJ = ${MAINSRC:.c=.o}
 CFLAGS=-I"${shell pwd}"/include -I. -p -g -Wall -O3
