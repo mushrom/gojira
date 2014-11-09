@@ -102,9 +102,9 @@ bool eval_frame_subexpr( stack_frame_t **frame_ret, stack_frame_t *first ){
 			frame->ptr = frame->ptr->next;
 
 			if ( move->down == NULL ){
-				printf( "[%s] Error: Empty expression\n", __func__ );
+				frame->error_call( frame, "[%s] Error: Empty expression\n", __func__ );
 
-				stack_trace( frame );
+				//stack_trace( frame );
 				ret = true;
 				break;
 			}
@@ -138,10 +138,10 @@ bool eval_frame_subexpr( stack_frame_t **frame_ret, stack_frame_t *first ){
 					}
 
 				} else {
-					printf( "[%s] Error: undefined variable \"%s\"\n",
+					frame->error_call( frame, "[%s] Error: undefined variable \"%s\"\n",
 							__func__, (char *)frame->ptr->data );
 
-					stack_trace( frame );
+					//stack_trace( frame );
 					ret = true;
 				}
 			}
@@ -293,8 +293,8 @@ bool eval_frame_expr( stack_frame_t **frame_ret, stack_frame_t *first ){
 
 		default:
 
-			printf( "[%s] Can't apply \"%s\"\n", __func__, type_str( frame->expr->type ));
-			stack_trace( frame );
+			frame->error_call( frame, "[%s] Can't apply \"%s\"\n", __func__, type_str( frame->expr->type ));
+			//stack_trace( frame );
 			ret = true;
 			break;
 	}

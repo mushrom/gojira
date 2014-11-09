@@ -88,12 +88,12 @@ static token_return_t get_token_from_str( char *string ){
 
 	if ( *string ){
 		// Check for parenthesis
-		if ( *string == '(' ){
+		if ( *string == '(' || *string == '{' || *string == '[' ){
 			ret.string = string + 1;
 			ret.token->type = TYPE_OPEN_PAREN;
 			ret.found = true;
 
-		} else if ( *string == ')' ){
+		} else if ( *string == ')' || *string == '}' || *string == ']' ){
 			ret.string = string + 1;
 			ret.token->type = TYPE_CLOSE_PAREN;
 			ret.found = true;
@@ -195,7 +195,7 @@ static token_return_t get_token_from_str( char *string ){
 
 			//printf( "> Have identifier \"%s\"\n", temp );
 
-			if ( strcmp( temp, "lambda" ) == 0 || strcmp( temp, "λ" ) == 0 ){
+			if ( strcmp( temp, "lambda" ) == 0 || strcmp( temp, "λ" ) == 0 || strcmp( temp, "function" ) == 0 ){
 				ret.token->type = TYPE_LAMBDA;
 
 			} else if ( strcmp( temp, "if" ) == 0 ){

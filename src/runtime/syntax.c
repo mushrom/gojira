@@ -34,7 +34,7 @@ stack_frame_t *expand_procedure( stack_frame_t *frame, token_t *tokens ){
 					var_name = temp->data;
 
 					if ( !move ){
-						printf( "[%s] Error: Have unbound variable \"%s\"\n", __func__, var_name );
+						frame->error_call( frame, "[%s] Error: Have unbound variable \"%s\"\n", __func__, var_name );
 						break;
 					}
 
@@ -49,9 +49,9 @@ stack_frame_t *expand_procedure( stack_frame_t *frame, token_t *tokens ){
 					move = move->next;
 
 				} else {
-					printf( "[%s] Error: expected symbol in procedure definition, have \"%s\"\n",
+					frame->error_call( frame, "[%s] Error: expected symbol in procedure definition, have \"%s\"\n",
 							__func__, type_str( temp->type ));
-					stack_trace( ret );
+					//stack_trace( ret );
 				}
 			}
 
@@ -83,7 +83,7 @@ stack_frame_t *expand_procedure( stack_frame_t *frame, token_t *tokens ){
 		}
 
 	} else {
-		printf( "[%s] Error: Trying to apply non-procedure as procedure (?!)\n", __func__ );
+		frame->error_call( frame, "[%s] Error: Trying to apply non-procedure as procedure (?!)\n", __func__ );
 	}
 
 	return ret;
@@ -107,7 +107,7 @@ token_t *expand_if_expr( stack_frame_t *frame, token_t *tokens ){
 		ret = move;
 
 	} else {
-		printf( "[%s] Error: If statement expected 4 tokens, but got %d\n", __func__, len );
+		frame->error_call( frame, "[%s] Error: If statement expected 4 tokens, but got %d\n", __func__, len );
 	}
 
 	return ret;
@@ -152,11 +152,11 @@ token_t *expand_syntax_rules( stack_frame_t *frame, token_t *tokens ){
 		}
 
 	} else {
-		printf( "[%s] Error: Expected at least 3 tokens, but got %d\n", __func__, len );
+		frame->error_call( frame, "[%s] Error: Expected at least 3 tokens, but got %d\n", __func__, len );
 	}
 
 	if ( !matched ){
-		printf( "[%s] Error: Could not match syntax pattern\n", __func__ );
+		frame->error_call( frame, "[%s] Error: Could not match syntax pattern\n", __func__ );
 	}
 
 	return ret;

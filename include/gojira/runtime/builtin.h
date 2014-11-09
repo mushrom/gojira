@@ -35,6 +35,9 @@ token_t *builtin_cdr( stack_frame_t *frame );
 token_t *builtin_is_null( stack_frame_t *frame );
 token_t *builtin_is_list( stack_frame_t *frame );
 
+// String functions
+token_t *builtin_string_append( stack_frame_t *frame );
+
 // Functions for use by the interpreter's trampoline
 token_t *builtin_return_last( stack_frame_t *frame );
 token_t *builtin_return_first( stack_frame_t *frame );

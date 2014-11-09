@@ -16,6 +16,9 @@ typedef struct variable {
 	unsigned hash;
 } variable_t;
 
+struct stack_frame;
+typedef void (*error_printer)( struct stack_frame *, char *fmt, ... );
+
 typedef struct stack_frame {
 	struct stack_frame *last; // Pointer to previous frame
 	token_t *ret;         // pointer to original place in code (return position)
@@ -29,8 +32,11 @@ typedef struct stack_frame {
 
 	token_t *value;       // value to return to last continuation
 	token_t *heap;        // List of all tokens allocated in the frame
+
+	error_printer error_call;
 } stack_frame_t;
 typedef stack_frame_t st_frame_t;
+
 typedef token_t *(*scheme_func)( stack_frame_t * );
 
 variable_t *global_add_func( st_frame_t *frame, char *name, scheme_func handle );
@@ -44,6 +50,8 @@ token_t *frame_find_var( st_frame_t *frame, char *key );
 
 token_t *frame_register_token( st_frame_t *frame, token_t *token );
 token_t *frame_alloc_token( st_frame_t *frame );
+
+void default_error_printer( stack_frame_t *frame, char *fmt, ... );
 
 void stack_trace( st_frame_t *frame );
 

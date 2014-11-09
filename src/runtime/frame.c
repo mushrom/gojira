@@ -8,32 +8,34 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdarg.h>
 
 // array of all builtin functions added by default
 struct global_builtin {
 	char        *name;
 	scheme_func  handle;
 } global_builtins[] = {
-	{ "+",          builtin_add },
-	{ "*",          builtin_multiply },
-	{ "modulo",     builtin_modulo },
-	{ "modulo",     builtin_modulo },
-	{ "-",          builtin_subtract },
-	{ "/",          builtin_divide },
-	{ "display",    builtin_display },
-	{ "newline",    builtin_newline },
-	{ "stacktrace", builtin_stacktrace },
-	{ "eq?",        builtin_equal },
-	{ "<",          builtin_lessthan },
-	{ ">",          builtin_greaterthan },
-	{ "car",        builtin_car },
-	{ "cdr",        builtin_cdr },
-	{ "cons",       builtin_cons },
-	{ "null?",      builtin_is_null },
-	{ "list?",      builtin_is_list },
-	{ "read-char",  builtin_read_char },
-	{ "intern-set", builtin_intern_set },
-	{ "intern-set!",builtin_intern_set_global },
+	{ "+",             builtin_add },
+	{ "*",             builtin_multiply },
+	{ "modulo",        builtin_modulo },
+	{ "modulo",        builtin_modulo },
+	{ "-",             builtin_subtract },
+	{ "/",             builtin_divide },
+	{ "display",       builtin_display },
+	{ "newline",       builtin_newline },
+	{ "stacktrace",    builtin_stacktrace },
+	{ "eq?",           builtin_equal },
+	{ "<",             builtin_lessthan },
+	{ ">",             builtin_greaterthan },
+	{ "car",           builtin_car },
+	{ "cdr",           builtin_cdr },
+	{ "cons",          builtin_cons },
+	{ "null?",         builtin_is_null },
+	{ "list?",         builtin_is_list },
+	{ "read-char",     builtin_read_char },
+	{ "intern-set",    builtin_intern_set },
+	{ "intern-set!",   builtin_intern_set_global },
+	{ "string-append", builtin_string_append },
 };
 
 // Adds an "external function" to a frame, and handles registering the tokens for garbage collection
@@ -134,6 +136,17 @@ void stack_trace( st_frame_t *frame ){
 	}
 }
 
+void default_error_printer( stack_frame_t *frame, char *fmt, ... ){
+	va_list args;
+	va_start( args, fmt );
+
+	stack_trace( frame );
+	vprintf( fmt, args );
+	printf( "[%s] got here\n", __func__ );
+
+	va_end( args );
+}
+
 st_frame_t *frame_create( st_frame_t *cur_frame, token_t *ptr ){
 	st_frame_t *ret;
 
@@ -144,6 +157,11 @@ st_frame_t *frame_create( st_frame_t *cur_frame, token_t *ptr ){
 	ret->value = NULL;
 	ret->expr = NULL;
 	ret->status = TYPE_NULL;
+
+	if ( cur_frame )
+		ret->error_call = cur_frame->error_call;
+	else
+		ret->error_call = default_error_printer;
 
 	return ret;
 }
