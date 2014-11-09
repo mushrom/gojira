@@ -161,12 +161,10 @@ bool eval_frame_subexpr( stack_frame_t **frame_ret, stack_frame_t *first ){
 			break;
 
 		case TYPE_SYNTAX_RULES:
-			//move = calloc( 1, sizeof( token_t ));
 			move = alloc_token( );
 			move->type = TYPE_SYNTAX;
 			move->down = clone_tokens( frame->ptr );
 
-			gc_unmark( move );
 			frame_add_token_noclone( frame, ext_proc_token( builtin_return_first ));
 			frame_add_token_noclone( frame, move );
 
@@ -245,7 +243,6 @@ bool eval_frame_expr( stack_frame_t **frame_ret, stack_frame_t *first ){
 				foo = clone_token_tree( frame->expr->down );
 			}
 
-			gc_unmark( foo );
 			frame_register_token( frame, foo );
 			frame->expr = frame->end = NULL;
 
@@ -302,7 +299,6 @@ bool eval_frame_expr( stack_frame_t **frame_ret, stack_frame_t *first ){
 	if ( apply && !ret ){
 		temp_frame = frame->last;
 
-		//gc_dump( frame );
 		gc_mark( frame->value );
 		frame->heap = gc_sweep( frame->heap );
 

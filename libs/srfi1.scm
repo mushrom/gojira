@@ -15,6 +15,21 @@
     (define iter
       (lambda (i sum xs)
         (if (not (eq? i count))
+          (cons sum
+            (iter
+              (+ i 1)
+              (+ sum step)
+              '()))
+          '())))
+
+    (iter 0 start '())))
+
+(define old_gen_range
+  (lambda (count start step)
+
+    (define iter
+      (lambda (i sum xs)
+        (if (not (eq? i count))
           (iter
             (+ i 1)
             (+ sum step)

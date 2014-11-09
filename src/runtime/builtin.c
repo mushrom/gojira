@@ -51,8 +51,7 @@ token_t *builtin_car( stack_frame_t *frame ){
 	token_t *ret = move;
 
 	if ( move && move->type == TYPE_LIST && move->down ){
-		ret = clone_token_tree( move->down );
-		gc_unmark( ret );
+		ret = move->down;
 
 	} else {
 		frame->error_call( frame, "[%s] Bad argument type \"%s\"\n", __func__,
@@ -71,11 +70,9 @@ token_t *builtin_cdr( stack_frame_t *frame ){
 	token_t *ret = move;
 
 	if ( move && move->type == TYPE_LIST && move->down ){
-		//ret = calloc( 1, sizeof( token_t ));
 		ret = alloc_token( );
 		ret->type = TYPE_LIST;
-		ret->down = clone_tokens( move->down->next );
-		gc_unmark( ret );
+		ret->down = move->down->next;
 
 	} else {
 		frame->error_call( frame, "[%s] Bad argument type \"%s\"\n", __func__,
@@ -97,16 +94,12 @@ token_t *builtin_cons( stack_frame_t *frame ){
 	if ( move && move->next ){
 		if ( move->next->type == TYPE_LIST ){
 			temp = clone_token_tree( move );
-			// TODO: Find a faster to append the element, there seems to be an issue with the garbage collector
-			//       freeing the last element of the list if not cloned.
-			//temp->next = frame_register_token( frame, clone_token_spine( move->next->down ));
-			temp->next = frame_register_token( frame, clone_tokens( move->next->down ));
+			temp->next = move->next->down;
 
 			ret = alloc_token( );
 			ret->type = TYPE_LIST;
 			ret->down = temp;
 			ret->next = NULL;
-			gc_unmark( ret );
 
 		} else {
 			frame->error_call( frame, "[%s] Bad argument type \"%s\", expected list\n", __func__, type_str( move->next->type ));

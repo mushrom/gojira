@@ -30,6 +30,26 @@ void print_token( token_t *token ){
 	}
 }
 
+void print_token_no_recurse( token_t *token ){
+	if ( token ){
+		switch ( token->type ){
+			case TYPE_NUMBER:
+				printf( "%d", token->smalldata );
+				break;
+			case TYPE_BOOLEAN:
+				printf( "#%c", (token->smalldata == true)? 't' : 'f' );
+				break;
+			case TYPE_STRING:
+			case TYPE_SYMBOL:
+				printf( "%s", (char *)token->data );
+				break;
+			default:
+				printf( "#<%s>", type_str( token->type ));
+				break;
+		}
+	}
+}
+
 // Prints all the tokens in a given tree
 token_t *dump_tokens( token_t *tokens ){
 	token_t *move;
@@ -41,6 +61,37 @@ token_t *dump_tokens( token_t *tokens ){
 	}
 
 	return tokens;
+}
+
+#include <gojira/runtime/garbage.h>
+token_t *debug_print_iter( token_t *tokens, unsigned level ){
+	if ( tokens ){
+		unsigned i;
+		if ( tokens->status == GC_MARKED ){
+			printf( "[marked]       " );
+		} else if ( tokens->status == GC_UNMARKED ){
+			printf( "[unmarked]     " );
+		} else if ( tokens->status == GC_FREED ){
+			printf( "[freed]        " );
+		} else {
+			printf( "[unknown (%d)] ", tokens->status );
+		}
+
+		for ( i = 0; i < level; i++ )
+			printf( "    " );
+
+		print_token_no_recurse( tokens );
+		printf( "\n" );
+
+		debug_print_iter( tokens->down, level + 1 );
+		debug_print_iter( tokens->next, level );
+	}
+
+	return tokens;
+}
+
+token_t *debug_print( token_t *tokens ){
+	return debug_print_iter( tokens, 0 );
 }
 
 // Strips a token from a tree. If the stripped token has a lower token,
