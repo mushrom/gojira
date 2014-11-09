@@ -302,8 +302,22 @@ variable_t *frame_add_var( st_frame_t *frame, char *key, token_t *token ){
 	return new_var;
 }
 
+token_t *frame_register_tokens( st_frame_t *frame, token_t *token ){
+	if ( token ){
+		frame_register_tokens( frame, token->down );
+		frame_register_tokens( frame, token->next );
+
+		token->gc_link = frame->heap;
+		frame->heap = token;
+	}
+
+	return token;
+}
+
 token_t *frame_register_token( st_frame_t *frame, token_t *token ){
 	if ( token ){
+		frame_register_tokens( frame, token->down );
+
 		token->gc_link = frame->heap;
 		frame->heap = token;
 	}

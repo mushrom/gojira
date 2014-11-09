@@ -3,6 +3,7 @@
 #include <gojira/tokens.h>
 
 token_t *alloc_token( void );
+void free_token( token_t *token );
 void free_tokens( token_t *tree );
 void free_token_tree( token_t *tree );
 

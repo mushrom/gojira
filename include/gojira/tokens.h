@@ -70,6 +70,8 @@ unsigned tokens_length( token_t *tree );
 token_t *replace_symbol( token_t *tokens, token_t *replace, char *name );
 token_t *replace_symbol_safe( token_t *tokens, token_t *replace, char *name );
 
+token_t *debug_print( token_t *tokens );
+
 #include <gojira/runtime/allocate.h>
 
 #endif

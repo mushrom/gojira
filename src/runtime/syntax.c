@@ -67,8 +67,6 @@ stack_frame_t *expand_procedure( stack_frame_t *frame, token_t *tokens ){
 			temp = ext_proc_token( builtin_return_last );
 			frame_add_token_noclone( ret, temp );
 
-			gc_unmark( body );
-
 			frame_register_token( ret, body );
 
 			for ( temp = body->next; temp; temp = temp->next )
@@ -77,7 +75,7 @@ stack_frame_t *expand_procedure( stack_frame_t *frame, token_t *tokens ){
 			ret->ptr = body;
 
 			if ( is_tailcall ){
-				gc_sweep( frame->heap );
+				frame->heap = gc_sweep( frame->heap );
 				frame_free( frame );
 			}
 		}
@@ -107,6 +105,7 @@ token_t *expand_if_expr( stack_frame_t *frame, token_t *tokens ){
 		ret = move;
 
 	} else {
+		stack_trace( frame );
 		printf( "[%s] Error: If statement expected 4 tokens, but got %d\n", __func__, len );
 	}
 

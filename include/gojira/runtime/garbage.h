@@ -9,6 +9,7 @@
 enum {
 	GC_UNMARKED,
 	GC_MARKED,
+	GC_FREED,
 };
 
 void gc_mark( token_t *tree );

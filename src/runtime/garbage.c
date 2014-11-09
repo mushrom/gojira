@@ -3,8 +3,15 @@
 #include <stdbool.h>
 
 void gc_mark( token_t *tree ){
-	if ( tree && tree->status == GC_UNMARKED ){
+	//if ( tree && tree->status == GC_UNMARKED ){
+	if ( tree ){
 		tree->status = GC_MARKED;
+
+		/*
+		printf( "Marked token: " );
+		print_token( tree );
+		printf( "\n" );
+		*/
 
 		gc_mark( tree->next );
 		gc_mark( tree->down );
@@ -15,12 +22,100 @@ void gc_unmark( token_t *tree ){
 	if ( tree ){
 		tree->status = GC_UNMARKED;
 
+		/*
+		printf( "Unmarked token: " );
+		print_token( tree );
+		printf( "\n" );
+		*/
+
 		gc_unmark( tree->next );
 		gc_unmark( tree->down );
 	}
 }
 
+token_t *gc_link( token_t *heap, token_t *tree ){
+	token_t *ret = heap;
+
+	if ( heap ){
+		tree->gc_link = heap;
+		ret = tree;
+	}
+
+	return ret;
+}
+
+token_t *free_all_unmarked( token_t *heap, token_t *tree ){
+	token_t *ret = heap;
+
+	if ( tree ){
+		ret = free_all_unmarked( ret, tree->down );
+		ret = free_all_unmarked( ret, tree->next );
+
+		if ( tree->status == GC_UNMARKED ){
+			free_token( tree );
+
+		} else {
+			ret = gc_link( ret, tree );
+		}
+	}
+
+	return ret;
+}
+
 token_t *gc_sweep( token_t *tree ){
+	token_t *move = tree;
+	token_t *last = NULL;
+	token_t *temp;
+	token_t *ret = NULL;
+
+	//return tree;
+	//printf( "Doing garbage collection..." );
+
+	while ( move ){
+		switch( move->status ){
+			// don't free and unmark if marked as in-use
+			case GC_MARKED:
+				last = move;
+				if ( !ret ){
+					ret = move;
+				}
+
+				move->status = GC_UNMARKED;
+				move = move->gc_link;
+				break;
+
+			// free the token if not in use, and clean up heap
+			case GC_UNMARKED:
+				/*
+				printf( "Freeing token: " );
+				print_token( move );
+				printf( "\n" );
+				*/
+
+				temp = move->gc_link;
+				if ( last ){
+					last->gc_link = temp;
+				}
+				free_token( move );
+				move = temp;
+				break;
+
+			// otherwise just continue, for experimental GC statuses
+			default:
+				last = move;
+				if ( !ret ){
+					ret = move;
+				}
+
+				move = move->gc_link;
+				break;
+		}
+	}
+
+	return ret;
+}
+
+token_t *old_gc_sweep( token_t *tree ){
 	token_t *ret = NULL;
 
 	if ( tree ){
@@ -30,7 +125,12 @@ token_t *gc_sweep( token_t *tree ){
 
 		} else {
 			ret = gc_sweep( tree->gc_link );
-			free_token_tree( tree );
+			free_token( tree );
+			//ret = free_all_unmarked( ret, tree->down );
+			//free_token_tree( tree );
+			/*
+			free_all_unmarked( tree->down );
+			*/
 		}
 	}
 
