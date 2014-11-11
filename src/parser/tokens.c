@@ -133,7 +133,7 @@ token_t *strip_token( token_t *tokens, type_t type ){
 token_t *remove_punc_tokens( token_t *tokens ){
 	token_t *ret = tokens;
 	type_t remove[] = {
-		TYPE_OPEN_PAREN, TYPE_CLOSE_PAREN, TYPE_APOSTR,
+		TYPE_OPEN_PAREN, TYPE_CLOSE_PAREN, TYPE_APOSTR, TYPE_COMMA,
 		TYPE_OCTOTHORPE, TYPE_TOKEN_LIST, TYPE_BASE_TOKEN, TYPE_NULL
 	};
 
@@ -259,6 +259,27 @@ token_t *replace_symbol_safe( token_t *tokens, token_t *replace, char *name ){
 		} else {
 			ret->down = replace_symbol_safe( ret->down, replace, name );
 			ret->next = replace_symbol_safe( ret->next, replace, name );
+		}
+	}
+	
+	return ret;
+}
+
+// Recursively replaces all tokens of "type" with "replace"
+token_t *replace_type( token_t *tokens, token_t *replace, type_t type ){
+	token_t *ret = tokens;
+	token_t *move;
+
+	if ( tokens ){
+		if ( tokens->type == type ){
+			ret = clone_tokens( replace );
+			for ( move = ret; move->next; move = move->next );
+			move->next = replace_type( tokens->next, replace, type );
+			free_token_tree( tokens );
+
+		} else {
+			ret->down = replace_type( ret->down, replace, type );
+			ret->next = replace_type( ret->next, replace, type );
 		}
 	}
 	

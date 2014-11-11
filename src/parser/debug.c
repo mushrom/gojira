@@ -17,6 +17,8 @@ char *debug_strings[] = {
 	"'",
 	"#",
 	"*",
+	",",
+	";",
 
 	"lambda",
 	"if",

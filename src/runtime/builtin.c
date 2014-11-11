@@ -181,8 +181,8 @@ token_t *builtin_equal( stack_frame_t *frame ){
 		op1 = frame->expr->next;
 		op2 = frame->expr->next->next;
 
-		if ( op1->type == TYPE_SYMBOL && op2->type == TYPE_SYMBOL ){
-			// symbols are supposed to compare true if they represent the same symbol.
+		if ( op1->type == TYPE_SYMBOL && op2->type == TYPE_SYMBOL ||
+		     op1->type == TYPE_STRING && op2->type == TYPE_STRING ){
 			val = strcmp( op1->data, op2->data ) == 0;
 
 		} else {

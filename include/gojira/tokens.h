@@ -21,6 +21,8 @@ typedef enum {
 	TYPE_APOSTR,
 	TYPE_OCTOTHORPE,
 	TYPE_ASTERISK,
+	TYPE_COMMA,
+	TYPE_SEMICOLON,
 
 	// Generated from symbol names in lexer
 	TYPE_LAMBDA,
@@ -72,6 +74,7 @@ token_t *clone_token_spine( token_t *tree );
 unsigned tokens_length( token_t *tree );
 token_t *replace_symbol( token_t *tokens, token_t *replace, char *name );
 token_t *replace_symbol_safe( token_t *tokens, token_t *replace, char *name );
+token_t *replace_type( token_t *tokens, token_t *replace, type_t type );
 
 token_t *debug_print( token_t *tokens );
 

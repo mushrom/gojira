@@ -104,6 +104,12 @@ static token_return_t get_token_from_str( char *string ){
 			ret.token->type = TYPE_APOSTR;
 			ret.found = true;
 
+		// Check for commas, for special syntax sugar purposes
+		} else if ( *string == ',' ){
+			ret.string = string + 1;
+			ret.token->type = TYPE_COMMA;
+			ret.found = true;
+
 		// Check for periods and special conditions ("." signifies a pair, while ".." is an identifier)
 		} else if ( *string == '.' && strchr( SEPERATOR, string[1])){
 			ret.string = string + 1;
@@ -162,9 +168,9 @@ static token_return_t get_token_from_str( char *string ){
 
 		// Check for comments
 		} else if ( *string == ';' ){
-			// FIXME: Segfaults if there's a comment at the end of the file/input
-			for ( i = 0; string[i] && string[i] != '\n'; i++ );
-			ret = get_token_from_str( string + i );
+			ret.string = string + 1;
+			ret.token->type = TYPE_SEMICOLON;
+			ret.found = true;
 
 		// Check for numbers
 		} else if ( strchr( DIGITS, *string ) ||
