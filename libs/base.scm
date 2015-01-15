@@ -1,17 +1,17 @@
-; program to test the interpreter
-; (proper test suite coming soon(!))
+// program to test the interpreter
+// (proper test suite coming soon(!))
 
-; quick unicode reference:
-;   ¬ = U+ac
-;   λ = U+3bb
-;   ∀ = U+2200
-;   ∁ = U+2201
-;   ∂ = U+2202
-;   ∃ = U+2203
-;   ∈ = U+2208
-;   ∑ = U+2211
-;   ∧ = U+2227
-;   ∨ = U+2228
+// quick unicode reference:
+//   ¬ = U+ac
+//   λ = U+3bb
+//   ∀ = U+2200
+//   ∁ = U+2201
+//   ∂ = U+2202
+//   ∃ = U+2203
+//   ∈ = U+2208
+//   ∑ = U+2211
+//   ∧ = U+2227
+//   ∨ = U+2228
 
 
 (define-syntax define
@@ -21,7 +21,7 @@
     ((_ sym)
      (intern-set 'sym 0))))
 
-; this will do until proper elipsis expansion is implemented...
+// this will do until proper elipsis expansion is implemented...
 (define-syntax begin
   (syntax-rules ()
 	((_ expr moar)
@@ -38,7 +38,7 @@
       #f
       #t)))
 
-; TODO: Fix symbol clashes between procedures and macro expansion
+// TODO: Fix symbol clashes between procedures and macro expansion
 (define-syntax or
   (syntax-rules ()
     ((_ _op1_ _op2_)
@@ -132,7 +132,7 @@
                   (display ") "))
                (iter (cdr x) indent)))
             ((lambda ()
-              ;(for indent (lambda (y) (display " ")))
+              // (for indent (lambda (y) (display " ")))
               (display (car x))
               (if (null? (cdr x))
                  #f

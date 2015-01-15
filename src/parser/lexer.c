@@ -172,6 +172,10 @@ static token_return_t get_token_from_str( char *string ){
 			ret.token->type = TYPE_SEMICOLON;
 			ret.found = true;
 
+		} else if ( string[0] == '/' && string[1] == '/' ){
+			for ( i = 0; string[i] && string[i + 1] != '\n'; i++ );
+			ret = get_token_from_str( string + i + 1 );
+
 		// Check for numbers
 		} else if ( strchr( DIGITS, *string ) ||
 				( *string == '-' && strchr( DIGITS, *(string + 1)))) {
