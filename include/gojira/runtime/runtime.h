@@ -10,6 +10,20 @@ extern "C" {
 #include <gojira/libs/hashmap.h>
 #include <stdbool.h>
 
+typedef struct binding {
+	token_t *symbol;
+	token_t *value;
+
+	struct binding *next;
+} binding_t;
+
+typedef struct procedure {
+	token_t *args;
+	token_t *body;
+
+	binding_t *bindings;
+} procedure_t;
+
 token_t *eval_loop( stack_frame_t *base, token_t *tokens );
 token_t *eval_loop_timed( stack_frame_t *base, token_t *tokens, unsigned limit );
 bool eval_frame_subexpr( stack_frame_t **frame_ret, stack_frame_t *first );

@@ -9,7 +9,74 @@
 #include <stdbool.h>
 #include <string.h>
 
+token_t *expand_lambda( stack_frame_t *frame, token_t *tokens ){
+	token_t *ret = alloc_token( );
+
+	procedure_t *proc = calloc( 1, sizeof( procedure_t ));;
+
+	if ( tokens_length( tokens ) < 3 ){
+		// TODO: do something
+		return NULL;
+	}
+
+	proc->args = tokens->next->down;
+	proc->body = tokens->next->next;
+	proc->bindings = NULL;
+
+	ret->type = TYPE_PROCEDURE;
+	ret->data = proc;
+
+	return ret;
+}
+
 stack_frame_t *expand_procedure( stack_frame_t *frame, token_t *tokens ){
+	stack_frame_t *ret = NULL;
+	token_t *move;
+	token_t *temp;
+	procedure_t *proc;
+	char *var_name;
+
+	if ( tokens->type == TYPE_PROCEDURE ){
+		proc = tokens->data;
+		move = tokens->next;
+		temp = proc->args;
+
+		foreach_in_list( temp ){
+			if ( temp->type == TYPE_SYMBOL ){
+				var_name = temp->data;
+
+				if ( !move ){
+					frame->error_call( frame, "[%s] Error: Have unbound variable \"%s\"\n", __func__, var_name );
+					break;
+				}
+
+				frame_add_var( frame, var_name, move );
+				move = move->next;
+
+			} else {
+				frame->error_call( frame, "[%s] Error: expected symbol in procedure definition, have \"%s\"\n",
+						__func__, type_str( temp->type ));
+				//stack_trace( ret );
+			}
+		}
+
+		ret = frame;
+
+		ret->expr = ret->end = NULL;
+
+		temp = ext_proc_token( builtin_return_last );
+		frame_add_token_noclone( ret, temp );
+
+		ret->ptr = proc->body;
+
+	} else {
+		frame->error_call( frame, "[%s] Error: Trying to apply non-procedure as procedure (?!)\n", __func__ );
+	}
+
+	return ret;
+}
+
+stack_frame_t *expand_procedure_old( stack_frame_t *frame, token_t *tokens ){
 	stack_frame_t *ret = NULL;
 	token_t *move;
 	token_t *temp;
