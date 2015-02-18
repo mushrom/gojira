@@ -120,11 +120,11 @@ bool eval_frame_subexpr( stack_frame_t **frame_ret, stack_frame_t *first ){
 			} else {
 				// search for symbol in the highest scope, which has the
 				// most often used variables
-				move = frame_find_var( first, frame->ptr->data );
+				move = frame_find_var( first, frame->ptr->data, NO_RECURSE );
 
 				// didn't find it, start from top frame
 				if ( !move )
-					move = frame_find_var( frame, frame->ptr->data );
+					move = frame_find_var( frame, frame->ptr->data, RECURSE );
 
 				if ( move ){
 					frame_add_token( frame, move );
@@ -238,7 +238,12 @@ bool eval_frame_expr( stack_frame_t **frame_ret, stack_frame_t *first ){
 			frame->value = foo;
 			*/
 			foo = expand_lambda( frame, frame->expr );
-			frame->value = foo;
+			if ( foo ){
+				frame->value = foo;
+
+			} else {
+				ret = true;
+			}
 			break;
 
 		case TYPE_IF:
@@ -267,7 +272,7 @@ bool eval_frame_expr( stack_frame_t **frame_ret, stack_frame_t *first ){
 			break;
 
 		case TYPE_DEF_SYNTAX:
-			frame_add_var( frame->last, frame->expr->next->data, frame->expr->next->next );
+			frame_add_var( frame->last, frame->expr->next->data, frame->expr->next->next, NO_RECURSE );
 
 			frame->value = frame_alloc_token( frame );
 			frame->value->type = TYPE_NULL;

@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 
 token_t *ext_proc_token( scheme_func handle ){
 	token_t *ret = NULL;
@@ -244,7 +245,7 @@ token_t *builtin_intern_set( stack_frame_t *frame ){
 			var = move;
 
 			if ( move->next ){
-				frame_add_var( frame->last, var->data, move->next );
+				frame_add_var( frame->last, var->data, move->next, NO_RECURSE );
 			} else {
 				frame->error_call( frame, "[%s] Error: Invalid set, expected value after symbol\n", __func__ );
 			}
@@ -278,7 +279,7 @@ token_t *builtin_intern_set_global( stack_frame_t *frame ){
 			if ( move->next ){
 				for ( first = frame; first->last; first = first->last );
 
-				frame_add_var( first, var->data, move->next );
+				frame_add_var( first, var->data, move->next, NO_RECURSE );
 			} else {
 				frame->error_call( frame, "[%s] Error: Invalid set, expected value after symbol\n", __func__ );
 			}

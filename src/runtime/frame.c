@@ -47,7 +47,7 @@ struct global_builtin {
 
 // Adds an "external function" to a frame, and handles registering the tokens for garbage collection
 variable_t *global_add_func( st_frame_t *frame, char *name, scheme_func handle ){
-	return frame_add_var( frame, name, frame_register_token( frame, ext_proc_token( handle )));
+	return frame_add_var( frame, name, frame_register_token( frame, ext_proc_token( handle )), NO_RECURSE );
 }
 
 st_frame_t *init_global_frame( st_frame_t *frame ){
@@ -131,7 +131,7 @@ void stack_trace( st_frame_t *frame ){
 			k = 0;
 			foreach_in_list( vars ){
 				var = vars->data;
-				printf( "%s%*s", var->key, 12 - utf8len( var->key ), "" );
+				printf( "%s%*s", var->key, 16 - utf8len( var->key ), "" );
 
 				k = (k + 1) % 6;
 				if ( !k )
@@ -149,7 +149,7 @@ void default_error_printer( stack_frame_t *frame, char *fmt, ... ){
 
 	stack_trace( frame );
 	vprintf( fmt, args );
-	printf( "[%s] got here\n", __func__ );
+	//printf( "[%s] got here\n", __func__ );
 
 	va_end( args );
 }
@@ -236,13 +236,14 @@ token_t *frame_add_token_noclone( st_frame_t *frame, token_t *token ){
 	return ret;
 }
 
-variable_t *frame_find_var_struct_hash( st_frame_t *frame, unsigned hash ){
+variable_t *frame_find_var_struct_hash( st_frame_t *frame, unsigned hash, bool recurse ){
 	variable_t *ret = NULL;
 	list_node_t *temp;
 	variable_t *var;
 
 	if ( frame ){
 		if ( frame->vars ){
+			// TODO: use hashmap here
 			temp = frame->vars->base;
 			foreach_in_list( temp ){
 				var = temp->data;
@@ -253,22 +254,23 @@ variable_t *frame_find_var_struct_hash( st_frame_t *frame, unsigned hash ){
 				}
 			}
 
-			if ( !ret )
-				ret = frame_find_var_struct_hash( frame->last, hash );
+			if ( !ret && recurse ){
+				ret = frame_find_var_struct_hash( frame->last, hash, recurse );
+			}
 
-		} else {
-			ret = frame_find_var_struct_hash( frame->last, hash );
+		} else if ( recurse ){
+			ret = frame_find_var_struct_hash( frame->last, hash, recurse );
 		}
 	}
 
 	return ret;
 }
 
-token_t *frame_find_var_hash( st_frame_t *frame, unsigned hash ){
+token_t *frame_find_var_hash( st_frame_t *frame, unsigned hash, bool recurse ){
 	token_t *ret = NULL;
 	variable_t *var;
 
-	var = frame_find_var_struct_hash( frame, hash );
+	var = frame_find_var_struct_hash( frame, hash, recurse );
 	if ( var ){
 		ret = var->token;
 	}
@@ -276,27 +278,27 @@ token_t *frame_find_var_hash( st_frame_t *frame, unsigned hash ){
 	return ret;
 }
 
-token_t *frame_find_var( st_frame_t *frame, char *key ){
+token_t *frame_find_var( st_frame_t *frame, char *key, bool recurse ){
 	token_t *ret = NULL;
 	unsigned hash;
 
 	hash = hash_string( key );
-	ret = frame_find_var_hash( frame, hash );
+	ret = frame_find_var_hash( frame, hash, recurse );
 
 	return ret;
 }
 
-variable_t *frame_find_var_struct( st_frame_t *frame, char *key ){
+variable_t *frame_find_var_struct( st_frame_t *frame, char *key, bool recurse ){
 	variable_t *ret = NULL;
 	unsigned hash;
 
 	hash = hash_string( key );
-	ret = frame_find_var_struct_hash( frame, hash );
+	ret = frame_find_var_struct_hash( frame, hash, recurse );
 
 	return ret;
 }
 
-variable_t *frame_add_var( st_frame_t *frame, char *key, token_t *token ){
+variable_t *frame_add_var( st_frame_t *frame, char *key, token_t *token, bool recurse ){
 	variable_t *new_var = NULL;
 	bool add_var = false;
 
@@ -304,7 +306,7 @@ variable_t *frame_add_var( st_frame_t *frame, char *key, token_t *token ){
 		if ( !frame->vars )
 			frame->vars = list_create( 0 );
 
-		new_var = frame_find_var_struct( frame, key );
+		new_var = frame_find_var_struct( frame, key, recurse );
 
 		if ( !new_var ){
 			new_var = calloc( 1, sizeof( variable_t ));

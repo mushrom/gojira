@@ -15,7 +15,9 @@ token_t *expand_lambda( stack_frame_t *frame, token_t *tokens ){
 	procedure_t *proc = calloc( 1, sizeof( procedure_t ));;
 
 	if ( tokens_length( tokens ) < 3 ){
-		// TODO: do something
+		frame->error_call( frame,
+				"[%s] Error: expected at least 3 tokens in lambda expression, but have %u\n",
+				__func__, tokens_length( tokens ));
 		return NULL;
 	}
 
@@ -41,6 +43,8 @@ stack_frame_t *expand_procedure( stack_frame_t *frame, token_t *tokens ){
 		move = tokens->next;
 		temp = proc->args;
 
+		//dump_tokens( move );
+
 		foreach_in_list( temp ){
 			if ( temp->type == TYPE_SYMBOL ){
 				var_name = temp->data;
@@ -50,7 +54,8 @@ stack_frame_t *expand_procedure( stack_frame_t *frame, token_t *tokens ){
 					break;
 				}
 
-				frame_add_var( frame, var_name, move );
+				//printf( "[%s] Adding \"%s\" as %p\n", __func__, var_name, move );
+				frame_add_var( frame, var_name, move, NO_RECURSE );
 				move = move->next;
 
 			} else {
