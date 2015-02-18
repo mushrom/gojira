@@ -21,19 +21,16 @@ eval_ret_t eval_step( stack_frame_t *base, stack_frame_t **frame, token_t *token
 
 	// Evaluate sub-expressions
 	if ( (*frame)->ptr ){
-		//have_error = eval_frame_subexpr( &frame, base );
 		if ( eval_frame_subexpr( frame, base ) == true )
 			ret = EVAL_STATUS_ERROR;
 
 	// Evaluation finished, apply function
 	} else {
 		if ( (*frame)->last ){
-			//have_error = eval_frame_expr( &frame, base );
 			if ( eval_frame_expr( frame, base ) == true )
 				ret = EVAL_STATUS_ERROR;
 
 		} else {
-			//running = false;
 			ret = EVAL_STATUS_NONE;
 		}
 	}
@@ -50,24 +47,6 @@ token_t *eval_loop( stack_frame_t *base, token_t *tokens ){
 	while ( status == EVAL_STATUS_RUNNING ){
 		status = eval_step( base, &frame, tokens );
 	}
-
-	/*
-	while ( running && !have_error ){
-		// Evaluate sub-expressions
-		if ( frame->ptr ){
-			have_error = eval_frame_subexpr( &frame, base );
-
-		// Evaluation finished, apply function
-		} else {
-			if ( frame->last ){
-				have_error = eval_frame_expr( &frame, base );
-
-			} else {
-				running = false;
-			}
-		}
-	}
-	*/
 
 	ret = base->expr;
 
@@ -118,13 +97,7 @@ bool eval_frame_subexpr( stack_frame_t **frame_ret, stack_frame_t *first ){
 				frame->ptr = frame->ptr->next;
 
 			} else {
-				// search for symbol in the highest scope, which has the
-				// most often used variables
-				move = frame_find_var( first, frame->ptr->data, NO_RECURSE );
-
-				// didn't find it, start from top frame
-				if ( !move )
-					move = frame_find_var( frame, frame->ptr->data, RECURSE );
+				move = frame_find_var( frame, frame->ptr->data, RECURSE );
 
 				if ( move ){
 					frame_add_token( frame, move );
@@ -231,12 +204,6 @@ bool eval_frame_expr( stack_frame_t **frame_ret, stack_frame_t *first ){
 			break;
 
 		case TYPE_LAMBDA:
-			/*
-			foo = frame_alloc_token( frame );
-			foo->type = TYPE_PROCEDURE;
-			foo->down = frame->expr;
-			frame->value = foo;
-			*/
 			foo = expand_lambda( frame, frame->expr );
 			if ( foo ){
 				frame->value = foo;
@@ -301,9 +268,7 @@ bool eval_frame_expr( stack_frame_t **frame_ret, stack_frame_t *first ){
 			break;
 
 		default:
-
 			frame->error_call( frame, "[%s] Can't apply \"%s\"\n", __func__, type_str( frame->expr->type ));
-			//stack_trace( frame );
 			ret = true;
 			break;
 	}
