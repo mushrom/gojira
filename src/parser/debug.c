@@ -32,6 +32,7 @@ char *debug_strings[] = {
 
 	"external procedure",
 	"syntax",
+	"variable reference",
 	"If you see this something has gone terribly wrong",
 };
 

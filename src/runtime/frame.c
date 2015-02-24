@@ -16,33 +16,33 @@ struct global_builtin {
 	scheme_func  handle;
 } global_builtins[] = {
 	// core functions
-	{ "+",              builtin_add },
-	{ "*",              builtin_multiply },
-	{ "modulo",         builtin_modulo },
-	{ "modulo",         builtin_modulo },
-	{ "-",              builtin_subtract },
-	{ "/",              builtin_divide },
-	{ "display",        builtin_display },
-	{ "newline",        builtin_newline },
-	{ "stacktrace",     builtin_stacktrace },
-	{ "eq?",            builtin_equal },
-	{ "<",              builtin_lessthan },
-	{ ">",              builtin_greaterthan },
-	{ "car",            builtin_car },
-	{ "cdr",            builtin_cdr },
-	{ "cons",           builtin_cons },
-	{ "null?",          builtin_is_null },
-	{ "list?",          builtin_is_list },
-	{ "read-char",      builtin_read_char },
-	{ "intern-set",     builtin_intern_set },
-	{ "intern-set!",    builtin_intern_set_global },
-	{ "intern-sleep",   builtin_sleep },
+	{ "+",               builtin_add },
+	{ "*",               builtin_multiply },
+	{ "modulo",          builtin_modulo },
+	{ "modulo",          builtin_modulo },
+	{ "-",               builtin_subtract },
+	{ "/",               builtin_divide },
+	{ "display",         builtin_display },
+	{ "newline",         builtin_newline },
+	{ "stacktrace",      builtin_stacktrace },
+	{ "eq?",             builtin_equal },
+	{ "<",               builtin_lessthan },
+	{ ">",               builtin_greaterthan },
+	{ "car",             builtin_car },
+	{ "cdr",             builtin_cdr },
+	{ "cons",            builtin_cons },
+	{ "null?",           builtin_is_null },
+	{ "list?",           builtin_is_list },
+	{ "read-char",       builtin_read_char },
+	{ "intern-set",      builtin_intern_set },
+	{ "intern-set!",     builtin_intern_set_global },
+	{ "intern-sleep",    builtin_sleep },
 
 	// string functions
-	{ "string-append",  builtin_string_append },
-	{ "string-contains",builtin_string_contains },
-	{ "string->symbol", builtin_string_to_symbol },
-	{ "symbol->string", builtin_symbol_to_string },
+	{ "string-append",   builtin_string_append },
+	{ "string-contains", builtin_string_contains },
+	{ "string->symbol",  builtin_string_to_symbol },
+	{ "symbol->string",  builtin_symbol_to_string },
 };
 
 // Adds an "external function" to a frame, and handles registering the tokens for garbage collection
@@ -180,6 +180,7 @@ st_frame_t *frame_free( st_frame_t *frame ){
 	if ( frame ){
 		if ( frame->vars ){
 			move = frame->vars->base;
+			/*
 			foreach_in_list( move ){
 				var = move->data;
 				free( var->key );
@@ -187,6 +188,7 @@ st_frame_t *frame_free( st_frame_t *frame ){
 			}
 
 			list_free( frame->vars );
+			*/
 		}
 
 		free( frame );
@@ -315,7 +317,8 @@ variable_t *frame_add_var( st_frame_t *frame, char *key, token_t *token, bool re
 			add_var = true;
 		}
 
-		new_var->token = frame_register_token( frame, clone_token_tree( token ));
+		//new_var->token = frame_register_token( frame, clone_token_tree( token ));
+		new_var->token = clone_token_tree( token );
 
 		if ( add_var ){
 			list_add_data( frame->vars, new_var );

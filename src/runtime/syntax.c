@@ -9,8 +9,54 @@
 #include <stdbool.h>
 #include <string.h>
 
+bool has_symbol( token_t *tokens, char *sym ){
+	bool ret = false;
+	token_t *move;
+
+	move = tokens;
+	foreach_in_list( move ){
+		if ( move->type == TYPE_SYMBOL && strcmp( move->data, sym ) == 0 ){
+			ret = true;
+			break;
+		}
+	}
+
+	return ret;
+}
+
+token_t *compile_lambda( stack_frame_t *frame, token_t *args, token_t *tokens ){
+	token_t *ret = tokens;
+	token_t *temp;
+
+	if ( tokens ){
+		if ( tokens->type == TYPE_SYMBOL ){
+			if ( !has_symbol( args, tokens->data ) &&
+			      frame_find_var( frame, tokens->data, RECURSE )){
+
+				ret = alloc_token( );
+				ret->type = TYPE_VARIABLE_REF;
+				ret->next = tokens->next;
+				ret->down = NULL;
+				ret->data = frame_find_var_struct( frame, tokens->data, RECURSE );
+
+				printf( "[%s] add binding for \"%s\" here at %p\n", __func__, tokens->data, ret->data );
+
+				free_token( tokens );
+			}
+
+		} else if ( tokens->type != TYPE_QUOTED_TOKEN && tokens->type != TYPE_VECTOR ){
+			ret->down = compile_lambda( frame, args, tokens->down );
+		}
+
+		ret->next = compile_lambda( frame, args, ret->next );
+	}
+
+	return ret;
+}
+
 token_t *expand_lambda( stack_frame_t *frame, token_t *tokens ){
 	token_t *ret = alloc_token( );
+	token_t *temp;
 
 	procedure_t *proc = calloc( 1, sizeof( procedure_t ));;
 
@@ -21,8 +67,10 @@ token_t *expand_lambda( stack_frame_t *frame, token_t *tokens ){
 		return NULL;
 	}
 
+	temp = clone_tokens( tokens->next->next );
+
 	proc->args = tokens->next->down;
-	proc->body = tokens->next->next;
+	proc->body = compile_lambda( frame, proc->args, temp );
 	proc->bindings = NULL;
 
 	ret->type = TYPE_PROCEDURE;

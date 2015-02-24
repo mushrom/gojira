@@ -89,6 +89,8 @@
 	(display x)
 	(newline)))
 
+(define countdown)
+
 ; recursively counts down from a given number 
 (define countdown
   (lambda (x)
@@ -116,8 +118,7 @@
 		  ;(begin
           ((lambda ()
 			 (f count)
-			 (iter (seq count))
-             ))
+			 (iter (seq count))))
 		  count)))
 	(iter 1)))
 

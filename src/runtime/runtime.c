@@ -121,6 +121,11 @@ bool eval_frame_subexpr( stack_frame_t **frame_ret, stack_frame_t *first ){
 
 			break;
 
+		case TYPE_VARIABLE_REF:
+			frame_add_token( frame, ((variable_t *)frame->ptr->data)->token );
+			frame->ptr = frame->ptr->next;
+			break;
+
 		case TYPE_LAMBDA:
 			// TODO: have the garbage collector ignore read-only code
 			//       so that cloning it isn't necessary

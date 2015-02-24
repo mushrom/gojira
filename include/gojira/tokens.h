@@ -39,6 +39,7 @@ typedef enum {
 	// Types used by interpreter
 	TYPE_EXTERN_PROC,
 	TYPE_SYNTAX,
+	TYPE_VARIABLE_REF,
 } type_t;
 
 typedef struct token {
