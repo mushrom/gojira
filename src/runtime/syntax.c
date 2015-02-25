@@ -60,9 +60,21 @@ token_t *compile_lambda( stack_frame_t *frame, token_t *args, token_t *tokens ){
 	return ret;
 }
 
+void free_procedure( void *ptr ){
+	if ( ptr ){
+		procedure_t *proc = ptr;
+
+		printf( "[%s] Freeing procedure at %p\n", __func__, ptr );
+		free_tokens( proc->body );
+		free_tokens( proc->args );
+		free( proc );
+	}
+}
+
 token_t *expand_lambda( stack_frame_t *frame, token_t *tokens ){
 	token_t *ret = alloc_token( );
 	token_t *temp;
+	shared_t *shr;
 
 	procedure_t *proc = calloc( 1, sizeof( procedure_t ));;
 
@@ -75,12 +87,13 @@ token_t *expand_lambda( stack_frame_t *frame, token_t *tokens ){
 
 	temp = clone_tokens( tokens->next->next );
 
-	proc->args = tokens->next->down;
+	proc->args = clone_tokens( tokens->next->down );
 	proc->body = compile_lambda( frame, proc->args, temp );
-	proc->bindings = NULL;
+	shr = shared_new( proc, free_procedure );
 
 	ret->type = TYPE_PROCEDURE;
-	ret->data = proc;
+	ret->data = shr;
+	//ret->data = proc;
 
 	return ret;
 }
@@ -91,9 +104,12 @@ stack_frame_t *expand_procedure( stack_frame_t *frame, token_t *tokens ){
 	token_t *temp;
 	procedure_t *proc;
 	char *var_name;
+	shared_t *shr;
 
 	if ( tokens->type == TYPE_PROCEDURE ){
-		proc = tokens->data;
+		shr = tokens->data;
+		//proc = tokens->data;
+		proc = shared_get( shr );
 		move = tokens->next;
 		temp = proc->args;
 

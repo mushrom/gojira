@@ -53,6 +53,7 @@ st_frame_t *frame_free( st_frame_t *frame );
 token_t *frame_add_token( st_frame_t *frame, token_t *token );
 token_t *frame_add_token_noclone( st_frame_t *frame, token_t *token );
 token_t *frame_register_token( st_frame_t *frame, token_t *token );
+token_t *frame_register_tokens( st_frame_t *frame, token_t *token );
 token_t *frame_alloc_token( st_frame_t *frame );
 
 variable_t *frame_add_var( st_frame_t *frame, char *key, token_t *token, bool recurse );

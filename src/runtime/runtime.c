@@ -141,7 +141,8 @@ bool eval_frame_subexpr( stack_frame_t **frame_ret, stack_frame_t *first ){
 		case TYPE_LAMBDA:
 			// TODO: have the garbage collector ignore read-only code
 			//       so that cloning it isn't necessary
-			frame->expr = frame_add_token_noclone( frame, clone_tokens( frame->ptr ));
+			//frame->expr = frame_add_token_noclone( frame, clone_tokens( frame->ptr ));
+			frame->expr = frame_register_tokens( frame, clone_tokens( frame->ptr ));
 			//frame->expr = frame->ptr;
 			frame->ptr  = NULL;
 

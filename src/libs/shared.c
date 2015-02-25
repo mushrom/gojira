@@ -21,9 +21,9 @@ void *shared_get( shared_t *ptr ){
 
 shared_t *shared_aquire( shared_t *ptr ){
 	if ( ptr ){
+		ptr->references++;
 		printf( "[%s] Shared variable with data %p now has %d references\n",
 				__func__, ptr->data, ptr->references );
-		ptr->references++;
 	}
 
 	return ptr;

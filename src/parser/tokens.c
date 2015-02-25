@@ -152,7 +152,7 @@ token_t *remove_punc_tokens( token_t *tokens ){
 }
 
 bool has_shared_data( type_t type ){
-	return type == TYPE_VARIABLE_REF;
+	return type == TYPE_VARIABLE_REF || type == TYPE_PROCEDURE;
 }
 
 // Clones a single token
