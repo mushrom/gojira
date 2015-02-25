@@ -44,6 +44,10 @@ void print_avail( void ){
 
 void free_token( token_t *token ){
 	if ( token ){
+		if ( has_shared_data( token->type )){
+			shared_release( token->data );
+		}
+
 		if ( avail_tokens < MAX_TOKEN_CACHE ){
 			cache_token( token );
 

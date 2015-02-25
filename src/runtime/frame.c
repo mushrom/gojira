@@ -3,6 +3,7 @@
 #include <gojira/runtime/garbage.h>
 #include <gojira/parse_debug.h>
 #include <gojira/libs/hashmap.h>
+#include <gojira/libs/shared.h>
 
 #include <string.h>
 #include <stdlib.h>
@@ -86,6 +87,8 @@ void stack_trace( st_frame_t *frame ){
 	token_t *token = NULL;
 	list_node_t *vars;
 	variable_t *var;
+	shared_t *shr;
+
 	unsigned i, k, limit = 3;
 	int start = 0, m;
 
@@ -130,7 +133,8 @@ void stack_trace( st_frame_t *frame ){
 
 			k = 0;
 			foreach_in_list( vars ){
-				var = vars->data;
+				var = shared_get( vars->data );
+				//var = shr->data;
 				printf( "%s%*s", var->key, 16 - utf8len( var->key ), "" );
 
 				k = (k + 1) % 6;
@@ -175,20 +179,21 @@ st_frame_t *frame_create( st_frame_t *cur_frame, token_t *ptr ){
 
 st_frame_t *frame_free( st_frame_t *frame ){
 	list_node_t *move;
-	variable_t *var;
+	//variable_t *var;
 
 	if ( frame ){
 		if ( frame->vars ){
 			move = frame->vars->base;
-			/*
 			foreach_in_list( move ){
+				shared_release( move->data );
+				/*
 				var = move->data;
 				free( var->key );
 				free( var );
+				*/
 			}
 
 			list_free( frame->vars );
-			*/
 		}
 
 		free( frame );
@@ -242,13 +247,15 @@ variable_t *frame_find_var_struct_hash( st_frame_t *frame, unsigned hash, bool r
 	variable_t *ret = NULL;
 	list_node_t *temp;
 	variable_t *var;
+	shared_t *shr;
 
 	if ( frame ){
 		if ( frame->vars ){
 			// TODO: use hashmap here
 			temp = frame->vars->base;
 			foreach_in_list( temp ){
-				var = temp->data;
+				shr = temp->data;
+				var = shared_get( shr );
 
 				if ( hash == var->hash ){
 					ret = var;
@@ -262,6 +269,38 @@ variable_t *frame_find_var_struct_hash( st_frame_t *frame, unsigned hash, bool r
 
 		} else if ( recurse ){
 			ret = frame_find_var_struct_hash( frame->last, hash, recurse );
+		}
+	}
+
+	return ret;
+}
+
+shared_t *frame_find_shared_struct_hash( st_frame_t *frame, unsigned hash, bool recurse ){
+	shared_t *ret = NULL;
+	list_node_t *temp;
+	variable_t *var;
+	shared_t *shr;
+
+	if ( frame ){
+		if ( frame->vars ){
+			// TODO: use hashmap here
+			temp = frame->vars->base;
+			foreach_in_list( temp ){
+				shr = temp->data;
+				var = shared_get( shr );
+
+				if ( hash == var->hash ){
+					ret = shr;
+					break;
+				}
+			}
+
+			if ( !ret && recurse ){
+				ret = frame_find_shared_struct_hash( frame->last, hash, recurse );
+			}
+
+		} else if ( recurse ){
+			ret = frame_find_shared_struct_hash( frame->last, hash, recurse );
 		}
 	}
 
@@ -300,8 +339,28 @@ variable_t *frame_find_var_struct( st_frame_t *frame, char *key, bool recurse ){
 	return ret;
 }
 
+shared_t *frame_find_shared_struct( st_frame_t *frame, char *key, bool recurse ){
+	shared_t *ret = NULL;
+	unsigned hash;
+
+	hash = hash_string( key );
+	ret = frame_find_shared_struct_hash( frame, hash, recurse );
+
+	return ret;
+}
+
+void free_var( void *ptr ){
+	if ( ptr ){
+		variable_t *var = ptr;
+		printf( "[%s] Freeing variable with hash 0x%x\n", __func__, var->hash );
+		free_tokens( var->token );
+		free( var );
+	}
+}
+
 variable_t *frame_add_var( st_frame_t *frame, char *key, token_t *token, bool recurse ){
 	variable_t *new_var = NULL;
+	shared_t *new_shared = NULL;
 	bool add_var = false;
 
 	if ( frame ){
@@ -314,14 +373,19 @@ variable_t *frame_add_var( st_frame_t *frame, char *key, token_t *token, bool re
 			new_var = calloc( 1, sizeof( variable_t ));
 			new_var->key = strdup( key );
 			new_var->hash = hash_string( key );
+
+			new_shared = shared_new( new_var, free_var );
+
 			add_var = true;
+
+			printf( "[%s] Adding variable with hash 0x%x\n", __func__, new_var->hash );
 		}
 
 		//new_var->token = frame_register_token( frame, clone_token_tree( token ));
 		new_var->token = clone_token_tree( token );
 
 		if ( add_var ){
-			list_add_data( frame->vars, new_var );
+			list_add_data( frame->vars, new_shared );
 		}
 
 	} else {

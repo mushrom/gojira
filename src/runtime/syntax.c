@@ -3,6 +3,7 @@
 #include <gojira/runtime/builtin.h>
 #include <gojira/runtime/garbage.h>
 #include <gojira/parse_debug.h>
+#include <gojira/libs/shared.h>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -27,6 +28,7 @@ bool has_symbol( token_t *tokens, char *sym ){
 token_t *compile_lambda( stack_frame_t *frame, token_t *args, token_t *tokens ){
 	token_t *ret = tokens;
 	token_t *temp;
+	shared_t *shr;
 
 	if ( tokens ){
 		if ( tokens->type == TYPE_SYMBOL ){
@@ -37,7 +39,11 @@ token_t *compile_lambda( stack_frame_t *frame, token_t *args, token_t *tokens ){
 				ret->type = TYPE_VARIABLE_REF;
 				ret->next = tokens->next;
 				ret->down = NULL;
-				ret->data = frame_find_var_struct( frame, tokens->data, RECURSE );
+				//ret->data = frame_find_var_struct( frame, tokens->data, RECURSE );
+				//ret->data = frame_find_var_struct( frame, tokens->data, RECURSE );
+				shr = frame_find_shared_struct( frame, tokens->data, RECURSE );
+				ret->data = shared_aquire( shr );
+				//shr->references++;
 
 				printf( "[%s] add binding for \"%s\" here at %p\n", __func__, tokens->data, ret->data );
 

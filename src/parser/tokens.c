@@ -151,30 +151,38 @@ token_t *remove_punc_tokens( token_t *tokens ){
 	return ret;
 }
 
-// Clones every token reachable from the given token
-token_t *clone_tokens( token_t *tree ){
-	token_t *ret = NULL;
-
-	if ( tree ){
-		//ret = calloc( 1, sizeof( token_t ));
-		ret = alloc_token( );
-		*ret = *tree;
-		// TODO: copy tree->data depending on the type
-
-		ret->down = clone_tokens( tree->down );
-		ret->next = clone_tokens( tree->next );
-	}
-	
-	return ret;
+bool has_shared_data( type_t type ){
+	return type == TYPE_VARIABLE_REF;
 }
 
 // Clones a single token
 token_t *clone_token( token_t *token ){
 	token_t *ret = NULL;
 
-	if ( token ){
+	ret = alloc_token( );
+	*ret = *token;
+
+	if ( has_shared_data( token->type )){
+		ret->data = shared_aquire( token->data );
+	}
+	
+	return ret;
+}
+
+// Clones every token reachable from the given token
+token_t *clone_tokens( token_t *tree ){
+	token_t *ret = NULL;
+
+	if ( tree ){
+		//ret = calloc( 1, sizeof( token_t ));
+		/*
 		ret = alloc_token( );
-		*ret = *token;
+		*ret = *tree;
+		*/
+		ret = clone_token( tree );
+
+		ret->down = clone_tokens( tree->down );
+		ret->next = clone_tokens( tree->next );
 	}
 	
 	return ret;
@@ -186,8 +194,11 @@ token_t *clone_token_tree( token_t *tree ){
 
 	if ( tree ){
 		//ret = calloc( 1, sizeof( token_t ));
+		/*
 		ret = alloc_token( );
 		memcpy( ret, tree, sizeof( token_t ));
+		*/
+		ret = clone_token( tree );
 
 		ret->down = clone_tokens( tree->down );
 		ret->next = NULL;
@@ -201,8 +212,11 @@ token_t *clone_token_spine( token_t *tree ){
 	token_t *ret = NULL;
 
 	if ( tree ){
+		/*
 		ret = alloc_token( );
 		memcpy( ret, tree, sizeof( token_t ));
+		*/
+		ret = clone_token( tree );
 
 		ret->down = tree->down;
 		ret->next = clone_tokens( tree->next );

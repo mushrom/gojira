@@ -4,6 +4,8 @@
 extern "C" {
 #endif
 
+#include <stdbool.h>
+
 typedef enum {
 	TYPE_NULL,
 	TYPE_BOOLEAN,
@@ -67,6 +69,7 @@ token_t *dump_tokens( token_t *tokens );
 token_t *strip_token( token_t *tokens, type_t type );
 token_t *remove_punc_tokens( token_t *tokens );
 
+bool has_shared_data( type_t type );
 token_t *clone_token( token_t *token );
 token_t *clone_tokens( token_t *tree );
 token_t *clone_token_tree( token_t *tree );
