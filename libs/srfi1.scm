@@ -12,13 +12,14 @@
 (define gen_range
   (lambda (count start step)
 
-    (define iter
-      (lambda (i sum xs)
+    ;(define iter
+    (intern-set 'iter
+      (lambda (i accum xs)
         (if (not (eq? i count))
-          (cons sum
+          (cons accum
             (iter
               (+ i 1)
-              (+ sum step)
+              (+ accum step)
               '()))
           '())))
 
@@ -39,13 +40,13 @@
     (iter 0 start '())))
 
 (define any
-  (lambda (func xs)
-    (member? #t (map func xs))))
+  (lambda (fn xs)
+    (member? #t (map fn xs))))
 (define ∃ any)
 
 (define every
-  (lambda (func xs)
-    (not (member? #f (map func xs)))))
+  (lambda (fn xs)
+    (not (member? #f (map fn xs)))))
 (define ∀ every)
 
 (define assq

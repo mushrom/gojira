@@ -129,8 +129,10 @@ bool eval_frame_subexpr( stack_frame_t **frame_ret, stack_frame_t *first ){
 				//shr = frame->ptr->data;
 				shr = shared_aquire( frame->ptr->data );
 				var = shared_get( shr );
+				/*
 				printf( "[%s] shr at %p, var at %p, var token at %p\n",
 						__func__, shr, var, var->token );
+						*/
 				frame_add_token( frame, var->token );
 			}
 

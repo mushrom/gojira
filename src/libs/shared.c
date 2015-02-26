@@ -22,8 +22,10 @@ void *shared_get( shared_t *ptr ){
 shared_t *shared_aquire( shared_t *ptr ){
 	if ( ptr ){
 		ptr->references++;
+		/*
 		printf( "[%s] Shared variable with data %p now has %d references\n",
 				__func__, ptr->data, ptr->references );
+				*/
 	}
 
 	return ptr;
@@ -33,8 +35,10 @@ void shared_release( shared_t *ptr ){
 	if ( ptr && ptr->references ){
 		ptr->references--;
 
+		/*
 		printf( "[%s] Shared variable with data %p now has %d references\n",
 				__func__, ptr->data, ptr->references );
+				*/
 
 		if ( ptr->references == 0 ){
 			if ( ptr->dtor ){

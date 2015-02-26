@@ -112,7 +112,8 @@
 ; repeatedly perform a function for "times", using iteration
 (define for-iter
   (lambda (times f)
-	(define iter
+	;(define iter
+	(intern-set 'iter
 	  (lambda (count)
 		(if (<= count times)
 		  ;(begin
@@ -245,6 +246,7 @@
 	(print wut)
 
     (print "-== Squares of numbers from 1 to 30:")
-    (psquares 30)))
+    (psquares 30)
+    (countdown 10)))
 
 (main)

@@ -45,7 +45,7 @@ token_t *compile_lambda( stack_frame_t *frame, token_t *args, token_t *tokens ){
 				ret->data = shared_aquire( shr );
 				//shr->references++;
 
-				printf( "[%s] add binding for \"%s\" here at %p\n", __func__, tokens->data, ret->data );
+				//printf( "[%s] add binding for \"%s\" here at %p\n", __func__, tokens->data, ret->data );
 
 				free_token( tokens );
 			}
@@ -64,7 +64,7 @@ void free_procedure( void *ptr ){
 	if ( ptr ){
 		procedure_t *proc = ptr;
 
-		printf( "[%s] Freeing procedure at %p\n", __func__, ptr );
+		//printf( "[%s] Freeing procedure at %p\n", __func__, ptr );
 		free_tokens( proc->body );
 		free_tokens( proc->args );
 		free( proc );

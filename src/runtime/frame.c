@@ -352,7 +352,7 @@ shared_t *frame_find_shared_struct( st_frame_t *frame, char *key, bool recurse )
 void free_var( void *ptr ){
 	if ( ptr ){
 		variable_t *var = ptr;
-		printf( "[%s] Freeing variable with hash 0x%x\n", __func__, var->hash );
+		//printf( "[%s] Freeing variable with hash 0x%x\n", __func__, var->hash );
 		free_tokens( var->token );
 		free( var );
 	}
@@ -378,7 +378,7 @@ variable_t *frame_add_var( st_frame_t *frame, char *key, token_t *token, bool re
 
 			add_var = true;
 
-			printf( "[%s] Adding variable with hash 0x%x\n", __func__, new_var->hash );
+			//printf( "[%s] Adding variable with hash 0x%x\n", __func__, new_var->hash );
 		}
 
 		//new_var->token = frame_register_token( frame, clone_token_tree( token ));
