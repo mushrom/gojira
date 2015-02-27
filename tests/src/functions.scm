@@ -1,0 +1,15 @@
+(display ((lambda () 'test)))
+(newline)
+
+(((lambda (x)
+    (lambda (y)
+      (x y)))
+  (lambda (x)
+    (display 'foo)
+    (display x)
+    (newline)))
+ 'thing)
+
+(display ((lambda (foo)
+            (* foo foo)) 123))
+(newline)
