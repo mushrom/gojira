@@ -19,11 +19,14 @@ out/libgojira.o: ${OBJ}
 	@echo LD -r ${OBJ} -o $@
 	@${LD} -r ${OBJ} -o $@
 
-all: out/gojira
+.PHONY: all
+all: out/gojira test
 
 lib: out/libgojira.o
 
 clean:
 	-rm -rf out ${OBJ} ${MAINOBJ}
 
-.PHONY: all
+.PHONY: test
+test:
+	@cd tests; ./dotests.sh
