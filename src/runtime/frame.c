@@ -29,6 +29,7 @@ struct global_builtin {
 	{ "eq?",             builtin_equal },
 	{ "<",               builtin_lessthan },
 	{ ">",               builtin_greaterthan },
+	{ "begin",           builtin_return_last },
 	{ "car",             builtin_car },
 	{ "cdr",             builtin_cdr },
 	{ "cons",            builtin_cons },

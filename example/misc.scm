@@ -7,15 +7,6 @@
     ((_ sym)
      (intern-set 'sym 0))))
 
-; this will do until proper elipsis expansion is implemented...
-(define-syntax begin
-  (syntax-rules ()
-	((_ expr moar)
-	 ((lambda () expr (begin moar))))
-	((_ expr)
-	 expr)
-	((_) #f)))
-
 (define-syntax while
   (syntax-rules ()
 	((while condition body)
@@ -113,13 +104,11 @@
 (define for-iter
   (lambda (times f)
 	(define iter
-	;(intern-set 'iter
 	  (lambda (count)
 		(if (<= count times)
-		  ;(begin
-          ((lambda ()
+		  (begin
 			 (f count)
-			 (iter (seq count))))
+			 (iter (seq count)))
 		  count)))
 	(iter 1)))
 
@@ -163,20 +152,20 @@
         (if (null? x)
           x
           (if (list? (car x))
-            ((lambda ()
-               (display "(")
-               (iter (car x) (+ indent 4))
-               (if (null? (cdr x))
-                  (display ")")
-                  (display ") "))
-               (iter (cdr x) indent)))
-            ((lambda ()
-              ;(for indent (lambda (y) (display " ")))
+            (begin
+              (display "(")
+              (iter (car x) (+ indent 4))
+              (if (null? (cdr x))
+                (display ")")
+                (display ") "))
+              (iter (cdr x) indent))
+
+            (begin
               (display (car x))
               (if (null? (cdr x))
-                 #f
-                 (display " "))
-              (iter (cdr x) indent)))))))
+                #f
+                (display " "))
+              (iter (cdr x) indent))))))
 
     (display "(")
     (iter ls 0)
@@ -202,17 +191,17 @@
   (lambda (count)
     (if (eq? count 0)
       0
-      ((lambda ()
+      (begin
         (print "abc")
-        (qwerty (- count 1)))))))
+        (qwerty (- count 1))))))
 
 (define qwerty
   (lambda (count)
     (if (eq? count 0)
       0
-      ((lambda ()
+      (begin
         (print "qwerty")
-        (abc (- count 1)))))))
+        (abc (- count 1))))))
 
 (define meh
   (lambda (y)
@@ -229,12 +218,12 @@
 (define beer
   (lambda (x)
     (if (> x 0)
-      ((lambda ()
+      (begin
         (display x) (print " bottles of beer on the wall")
         (display x) (print " bottles of beer")
         (print "Take one down, pass it around")
         (display (- x 1)) (print " bottles of beer on the wall")
-        (beer (- x 1))))
+        (beer (- x 1)))
       #f)))
 
 ; The main function, used as the entry point
