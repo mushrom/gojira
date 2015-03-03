@@ -10,4 +10,23 @@
   (lambda ()
     (recurse-func 0))) 
 
+(intern-set 'qwerty
+  (lambda (num)
+    (display 'qwerty)
+    (newline)
+
+    (if (> num 0)
+      (abc (- num 1))
+      '())))
+
+(intern-set 'abc
+  (lambda (num)
+    (display 'abc)
+    (newline)
+
+    (if (> num 0)
+      (qwerty (- num 1))
+      '())))
+
 (recurse)
+(abc 10)
