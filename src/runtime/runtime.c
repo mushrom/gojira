@@ -130,7 +130,7 @@ bool eval_frame_subexpr( stack_frame_t **frame_ret, stack_frame_t *first ){
 				var = shared_get( shr );
 				frame_add_token( frame, var->token );
 
-				if ( move->type != TYPE_SYNTAX ){
+				if ( var->token->type != TYPE_SYNTAX ){
 					frame->ptr = frame->ptr->next;
 
 				} else {
