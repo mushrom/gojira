@@ -92,8 +92,8 @@ bool eval_frame_subexpr( stack_frame_t **frame_ret, stack_frame_t *first ){
 			break;
 
 		case TYPE_SYMBOL:
-			if ( frame->ptr->down ){
-				frame_add_token( frame, frame->ptr->down );
+			if ( *(char *)frame->ptr->data == ':' ){
+				frame_add_token( frame, frame->ptr );
 				frame->ptr = frame->ptr->next;
 
 			} else {
@@ -114,7 +114,6 @@ bool eval_frame_subexpr( stack_frame_t **frame_ret, stack_frame_t *first ){
 					frame->error_call( frame, "[%s] Error: undefined variable \"%s\"\n",
 							__func__, (char *)frame->ptr->data );
 
-					//stack_trace( frame );
 					ret = true;
 				}
 			}
