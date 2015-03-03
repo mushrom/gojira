@@ -112,8 +112,8 @@
 ; repeatedly perform a function for "times", using iteration
 (define for-iter
   (lambda (times f)
-	;(define iter
-	(intern-set 'iter
+	(define iter
+	;(intern-set 'iter
 	  (lambda (count)
 		(if (<= count times)
 		  ;(begin

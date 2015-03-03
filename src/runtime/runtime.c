@@ -126,18 +126,19 @@ bool eval_frame_subexpr( stack_frame_t **frame_ret, stack_frame_t *first ){
 				shared_t *shr;
 				variable_t *var;
 
-				//shr = frame->ptr->data;
 				shr = shared_aquire( frame->ptr->data );
 				var = shared_get( shr );
-				/*
-				printf( "[%s] shr at %p, var at %p, var token at %p\n",
-						__func__, shr, var, var->token );
-						*/
 				frame_add_token( frame, var->token );
+
+				if ( move->type != TYPE_SYNTAX ){
+					frame->ptr = frame->ptr->next;
+
+				} else {
+					for ( frame->ptr = frame->ptr->next; frame->ptr; frame->ptr = frame->ptr->next )
+						frame_add_token( frame, frame->ptr );
+				}
 			}
 
-			//frame_add_token( frame, ((variable_t *)frame->ptr->data)->token );
-			frame->ptr = frame->ptr->next;
 			break;
 
 		case TYPE_LAMBDA:
