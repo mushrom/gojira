@@ -10,3 +10,6 @@
 
 (display '(foo (bar ((baz faz)) hello) cool world))
 (newline)
+
+(display (list 1 2 (+ 1 2) (list 4 5 6) 'qwerty "foo"))
+(newline)

@@ -33,6 +33,7 @@ struct global_builtin {
 	{ "cdr",             builtin_cdr },
 	{ "cons",            builtin_cons },
 	{ "null?",           builtin_is_null },
+	{ "list",            builtin_list },
 	{ "list?",           builtin_is_list },
 	{ "read-char",       builtin_read_char },
 	{ "intern-set",      builtin_intern_set },

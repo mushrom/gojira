@@ -11,7 +11,6 @@
 token_t *ext_proc_token( scheme_func handle ){
 	token_t *ret = NULL;
 
-	//ret = calloc( 1, sizeof( token_t ));
 	ret = alloc_token( );
 
 	ret->data = handle;
@@ -25,7 +24,6 @@ token_t *builtin_add( stack_frame_t *frame ){
 	token_t *move;
 	int sum = 0;
 
-	//ret = calloc( 1, sizeof( token_t ));
 	ret = alloc_token( );
 	ret->type = TYPE_NUMBER;
 
@@ -37,7 +35,6 @@ token_t *builtin_add( stack_frame_t *frame ){
 		} else {
 			frame->error_call( frame, "[%s] Error: Bad argument type \"%s\"\n",
 					__func__, type_str( move->type ));
-			//printf( "[%s] Error: Bad argument type \"%s\"\n", __func__, type_str( move->type ));
 			break;
 		}
 	}
@@ -57,10 +54,6 @@ token_t *builtin_car( stack_frame_t *frame ){
 	} else {
 		frame->error_call( frame, "[%s] Bad argument type \"%s\"\n", __func__,
 				type_str( move->type ));
-		/*
-		printf( "[%s] Bad argument type \"%s\"\n", __func__, type_str( move->type ));
-		stack_trace( frame );
-		*/
 	}
 
 	return ret;
@@ -78,10 +71,6 @@ token_t *builtin_cdr( stack_frame_t *frame ){
 	} else {
 		frame->error_call( frame, "[%s] Bad argument type \"%s\"\n", __func__,
 				type_str( move->type ));
-		/*
-		printf( "[%s] Bad argument type \"%s\"\n", __func__, type_str( move->type ));
-		stack_trace( frame );
-		*/
 	}
 
 	return ret;
@@ -104,18 +93,10 @@ token_t *builtin_cons( stack_frame_t *frame ){
 
 		} else {
 			frame->error_call( frame, "[%s] Bad argument type \"%s\", expected list\n", __func__, type_str( move->next->type ));
-			/*
-			printf( "[%s] Bad argument type \"%s\", expected list\n", __func__, type_str( move->next->type ));
-			stack_trace( frame );
-			*/
 		}
 
 	} else {
 		frame->error_call( frame, "[%s] Expected 2 arguments, have %d\n", __func__, tokens_length( move ));
-		/*
-			printf( "[%s] Expected 2 arguments, have %d\n", __func__, tokens_length( move ));
-			stack_trace( frame );
-		*/
 	}
 
 	return ret;
@@ -126,7 +107,6 @@ token_t *builtin_divide( stack_frame_t *frame ){
 	token_t *move;
 	int sum = 1;
 
-	//ret = calloc( 1, sizeof( token_t ));
 	ret = alloc_token( );
 	ret->type = TYPE_NUMBER;
 
@@ -140,7 +120,6 @@ token_t *builtin_divide( stack_frame_t *frame ){
 				sum /= move->smalldata;
 
 			} else {
-				//printf( "[%s] Error: Bad argument type \"%s\"\n", __func__, type_str( move->type ));
 				frame->error_call( frame, "[%s] Error: Bad argument type \"%s\"\n", __func__, type_str( move->type ));
 				break;
 			}
@@ -156,7 +135,6 @@ token_t *builtin_display( stack_frame_t *frame ){
 	token_t *ret;
 	token_t *move;
 
-	//ret = calloc( 1, sizeof( token_t ));
 	ret = alloc_token( );
 	ret->type = TYPE_NULL;
 
@@ -174,7 +152,6 @@ token_t *builtin_equal( stack_frame_t *frame ){
 
 	token_t *op1, *op2;
 
-	//ret = calloc( 1, sizeof( token_t ));
 	ret = alloc_token( );
 	ret->type = TYPE_BOOLEAN;
 
@@ -193,7 +170,6 @@ token_t *builtin_equal( stack_frame_t *frame ){
 		}
 
 	} else {
-		//printf( "[%s] Error: Expected 2 arguments to \"eq?\"\n", __func__ );
 		frame->error_call( frame, "[%s] Error: Expected 2 arguments to \"eq?\"\n", __func__ );
 	}
 
@@ -208,7 +184,6 @@ token_t *builtin_greaterthan( stack_frame_t *frame ){
 
 	token_t *op1, *op2;
 
-	//ret = calloc( 1, sizeof( token_t ));
 	ret = alloc_token( );
 	ret->type = TYPE_BOOLEAN;
 
@@ -221,7 +196,6 @@ token_t *builtin_greaterthan( stack_frame_t *frame ){
 
 	} else {
 		frame->error_call( frame, "[%s] Error: Expected 2 arguments to \">\"\n", __func__ );
-		//printf( "[%s] Error: Expected 2 arguments to \">\"\n", __func__ );
 	}
 
 	ret->smalldata = val;
@@ -234,7 +208,6 @@ token_t *builtin_intern_set( stack_frame_t *frame ){
 	token_t *move;
 	token_t *var;
 
-	//ret = calloc( 1, sizeof( token_t ));
 	ret = alloc_token( );
 	ret->type = TYPE_NULL;
 
@@ -266,7 +239,6 @@ token_t *builtin_intern_set_global( stack_frame_t *frame ){
 	token_t *var;
 	st_frame_t *first;
 
-	//ret = calloc( 1, sizeof( token_t ));
 	ret = alloc_token( );
 	ret->type = TYPE_NULL;
 
@@ -317,7 +289,6 @@ token_t *builtin_is_null( stack_frame_t *frame ){
 	token_t *move;
 	bool val = false;
 
-	//ret = calloc( 1, sizeof( token_t ));
 	ret = alloc_token( );
 	ret->type = TYPE_BOOLEAN;
 
@@ -341,7 +312,6 @@ token_t *builtin_lessthan( stack_frame_t *frame ){
 
 	token_t *op1, *op2;
 
-	//ret = calloc( 1, sizeof( token_t ));
 	ret = alloc_token( );
 	ret->type = TYPE_BOOLEAN;
 
@@ -357,6 +327,17 @@ token_t *builtin_lessthan( stack_frame_t *frame ){
 	}
 
 	ret->smalldata = val;
+
+	return ret;
+}
+
+token_t *builtin_list( stack_frame_t *frame ){
+	token_t *move = frame->expr->next;
+	token_t *ret = NULL;
+
+	ret = alloc_token( );
+	ret->type = TYPE_LIST;
+	ret->down = move;
 
 	return ret;
 }
@@ -392,7 +373,6 @@ token_t *builtin_multiply( stack_frame_t *frame ){
 	token_t *move;
 	int sum = 1;
 
-	//ret = calloc( 1, sizeof( token_t ));
 	ret = alloc_token( );
 	ret->type = TYPE_NUMBER;
 
@@ -415,7 +395,6 @@ token_t *builtin_multiply( stack_frame_t *frame ){
 token_t *builtin_newline( stack_frame_t *frame ){
 	token_t *ret;
 
-	//ret = calloc( 1, sizeof( token_t ));
 	ret = alloc_token( );
 	ret->type = TYPE_NULL;
 
@@ -445,7 +424,6 @@ token_t *builtin_return_last( stack_frame_t *frame ){
 token_t *builtin_stacktrace( stack_frame_t *frame ){
 	token_t *ret;
 
-	//ret = calloc( 1, sizeof( token_t ));
 	ret = alloc_token( );
 	ret->type = TYPE_NULL;
 
@@ -469,7 +447,6 @@ token_t *builtin_subtract( stack_frame_t *frame ){
 	token_t *move;
 	int sum = 0;
 
-	//ret = calloc( 1, sizeof( token_t ));
 	ret = alloc_token( );
 	ret->type = TYPE_NUMBER;
 
