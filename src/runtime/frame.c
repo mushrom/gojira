@@ -41,6 +41,7 @@ struct global_builtin {
 	{ "intern-sleep",    builtin_sleep },
 	{ "true",            builtin_true },
 	{ "false",           builtin_false },
+	{ "load!",           builtin_load_global_file },
 
 	// string functions
 	{ "string-append",   builtin_string_append },

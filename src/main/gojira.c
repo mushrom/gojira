@@ -10,6 +10,7 @@
 #include <gojira/runtime/builtin.h>
 #include <gojira/runtime/garbage.h>
 #include <gojira/libs/stack.h>
+#include <gojira/runtime/files.h>
 #include <linenoise/linenoise.h>
 
 // Some function definitions used only in this file.
@@ -83,29 +84,7 @@ int main( int argc, char *argv[] ){
 			if ( interactive )
 				printf( "Have file \"%s\"\n", fname );
 
-			// Begin parsing the file
-			input_file = fopen( fname, "r" );
-			if ( input_file ){
-				buf = read_input_file( input_file );
-				fclose( input_file );
-
-				// generate a parse tree, and make sure all tokens are "clean" for the GC
-				tree = remove_punc_tokens( parse_tokens( lexerize( buf )));
-				gc_unmark( tree );
-
-				// Interpret the tree, if there is one
-				if ( tree ){
-					global_frame->ptr = tree;
-					eval_loop( global_frame, tree );
-					free_tokens( tree );
-				}
-
-				// Clean up the file buffer
-				free( buf );
-
-			} else {
-				perror( fname );
-			}
+            evaluate_file( global_frame, fname );
 		}
 	}
 
@@ -154,22 +133,6 @@ int main( int argc, char *argv[] ){
 // Displays the handy help message dialog
 void print_help( ){
 	printf( "Usage: gojira [-hi] [files]\n" );
-}
-
-// Allocates a buffer, reads the entire file into it, and returns the buffer
-char *read_input_file( FILE *fp ){
-	char *ret = NULL;
-	long size;
-
-	fseek( fp, 0, SEEK_END );
-	size = ftell( fp );
-	fseek( fp, 0, SEEK_SET );
-
-	ret = malloc( sizeof( char[ size + 1 ]));
-	fread( ret, 1, size, fp );
-	ret[size] = 0;
-
-	return ret;
 }
 
 // Allocates a buffer, reads a complete (meaning with matching parenthesis) statement into it,

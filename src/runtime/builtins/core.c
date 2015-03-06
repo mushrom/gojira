@@ -1,6 +1,7 @@
 #include <gojira/runtime/runtime.h>
 #include <gojira/runtime/garbage.h>
 #include <gojira/runtime/builtin.h>
+#include <gojira/runtime/files.h>
 #include <gojira/parse_debug.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -493,6 +494,37 @@ token_t *builtin_false( stack_frame_t *frame ){
 
 	} else {
 		frame->error_call( frame, "[%s] Error: Expected 2 arguments, but got %d\n",
+				__func__, frame->ntokens - 1 );
+	}
+
+	return ret;
+}
+
+token_t *builtin_load_global_file( stack_frame_t *frame ){
+	token_t *ret = NULL;
+	stack_frame_t *tempframe;
+	bool eval_return;
+
+	if ( frame->ntokens == 2 ){
+		if ( frame->expr->next->type == TYPE_STRING ){
+			tempframe = frame;
+			for ( ; tempframe->last; tempframe = tempframe->last );
+
+			eval_return = evaluate_file( tempframe, frame->expr->next->data );
+
+			ret = alloc_token( );
+			ret->type      = TYPE_BOOLEAN;
+			ret->smalldata = eval_return;
+
+		} else {
+			// bad type
+			frame->error_call( frame, "[%s] Error: Expected a string as the pathname, but got a %s\n",
+					__func__, type_str( frame->expr->next->type ));
+		}
+
+	} else {
+		// not enough tokens
+		frame->error_call( frame, "[%s] Error: Expected 1 argument, but have %d\n",
 				__func__, frame->ntokens - 1 );
 	}
 
