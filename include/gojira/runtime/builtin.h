@@ -42,6 +42,10 @@ token_t *builtin_string_to_symbol( stack_frame_t *frame );
 token_t *builtin_symbol_to_string( stack_frame_t *frame );
 token_t *builtin_string_contains( stack_frame_t *frame );
 
+// boolean functions
+token_t *builtin_true( stack_frame_t *frame );
+token_t *builtin_false( stack_frame_t *frame );
+
 // Functions for use by the interpreter's trampoline
 token_t *builtin_return_last( stack_frame_t *frame );
 token_t *builtin_return_first( stack_frame_t *frame );

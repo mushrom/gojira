@@ -470,3 +470,31 @@ token_t *builtin_subtract( stack_frame_t *frame ){
 
 	return ret;
 }
+
+token_t *builtin_true( stack_frame_t *frame ){
+	token_t *ret = NULL;
+
+	if ( frame->ntokens == 3 ){
+		ret = frame->expr->next;
+
+	} else {
+		frame->error_call( frame, "[%s] Error: Expected 2 arguments, but got %d\n",
+				__func__, frame->ntokens - 1 );
+	}
+
+	return ret;
+}
+
+token_t *builtin_false( stack_frame_t *frame ){
+	token_t *ret = NULL;
+
+	if ( frame->ntokens == 3 ){
+		ret = frame->expr->next->next;
+
+	} else {
+		frame->error_call( frame, "[%s] Error: Expected 2 arguments, but got %d\n",
+				__func__, frame->ntokens - 1 );
+	}
+
+	return ret;
+}

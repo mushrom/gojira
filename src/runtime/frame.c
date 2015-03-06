@@ -20,7 +20,6 @@ struct global_builtin {
 	{ "+",               builtin_add },
 	{ "*",               builtin_multiply },
 	{ "modulo",          builtin_modulo },
-	{ "modulo",          builtin_modulo },
 	{ "-",               builtin_subtract },
 	{ "/",               builtin_divide },
 	{ "display",         builtin_display },
@@ -40,6 +39,8 @@ struct global_builtin {
 	{ "intern-set",      builtin_intern_set },
 	{ "intern-set!",     builtin_intern_set_global },
 	{ "intern-sleep",    builtin_sleep },
+	{ "true",            builtin_true },
+	{ "false",           builtin_false },
 
 	// string functions
 	{ "string-append",   builtin_string_append },

@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <getopt.h>
 #include <gojira/lexer.h>
 #include <gojira/parser.h>
 #include <gojira/config.h>
