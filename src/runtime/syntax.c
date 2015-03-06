@@ -229,30 +229,6 @@ stack_frame_t *expand_procedure_old( stack_frame_t *frame, token_t *tokens ){
 	return ret;
 }
 
-token_t *expand_if_expr( stack_frame_t *frame, token_t *tokens ){
-	token_t *ret = NULL; 
-	token_t *move;
-	int len;
-
-	len = tokens_length( tokens );
-
-	if ( len == 4 ){
-
-		move = alloc_token( );
-		move->type = TYPE_IF;
-		move->down = clone_tokens( frame->ptr->next->next );
-		move->next = frame_register_token( frame, clone_token_tree( frame->ptr->next ));
-		gc_unmark( move );
-
-		ret = move;
-
-	} else {
-		frame->error_call( frame, "[%s] Error: If statement expected 4 tokens, but got %d\n", __func__, len );
-	}
-
-	return ret;
-}
-
 token_t *expand_syntax_rules( stack_frame_t *frame, token_t *tokens ){
 	token_t *ret = NULL;
 

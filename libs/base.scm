@@ -13,13 +13,23 @@
 ;   ∧ = U+2227
 ;   ∨ = U+2228
 
-
-(define-syntax define
+(intern-set 'define
   (syntax-rules ()
     ((_ sym def)
      (intern-set 'sym def))
     ((_ sym)
      (intern-set 'sym 0))))
+
+(define define-syntax define)
+
+(define-syntax if
+  (syntax-rules ()
+    ((_ condition a else b)
+     ((condition (lambda () a)
+                 (lambda () b))))
+    ((_ condition a b)
+     ((condition (lambda () a)
+                 (lambda () b))))))
 
 (define help "To see the gojira scheme tutorial, visit http:;example.com. To see the currently defined variables, try (stacktrace).")
 

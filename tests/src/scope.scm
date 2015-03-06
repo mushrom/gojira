@@ -1,6 +1,11 @@
 ; stress test for scoping rules
+(intern-set 'if
+  (syntax-rules ()
+    ((_ condition a b)
+     ((condition (lambda () a)
+                 (lambda () b)))))
 
-(define-syntax define
+(intern-set 'define
   (syntax-rules ()
     ((_ sym def)
      (intern-set 'sym def))

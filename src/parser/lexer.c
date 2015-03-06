@@ -204,12 +204,6 @@ static token_return_t get_token_from_str( char *string ){
 			     strcmp( temp, "function" ) == 0 || strcmp( temp, "func" ) == 0 ){
 				ret.token->type = TYPE_LAMBDA;
 
-			} else if ( strcmp( temp, "if" ) == 0 ){
-				ret.token->type = TYPE_IF;
-
-			} else if ( strcmp( temp, "define-syntax" ) == 0 ){
-				ret.token->type = TYPE_DEF_SYNTAX;
-
 			} else if ( strcmp( temp, "syntax-rules" ) == 0 ){
 				ret.token->type = TYPE_SYNTAX_RULES;
 			}

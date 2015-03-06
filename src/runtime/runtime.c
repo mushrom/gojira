@@ -141,19 +141,9 @@ bool eval_frame_subexpr( stack_frame_t **frame_ret, stack_frame_t *first ){
 			break;
 
 		case TYPE_LAMBDA:
-			// TODO: have the garbage collector ignore read-only code
-			//       so that cloning it isn't necessary
-			//frame->expr = frame_add_token_noclone( frame, clone_tokens( frame->ptr ));
-			frame->expr = frame_register_tokens( frame, clone_tokens( frame->ptr ));
-			//frame->expr = frame->ptr;
+			frame->expr = frame->ptr;
 			frame->ptr  = NULL;
 
-			break;
-
-		case TYPE_DEF_SYNTAX:
-			frame_add_token( frame, frame->ptr );
-			frame_add_token( frame, frame->ptr->next );
-			frame->ptr = frame->ptr->next->next;
 			break;
 
 		case TYPE_SYNTAX_RULES:
@@ -165,19 +155,6 @@ bool eval_frame_subexpr( stack_frame_t **frame_ret, stack_frame_t *first ){
 			frame_add_token_noclone( frame, move );
 
 			frame->ptr = NULL;
-			break;
-
-		case TYPE_IF:
-			move = expand_if_expr( frame, frame->ptr );
-
-			if ( move ){
-				frame_add_token_noclone( frame, move );
-				frame->ptr = move->next;
-
-			} else {
-				ret = true;
-			}
-
 			break;
 
 		case TYPE_QUOTED_TOKEN:
@@ -233,39 +210,6 @@ bool eval_frame_expr( stack_frame_t **frame_ret, stack_frame_t *first ){
 			}
 			break;
 
-		case TYPE_IF:
-			if ( frame->expr->next->type == TYPE_BOOLEAN
-					&& frame->expr->next->smalldata == false ){
-				foo = clone_token_tree( frame->expr->down->next );
-
-			} else {
-				foo = clone_token_tree( frame->expr->down );
-			}
-
-			frame_register_token( frame, foo );
-			frame->expr = frame->end = NULL;
-
-			if ( foo->type == TYPE_LIST ){
-				// If it's an expression, evaluate the tokens in the current frame.
-				// TODO: find a less hackish way to do this
-				frame->ptr = foo->down;
-
-			} else {
-				frame_add_token_noclone( frame, ext_proc_token( builtin_return_first ));
-				frame->ptr = foo;
-			}
-
-			apply = false;
-			break;
-
-		case TYPE_DEF_SYNTAX:
-			frame_add_var( frame->last, frame->expr->next->data, frame->expr->next->next, NO_RECURSE );
-
-			frame->value = frame_alloc_token( frame );
-			frame->value->type = TYPE_NULL;
-
-			break;
-
 		case TYPE_SYNTAX:
 			foo = expand_syntax_rules( frame, frame->expr );
 
@@ -283,6 +227,18 @@ bool eval_frame_expr( stack_frame_t **frame_ret, stack_frame_t *first ){
 
 			} else {
 				ret = true;
+			}
+
+			break;
+
+		case TYPE_BOOLEAN:
+			{
+				foo = ext_proc_token( frame->expr->smalldata? builtin_true : builtin_false );
+				frame_register_token( frame, foo );
+
+				foo->next = frame->expr->next;
+				frame->expr = foo;
+				apply = false;
 			}
 
 			break;
