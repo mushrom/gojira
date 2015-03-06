@@ -1,18 +1,4 @@
-; program to test the interpreter
-; (proper test suite coming soon(!))
-
-; quick unicode reference:
-;   ¬ = U+ac
-;   λ = U+3bb
-;   ∀ = U+2200
-;   ∁ = U+2201
-;   ∂ = U+2202
-;   ∃ = U+2203
-;   ∈ = U+2208
-;   ∑ = U+2211
-;   ∧ = U+2227
-;   ∨ = U+2228
-
+; necessary bits of the language that aren't implemented by the interpreter
 (intern-set 'define
   (syntax-rules ()
     ((_ sym def)
@@ -82,9 +68,7 @@
 
 (define print
   (lambda (x)
-    (if (list? x)
-      (pprint-list x)
-      (display x))
+    (display x)
 	(newline)))
 
 (define map
@@ -118,28 +102,24 @@
       0
       (seq (length (cdr ls))))))
 
-(define pprint-list
-  (lambda (ls)
-    (define iter
-      (lambda (x indent)
-        (if (null? x)
-          x
-          (if (list? (car x))
-            ((lambda ()
-               (display "(")
-               (iter (car x) (+ indent 4))
-               (if (null? (cdr x))
-                  (display ")")
-                  (display ") "))
-               (iter (cdr x) indent)))
-            ((lambda ()
-              ; (for indent (lambda (y) (display " ")))
-              (display (car x))
-              (if (null? (cdr x))
-                 #f
-                 (display " "))
-              (iter (cdr x) indent)))))))
+; A basic module system
+(define modules '("base"))
+(define modpath "./libs/")
 
-    (display "(")
-    (iter ls 0)
-    (display ")")))
+(define as_modpath
+  (lambda (name)
+    (string-append (string-append modpath name) ".scm")))
+
+(define load-module!
+  (lambda (modname)
+    (if (not (member? modname modules))
+      (if (load! (as_modpath modname))
+        (begin
+          (intern-set! 'modules (cons modname modules))
+          #t)
+        #f)
+      #f)))
+
+(define required-modules!
+  (lambda (modlist)
+    (map load-module! modlist)))

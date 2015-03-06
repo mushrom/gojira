@@ -503,6 +503,7 @@ token_t *builtin_false( stack_frame_t *frame ){
 token_t *builtin_load_global_file( stack_frame_t *frame ){
 	token_t *ret = NULL;
 	stack_frame_t *tempframe;
+	token_t *oldptr;
 	bool eval_return;
 
 	if ( frame->ntokens == 2 ){
@@ -510,7 +511,10 @@ token_t *builtin_load_global_file( stack_frame_t *frame ){
 			tempframe = frame;
 			for ( ; tempframe->last; tempframe = tempframe->last );
 
+			oldptr = tempframe->ptr;
 			eval_return = evaluate_file( tempframe, frame->expr->next->data );
+			tempframe->ptr = oldptr;
+			//frame->status = EVAL_STATUS_RUNNING;
 
 			ret = alloc_token( );
 			ret->type      = TYPE_BOOLEAN;

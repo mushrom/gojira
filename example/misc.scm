@@ -1,88 +1,9 @@
-; program to test the interpreter
-; (proper test suite coming soon(!))
-(define-syntax define
-  (syntax-rules ()
-    ((_ sym def)
-     (intern-set 'sym def))
-    ((_ sym)
-     (intern-set 'sym 0))))
+; A collection of random functions to test the interpreter
 
-(define-syntax while
-  (syntax-rules ()
-	((while condition body)
-	 (begin
-		(define loop
-		  (lambda ()
-			(if condition
-			  (begin
-				 body
-				 (loop))
-			  #f)))
-		(loop)))))
-
-(define help "To see the gojira scheme tutorial, visit http://example.com. To see the currently defined variables, try (stacktrace).")
-
-; Recursive factorial function
-(define fact
-  (lambda (x)
-    (if (> x 0)
-      (* x (fact (- x 1)))
-      1)))
-
-; Sequence function
-(define seq
-  (lambda (x)
-    (+ x 1)))
-
-(define not
-  (lambda (x)
-    (if x
-      #f
-      #t)))
-
-; TODO: Fix symbol clashes between procedures and macro expansion
-(define-syntax or
-  (syntax-rules ()
-    ((_ _op1_ _op2_)
-     (if _op1_
-       #t
-       (if _op2_
-         #t
-         #f)))))
-
-(define-syntax and
-  (syntax-rules ()
-    ((_ _op1_ _op2_)
-     (if _op1_
-       (if _op2_
-         #t
-         #f)
-       #f))))
-
-(define = eq?)
-
-(define <=
-  (lambda (a b)
-	(or
-	  (< a b)
-	  (eq? a b))))
-
-(define caar
-  (lambda (x)
-	(car (car x))))
-
-(define caaar
-  (lambda (x)
-	(car (caar x))))
-
-(define print
-  (lambda (x)
-	(display x)
-	(newline)))
-
-(define countdown)
+(required-modules! '("srfi1" "math"))
 
 ; recursively counts down from a given number 
+(define countdown)
 (define countdown
   (lambda (x)
     (display "T minus ")
@@ -112,11 +33,6 @@
 		  count)))
 	(iter 1)))
 
-; Square a number
-(define square
-  (lambda (x)
-    (* x x)))
-
 ; Sort of clear the terminal
 (define clear
   (lambda ()
@@ -143,42 +59,6 @@
 		(print (fact y))))))
 
 (define wut (fact 6))
-
-; print every element in a list
-(define asdf
-  (lambda (ls)
-    (define iter
-      (lambda (x indent)
-        (if (null? x)
-          x
-          (if (list? (car x))
-            (begin
-              (display "(")
-              (iter (car x) (+ indent 4))
-              (if (null? (cdr x))
-                (display ")")
-                (display ") "))
-              (iter (cdr x) indent))
-
-            (begin
-              (display (car x))
-              (if (null? (cdr x))
-                #f
-                (display " "))
-              (iter (cdr x) indent))))))
-
-    (display "(")
-    (iter ls 0)
-    (display ")")
-    (print "")))
-
-; Calculate the sum of a function with inputs from 1 to n.
-(define sum
-  (lambda (n f)
-    (if (> n 0)
-      (+ (f n)
-         (sum (- n 1) f))
-      0)))
 
 (define generator
   (lambda (x)
@@ -237,5 +117,4 @@
     (print "-== Squares of numbers from 1 to 30:")
     (psquares 30)
     (countdown 10)))
-
 (main)
