@@ -5,24 +5,49 @@
 #include <stdbool.h>
 #include <string.h>
 
+#include <gojira/libs/shared.h>
+#include <gojira/runtime/runtime.h>
+
 void print_token( token_t *token ){
+	procedure_t *proc;
+	shared_t *shr;
+
 	if ( token ){
 		switch ( token->type ){
 			case TYPE_NUMBER:
 				printf( "%d", token->smalldata );
 				break;
+
 			case TYPE_BOOLEAN:
 				printf( "#%c", (token->smalldata == true)? 't' : 'f' );
 				break;
+
 			case TYPE_STRING:
 			case TYPE_SYMBOL:
 				printf( "%s", (char *)token->data );
 				break;
+
 			case TYPE_LIST:
 				putchar( '(' );
 				dump_tokens( token->down );
 				putchar( ')' );
 				break;
+
+			case TYPE_PROCEDURE:
+				shr = token->data;
+				proc = shared_get( shr );
+
+				printf( "#<%s (", type_str( token->type ));
+				dump_tokens( proc->args );
+				printf( ") @ %p>", shr );
+
+				/* TODO: add some sort of debugging flag to print the body tokens
+				printf( "(" );
+				dump_tokens( proc->body );
+				printf( ")" );
+				*/
+				break;
+
 			default:
 				printf( "#<%s>", type_str( token->type ));
 				break;
