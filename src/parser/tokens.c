@@ -27,6 +27,10 @@ void print_token( token_t *token ){
 				printf( "%s", (char *)token->data );
 				break;
 
+			case TYPE_CHAR:
+				printf( "%c", token->smalldata );
+				break;
+
 			case TYPE_LIST:
 				putchar( '(' );
 				dump_tokens( token->down );
@@ -64,6 +68,11 @@ void print_token_no_recurse( token_t *token ){
 			case TYPE_BOOLEAN:
 				printf( "#%c", (token->smalldata == true)? 't' : 'f' );
 				break;
+
+			case TYPE_CHAR:
+				printf( "%c", token->smalldata );
+				break;
+
 			case TYPE_STRING:
 			case TYPE_SYMBOL:
 				printf( "%s", (char *)token->data );

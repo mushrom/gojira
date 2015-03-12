@@ -149,10 +149,10 @@ bool eval_frame_subexpr( stack_frame_t **frame_ret, stack_frame_t *first ){
 		case TYPE_SYNTAX_RULES:
 			move = alloc_token( );
 			move->type = TYPE_SYNTAX;
-			move->down = clone_tokens( frame->ptr );
+			move->down = frame->ptr;
 
 			frame_add_token_noclone( frame, ext_proc_token( builtin_return_first ));
-			frame_add_token_noclone( frame, move );
+			frame_add_token( frame, move );
 
 			frame->ptr = NULL;
 			break;
