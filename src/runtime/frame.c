@@ -48,6 +48,10 @@ struct global_builtin {
 	{ "string-contains", builtin_string_contains },
 	{ "string->symbol",  builtin_string_to_symbol },
 	{ "symbol->string",  builtin_symbol_to_string },
+
+	// vector functions
+	{ "vector?",         builtin_is_vector },
+	{ "vector-ref",      builtin_vector_ref },
 };
 
 // Adds an "external function" to a frame, and handles registering the tokens for garbage collection

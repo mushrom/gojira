@@ -20,6 +20,7 @@ token_t *alloc_token( void ){
 
 		ret->down = ret->gc_link = NULL;
 		ret->status = 0;
+		ret->flags = T_FLAG_NULL;
 		avail_tokens--;
 
 	} else {
@@ -44,8 +45,10 @@ void print_avail( void ){
 
 void free_token( token_t *token ){
 	if ( token ){
-		if ( has_shared_data( token->type )){
+		//if ( has_shared_data( token->type )){
+		if ( token->flags & T_FLAG_HAS_SHARED ){
 			shared_release( token->data );
+			//puts( "Got here, freed things, you know" );
 		}
 
 		if ( avail_tokens < MAX_TOKEN_CACHE ){

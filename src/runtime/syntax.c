@@ -4,6 +4,7 @@
 #include <gojira/runtime/garbage.h>
 #include <gojira/parse_debug.h>
 #include <gojira/libs/shared.h>
+#include <gojira/libs/dlist.h>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -37,15 +38,12 @@ token_t *compile_lambda( stack_frame_t *frame, token_t *args, token_t *tokens ){
 
 				ret = alloc_token( );
 				ret->type = TYPE_VARIABLE_REF;
+				ret->flags |= T_FLAG_HAS_SHARED;
 				ret->next = tokens->next;
 				ret->down = NULL;
-				//ret->data = frame_find_var_struct( frame, tokens->data, RECURSE );
-				//ret->data = frame_find_var_struct( frame, tokens->data, RECURSE );
+
 				shr = frame_find_shared_struct( frame, tokens->data, RECURSE );
 				ret->data = shared_aquire( shr );
-				//shr->references++;
-
-				//printf( "[%s] add binding for \"%s\" here at %p\n", __func__, tokens->data, ret->data );
 
 				free_token( tokens );
 			}
@@ -71,6 +69,20 @@ void free_procedure( void *ptr ){
 	}
 }
 
+void free_vector( void *ptr ){
+	if ( ptr ){
+		dlist_t *dlst = ptr;
+		unsigned i;
+
+		//printf( "[%s] Freeing vector at %p\n", __func__, ptr );
+
+		foreach_in_dlist( i, dlst ){
+			//printf( "[%s] Freeing vector element at %p\n", __func__, dlist_get( dlst, i ));
+			free_tokens( dlist_get( dlst, i ));
+		}
+	}
+}
+
 token_t *expand_lambda( stack_frame_t *frame, token_t *tokens ){
 	token_t *ret = alloc_token( );
 	token_t *temp;
@@ -93,7 +105,35 @@ token_t *expand_lambda( stack_frame_t *frame, token_t *tokens ){
 
 	ret->type = TYPE_PROCEDURE;
 	ret->data = shr;
+	ret->flags |= T_FLAG_HAS_SHARED;
 	//ret->data = proc;
+
+	return ret;
+}
+
+token_t *expand_vector( stack_frame_t *frame, token_t *tokens ){
+	token_t *ret = NULL;
+	token_t *foo;
+
+	if ( frame->ptr->down && frame->ptr->down->type == TYPE_LIST ){
+		foo = alloc_token( );
+		dlist_t *nlist = dlist_create( 0, 0 );
+		shared_t *shr = shared_new( nlist, free_vector );
+		token_t *temp = frame->ptr->down->down;
+
+		foo->type = TYPE_VECTOR;
+		foo->data = shr;
+		foo->flags |= T_FLAG_HAS_SHARED;
+
+		foreach_in_list( temp ){
+			dlist_add( nlist, clone_token_tree( temp ));
+		}
+
+		ret = foo;
+
+	} else {
+		frame->error_call( frame, "[%s] Error: Invalid vector syntax\n", __func__ );
+	}
 
 	return ret;
 }

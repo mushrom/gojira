@@ -44,12 +44,18 @@ typedef enum {
 	TYPE_VARIABLE_REF,
 } type_t;
 
+typedef enum {
+	T_FLAG_NULL       = 0,
+	T_FLAG_HAS_SHARED = 1,
+} token_flag_t;
+
 typedef struct token {
 	type_t type;
-
 	// Used for rule reduction while parsing, and for garbage status
 	// during runtime.
 	unsigned status;
+	// special flags about the token
+	token_flag_t flags;
 
 	// token data
 	union {

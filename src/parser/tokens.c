@@ -6,6 +6,7 @@
 #include <string.h>
 
 #include <gojira/libs/shared.h>
+#include <gojira/libs/dlist.h>
 #include <gojira/runtime/runtime.h>
 
 void print_token( token_t *token ){
@@ -50,6 +51,26 @@ void print_token( token_t *token ){
 				dump_tokens( proc->body );
 				printf( ")" );
 				*/
+				break;
+
+			case TYPE_VECTOR:
+				shr = token->data;
+
+				printf( "#(" );
+
+				if ( token->flags & T_FLAG_HAS_SHARED ){
+					dlist_t *foo = shared_get( shr );
+					unsigned i;
+
+					foreach_in_dlist( i, foo ){
+						if ( i > 0 )
+							putchar( ' ' );
+
+						dump_tokens( dlist_get( foo, i ));
+					}
+				}
+
+				printf( ")" );
 				break;
 
 			default:
@@ -196,7 +217,8 @@ token_t *clone_token( token_t *token ){
 	ret = alloc_token( );
 	*ret = *token;
 
-	if ( has_shared_data( token->type )){
+	//if ( has_shared_data( token->type )){
+	if ( token->flags & T_FLAG_HAS_SHARED ){ 
 		ret->data = shared_aquire( token->data );
 	}
 	

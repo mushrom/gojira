@@ -1,0 +1,7 @@
+#(a b c 1 2 3 :foo :bar (baz :que))
+#t
+#f
+:foo
+wut
+133
+#(:foo 123 wut)

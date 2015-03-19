@@ -162,6 +162,17 @@ bool eval_frame_subexpr( stack_frame_t **frame_ret, stack_frame_t *first ){
 			frame->ptr = frame->ptr->next;
 			break;
 
+		case TYPE_VECTOR:
+			move = expand_vector( frame, frame->ptr );
+
+			if ( move )
+				frame_add_token_noclone( frame, move );
+			else
+				ret = true;
+
+			frame->ptr = frame->ptr->next;
+			break;
+
 		default:
 			frame_add_token( frame, frame->ptr );
 			frame->ptr = frame->ptr->next;
