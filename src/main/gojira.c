@@ -20,7 +20,7 @@ char *read_with_parens( FILE *fp );
 
 int main( int argc, char *argv[] ){
 	int ret = 0;
-	char option;
+	signed char option;
 	int i = 0;
 	int lastopt = 0;
 	bool interactive = false;
