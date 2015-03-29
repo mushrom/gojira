@@ -4,3 +4,6 @@ Hello, world
 #f
 testing this
 testing
+testing"this \
+\\""\
+abc\d

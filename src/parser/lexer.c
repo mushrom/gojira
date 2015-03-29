@@ -118,24 +118,46 @@ static token_return_t get_token_from_str( char *string ){
 
 		// Check for strings
 		} else if ( *string == '"' ){
-			//ret.string = strchr( string + 1, '"' );
+			bool closed = false;
+			bool escaped = false;
 			ret.string = temp = string + 1;
-			for ( i = 0; temp[i] && temp[i] != '"'; i++ );
 
-			foo = malloc( sizeof( char[i + 1] ));
+			// Check to make sure the string is proper
+			for ( i = 0; temp[i] && (!escaped && temp[i] == '"') == false; i++ ){
+				if ( temp[i] == '\\' && !escaped ){
+					escaped = true;
+				} else {
+					escaped = false;
+				}
+			}
 
-			strncpy( foo, temp, i );
-			foo[i] = 0;
+			if ( temp[i] ){
+				unsigned n;
+				unsigned real_pos;
+				foo = malloc( sizeof( char[i + 1] ));
 
-			ret.token->data = foo;
+				// Copy the string to it's own buffer, while escaping characters
+				escaped = false;
+				for ( real_pos = n = 0; temp[n] && n < i; n++ ){
+					if ( temp[n] == '\\' && !escaped ){
+						escaped = true;
+					} else {
+						foo[real_pos] = temp[n];
+						escaped = false;
+						real_pos++;
+					}
+				}
 
-			if ( ret.string ){
+				foo[real_pos] = 0;
+
+				ret.token->data = foo;
 				ret.string += i + 1;
 				ret.token->type = TYPE_STRING;
 				ret.found = true;
 
 			} else {
-				//TODO: let the user know they done messed up
+				//TODO: keep track of where the current token is
+				printf( "[%s] Error: Unterminated string at $place\n", __func__ );
 			}
 
 		} else if ( *string == '#' ){

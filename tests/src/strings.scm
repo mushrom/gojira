@@ -15,3 +15,13 @@
 
 (display (symbol->string 'testing))
 (newline)
+
+; test string escapes
+(display "testing\"this \\")
+(newline)
+
+(display "\\\\\"\"\\")
+(newline)
+
+(display "\a\b\c\\d")
+(newline)
