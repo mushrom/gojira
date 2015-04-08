@@ -20,3 +20,14 @@
    foo)
  #(:foo 123 wut)))
 (newline)
+
+((lambda (foo)
+   (display foo)
+   (newline)
+
+   (display (vector-set! foo 2 '(a b c)))
+   (newline)
+
+   (display foo)
+   (newline))
+ #(:foo :bar :baz))

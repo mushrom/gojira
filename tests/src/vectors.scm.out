@@ -5,3 +5,6 @@
 wut
 133
 #(:foo 123 wut)
+#(:foo :bar :baz)
+#(:foo :bar (a b c))
+#(:foo :bar (a b c))

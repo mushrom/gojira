@@ -49,6 +49,7 @@ token_t *builtin_false( stack_frame_t *frame );
 // vector functions
 token_t *builtin_is_vector( stack_frame_t *frame );
 token_t *builtin_vector_ref( stack_frame_t *frame );
+token_t *builtin_vector_set( stack_frame_t *frame );
 
 // Functions for use by the interpreter's trampoline
 token_t *builtin_return_last( stack_frame_t *frame );

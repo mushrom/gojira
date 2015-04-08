@@ -52,6 +52,7 @@ struct global_builtin {
 	// vector functions
 	{ "vector?",         builtin_is_vector },
 	{ "vector-ref",      builtin_vector_ref },
+	{ "vector-set!",     builtin_vector_set },
 };
 
 // Adds an "external function" to a frame, and handles registering the tokens for garbage collection
