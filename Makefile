@@ -3,7 +3,7 @@ SRC+= ${wildcard src/runtime/builtins/*.c}
 MAINSRC = ${wildcard src/main/*.c} ${SRC} ${wildcard linenoise/linenoise.c}
 OBJ = ${SRC:.c=.o}
 MAINOBJ = ${MAINSRC:.c=.o}
-CFLAGS=-I"${shell pwd}"/include -I. -p -g -Wall -O3 -std=c11 -pedantic -D_DEFAULT_SOURCE
+CFLAGS=-I"${shell pwd}"/include -I. -g -Wall -O3 -std=c11 -pedantic -D_DEFAULT_SOURCE
 
 .c.o:
 	@echo CC -c $< -o $@
@@ -29,4 +29,4 @@ clean:
 
 .PHONY: test
 test:
-	@cd tests; ./dotests.sh
+	@cd tests; sh dotests.sh
