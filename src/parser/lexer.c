@@ -160,6 +160,12 @@ static token_return_t get_token_from_str( char *string ){
 				printf( "[%s] Error: Unterminated string at $place\n", __func__ );
 			}
 
+		// Check for comments
+		} else if ( *string == ';' || (*string == '#' && string[1] == '!')){
+			for ( i = 0; string[i] && string[i + 1] != '\n'; i++ );
+			ret = get_token_from_str( string + i + 1 );
+
+
 		} else if ( *string == '#' ){
 			/* could be either vector, boolean or character
 			 *
@@ -176,10 +182,18 @@ static token_return_t get_token_from_str( char *string ){
 
 			// Check for characters
 			} else if ( string[1] == '\\' && string[2] ){
-				ret.string = string + 3;
-				ret.token->type = TYPE_CHAR;
-				ret.token->smalldata = string[2];
-				ret.found = true;
+				if ( strncmp( string + 2, "newline", 7 ) == 0 ){
+					ret.string = string + 9;
+					ret.token->type = TYPE_CHAR;
+					ret.token->smalldata = '\n';
+					ret.found = true;
+
+				} else {
+					ret.string = string + 3;
+					ret.token->type = TYPE_CHAR;
+					ret.token->smalldata = string[2];
+					ret.found = true;
+				}
 
 			// Otherwise just leave everything
 			} else {
@@ -187,11 +201,6 @@ static token_return_t get_token_from_str( char *string ){
 				ret.token->type = TYPE_OCTOTHORPE;
 				ret.found = true;
 			}
-
-		// Check for comments
-		} else if ( *string == ';' ){
-			for ( i = 0; string[i] && string[i + 1] != '\n'; i++ );
-			ret = get_token_from_str( string + i + 1 );
 
 		// Check for numbers
 		} else if ( strchr( DIGITS, *string ) ||
