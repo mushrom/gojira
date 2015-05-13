@@ -17,7 +17,7 @@
      ((condition (lambda () a)
                  (lambda () b))))))
 
-(define help "To see the gojira scheme tutorial, visit http:;example.com. To see the currently defined variables, try (stacktrace).")
+(define help "To see the gojira scheme tutorial, visit https://example.com. To see the currently defined variables, try (stacktrace).")
 
 (define not
   (lambda (x)
@@ -104,13 +104,14 @@
 
 ; A basic module system
 (define modules '("base"))
-(define modpath "./libs/")
+;(define modpath "./libs/")
+(define modpath "")
 
 (define as_modpath
   (lambda (name)
     (string-append (string-append modpath name) ".scm")))
 
-(define load-module!
+(define import-mod!
   (lambda (modname)
     (if (not (member? modname modules))
       (if (load! (as_modpath modname))
@@ -120,6 +121,6 @@
         #f)
       #f)))
 
-(define required-modules!
+(define import!
   (lambda (modlist)
-    (map load-module! modlist)))
+    (map import-mod! modlist)))

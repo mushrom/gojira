@@ -74,6 +74,9 @@ int main( int argc, char *argv[] ){
 	global_frame = frame_create( NULL, NULL );
 	init_global_frame( global_frame );
 
+	// Load the 'base' library for needed primatives
+	evaluate_file( global_frame, BASE_LIB );
+
 	// If there were files passed, interpet them
 	if ( lastopt ){
 		for ( i = lastopt; i < argc; i++ ){
