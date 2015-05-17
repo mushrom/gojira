@@ -43,8 +43,6 @@ typedef struct stack_frame {
 } stack_frame_t;
 typedef stack_frame_t st_frame_t;
 
-typedef token_t *(*scheme_func)( stack_frame_t * );
-
 variable_t *global_add_func( st_frame_t *frame, char *name, scheme_func handle );
 st_frame_t *init_global_frame( st_frame_t *frame );
 st_frame_t *frame_create( st_frame_t *cur_frame, token_t *ptr );

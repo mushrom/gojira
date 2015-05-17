@@ -49,6 +49,11 @@ typedef enum {
 	T_FLAG_HAS_SHARED = 1,
 } token_flag_t;
 
+// stack_frame_t defined in include/gojira/runtime/frame.h
+typedef struct stack_frame stack_frame_t;
+typedef struct token token_t;
+typedef token_t *(*scheme_func)( stack_frame_t * );
+
 typedef struct token {
 	type_t type;
 	// Used for rule reduction while parsing, and for garbage status
@@ -61,6 +66,7 @@ typedef struct token {
 	union {
 		void *data;
 		unsigned smalldata;
+		scheme_func func;
 	};
 
 	struct token *next;

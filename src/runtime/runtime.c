@@ -194,7 +194,8 @@ bool eval_frame_expr( stack_frame_t **frame_ret, stack_frame_t *first ){
 
 	switch ( frame->expr->type ){
 		case TYPE_EXTERN_PROC:
-			handle = frame->expr->data;
+			//handle = frame->expr->data;
+			handle = frame->expr->func;
 
 			if ( handle )
 				frame->value = handle( frame );

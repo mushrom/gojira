@@ -118,7 +118,6 @@ static token_return_t get_token_from_str( char *string ){
 
 		// Check for strings
 		} else if ( *string == '"' ){
-			bool closed = false;
 			bool escaped = false;
 			ret.string = temp = string + 1;
 

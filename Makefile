@@ -7,7 +7,7 @@ CFLAGS=-I"${shell pwd}"/include -I. -g -Wall -O3 -std=c11 -pedantic -D_DEFAULT_S
 PREFIX=/
 
 .PHONY: all
-all: out/gojira test
+all: out/gojira
 
 include/gojira/config.h:
 	sed 's#SOME_PREFIX_HERE#${PREFIX}/share/gojira#' < include/gojira/config.h.tmp > include/gojira/config.h

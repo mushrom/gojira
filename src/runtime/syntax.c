@@ -28,7 +28,6 @@ bool has_symbol( token_t *tokens, char *sym ){
 
 token_t *compile_lambda( stack_frame_t *frame, token_t *args, token_t *tokens ){
 	token_t *ret = tokens;
-	token_t *temp;
 	shared_t *shr;
 
 	if ( tokens ){

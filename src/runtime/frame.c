@@ -96,7 +96,6 @@ void stack_trace( st_frame_t *frame ){
 	token_t *token = NULL;
 	list_node_t *vars;
 	variable_t *var;
-	shared_t *shr;
 
 	unsigned i, k, limit = 3;
 	int start = 0, m;

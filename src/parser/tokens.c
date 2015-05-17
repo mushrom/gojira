@@ -44,7 +44,7 @@ void print_token( token_t *token ){
 
 				printf( "#<%s (", type_str( token->type ));
 				dump_tokens( proc->args );
-				printf( ") @ %p>", shr );
+				printf( ") @ %p>", (void *)shr );
 
 				/* TODO: add some sort of debugging flag to print the body tokens
 				printf( "(" );

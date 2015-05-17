@@ -26,7 +26,6 @@ int main( int argc, char *argv[] ){
 	bool interactive = false;
 
 	char *fname = NULL;
-	FILE *input_file = NULL;
 
 	stack_frame_t *global_frame;
 	token_t *tree;
@@ -80,7 +79,6 @@ int main( int argc, char *argv[] ){
 	// If there were files passed, interpet them
 	if ( lastopt ){
 		for ( i = lastopt; i < argc; i++ ){
-			char *buf;
 			fname = argv[i];
 
 			// Let the user know what files are being interpreted, if in an REPL

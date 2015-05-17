@@ -14,7 +14,7 @@ token_t *ext_proc_token( scheme_func handle ){
 
 	ret = alloc_token( );
 
-	ret->data = handle;
+	ret->func = handle;
 	ret->type = TYPE_EXTERN_PROC;
 
 	return ret;
