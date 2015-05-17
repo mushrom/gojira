@@ -62,6 +62,11 @@ token_t *builtin_cons( stack_frame_t *frame );
 token_t *builtin_list( stack_frame_t *frame );
 token_t *builtin_load_global_file( stack_frame_t *frame );
 
+// File functions
+token_t *builtin_open( stack_frame_t *frame );
+token_t *builtin_readall( stack_frame_t *frame );
+token_t *builtin_writechar( stack_frame_t *frame );
+
 #ifdef __cplusplus
 }
 #endif

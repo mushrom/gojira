@@ -53,6 +53,11 @@ struct global_builtin {
 	{ "vector?",         builtin_is_vector },
 	{ "vector-ref",      builtin_vector_ref },
 	{ "vector-set!",     builtin_vector_set },
+
+	// file functions
+	{ "open",            builtin_open },
+	{ "readall",         builtin_readall },
+	{ "writechar",       builtin_writechar },
 };
 
 // Adds an "external function" to a frame, and handles registering the tokens for garbage collection

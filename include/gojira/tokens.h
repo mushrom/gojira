@@ -8,6 +8,8 @@ extern "C" {
 
 typedef enum {
 	TYPE_NULL,
+
+	// Basic types
 	TYPE_BOOLEAN,
 	TYPE_NUMBER,
 	TYPE_CHAR,
@@ -17,6 +19,7 @@ typedef enum {
 	TYPE_LIST,
 	TYPE_VECTOR,
 
+	// Punctuation
 	TYPE_OPEN_PAREN,
 	TYPE_CLOSE_PAREN,
 	TYPE_PERIOD,
@@ -38,10 +41,13 @@ typedef enum {
 	TYPE_QUOTED_TOKEN,
 	TYPE_PROCEDURE,
 
-	// Types used by interpreter
+	// Types used by interpreter for internal housekeeping
 	TYPE_EXTERN_PROC,
 	TYPE_SYNTAX,
 	TYPE_VARIABLE_REF,
+	TYPE_FILE,
+
+	TYPE_END,
 } type_t;
 
 typedef enum {
