@@ -84,6 +84,45 @@ token_t *builtin_readall( stack_frame_t *frame ){
 	return ret;
 }
 
+token_t *builtin_read_char( stack_frame_t *frame ){
+	token_t *ret = NULL;
+	FILE *fp;
+	shared_t *shr;
+	int c;
+
+	if ( frame->ntokens >= 2 ){
+		if ( frame->expr->next->type == TYPE_FILE ){
+			shr = frame->expr->next->data;
+			fp = shared_get( shr );
+
+			c = fgetc( fp );
+
+			if ( !feof( fp )){
+				ret = alloc_token( );
+				ret->type = TYPE_CHAR;
+				ret->smalldata = c; 
+
+			} else {
+				ret = alloc_token( );
+				ret->type = TYPE_BOOLEAN;
+				ret->smalldata = false;
+			}
+
+		} else {
+			frame->error_call( frame, "[%s] Expected file, but have %s\n",
+				__func__, type_str( frame->expr->next->type ));
+		}
+
+	} else {
+		//frame->error_call( frame, "[%s] Need moar tokenz\n", __func__ );
+		ret = alloc_token( );
+		ret->type = TYPE_CHAR;
+		ret->smalldata = getchar( );
+	}
+
+	return ret;
+}
+
 token_t *builtin_writechar( stack_frame_t *frame ){
 	token_t *ret = NULL;
 	FILE *fp;

@@ -4,7 +4,7 @@ MAINSRC = ${wildcard src/main/*.c} ${SRC} ${wildcard linenoise/linenoise.c}
 OBJ = ${SRC:.c=.o}
 MAINOBJ = ${MAINSRC:.c=.o}
 CFLAGS=-I"${shell pwd}"/include -I. -g -Wall -O3 -std=c11 -pedantic -D_DEFAULT_SOURCE
-PREFIX=/
+PREFIX=/usr/local
 
 .PHONY: all
 all: out/gojira

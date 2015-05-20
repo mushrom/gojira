@@ -404,16 +404,6 @@ token_t *builtin_newline( stack_frame_t *frame ){
 	return ret;
 }
 
-token_t *builtin_read_char( stack_frame_t *frame ){
-	token_t *ret = NULL;
-
-	ret = alloc_token( );
-	ret->type = TYPE_CHAR;
-	ret->smalldata = getchar( );
-
-	return ret;
-}
-
 token_t *builtin_return_first( stack_frame_t *frame ){
 	return frame->expr->next;
 }

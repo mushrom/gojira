@@ -35,19 +35,19 @@ struct global_builtin {
 	{ "null?",           builtin_is_null },
 	{ "list",            builtin_list },
 	{ "list?",           builtin_is_list },
-	{ "read-char",       builtin_read_char },
 	{ "intern-set",      builtin_intern_set },
 	{ "intern-set!",     builtin_intern_set_global },
 	{ "intern-sleep",    builtin_sleep },
 	{ "true",            builtin_true },
 	{ "false",           builtin_false },
-	{ "load!",           builtin_load_global_file },
 
 	// string functions
 	{ "string-append",   builtin_string_append },
 	{ "string-contains", builtin_string_contains },
 	{ "string->symbol",  builtin_string_to_symbol },
 	{ "symbol->string",  builtin_symbol_to_string },
+	{ "string",          builtin_char_to_string },
+	{ "string?",         builtin_is_string },
 
 	// vector functions
 	{ "vector?",         builtin_is_vector },
@@ -57,7 +57,9 @@ struct global_builtin {
 	// file functions
 	{ "open",            builtin_open },
 	{ "readall",         builtin_readall },
-	{ "writechar",       builtin_writechar },
+	{ "read-char",       builtin_read_char },
+	{ "write-char",      builtin_writechar },
+	{ "load!",           builtin_load_global_file },
 };
 
 // Adds an "external function" to a frame, and handles registering the tokens for garbage collection

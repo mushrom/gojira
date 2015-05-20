@@ -120,3 +120,64 @@ token_t *builtin_symbol_to_string( stack_frame_t *frame ){
 
 	return ret;
 }
+
+token_t *builtin_char_to_string( stack_frame_t *frame ){
+	token_t *ret = NULL;
+	token_t *move;
+	char *str = NULL;
+	unsigned len;
+	unsigned i;
+	bool all_char = true;
+
+	if ( frame->ntokens == 2 ){
+		if ( frame->expr->next->type == TYPE_LIST ){
+			move = frame->expr->next->down;
+			len = tokens_length( move );
+			str = malloc( sizeof( char[len + 1] ));
+
+			i = 0;
+			foreach_in_list( move ){
+				if ( move->type == TYPE_CHAR ){
+					str[i] = move->smalldata;
+					i++;
+
+				} else {
+					all_char = false;
+					break;
+				}
+			}
+
+			if ( all_char ){
+				str[i] = 0;
+				ret = alloc_token( );
+				ret->type = TYPE_STRING;
+				ret->data = str;
+			} else {
+				free( str );
+			}
+		} else {
+			frame->error_call( frame, "[%s] Expected list, but have %s\n",
+					__func__, type_str( frame->expr->next->type ));
+		}
+	} else {
+		frame->error_call( frame, "[%s] Expected 1 argument, but have %d\n",
+				__func__, frame->ntokens - 1 );
+	}
+
+	return ret;
+}
+
+token_t *builtin_is_string( stack_frame_t *frame ){
+	token_t *ret = NULL;
+
+	if ( frame->ntokens == 2 ){
+		ret = alloc_token( );
+		ret->type = TYPE_BOOLEAN;
+		ret->smalldata = frame->expr->next->type == TYPE_STRING;
+
+	} else {
+		frame->error_call( frame, "[%s] Need moar tokenz\n", __func__ );
+	}
+
+	return ret;
+}
