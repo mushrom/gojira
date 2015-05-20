@@ -43,6 +43,7 @@ token_t *builtin_symbol_to_string( stack_frame_t *frame );
 token_t *builtin_string_contains( stack_frame_t *frame );
 token_t *builtin_char_to_string( stack_frame_t *frame );
 token_t *builtin_is_string( stack_frame_t *frame );
+token_t *builtin_string_ref( stack_frame_t *frame );
 
 // boolean functions
 token_t *builtin_true( stack_frame_t *frame );

@@ -46,8 +46,9 @@ struct global_builtin {
 	{ "string-contains", builtin_string_contains },
 	{ "string->symbol",  builtin_string_to_symbol },
 	{ "symbol->string",  builtin_symbol_to_string },
-	{ "string",          builtin_char_to_string },
+	{ "list->string",    builtin_char_to_string },
 	{ "string?",         builtin_is_string },
+	{ "string-ref",      builtin_string_ref },
 
 	// vector functions
 	{ "vector?",         builtin_is_vector },

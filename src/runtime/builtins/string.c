@@ -38,6 +38,7 @@ token_t *builtin_string_append( stack_frame_t *frame ){
 
 	return ret;
 }
+
 token_t *builtin_string_contains( stack_frame_t *frame ){
 	token_t *ret = NULL;
 	token_t *op1, *op2;
@@ -174,6 +175,46 @@ token_t *builtin_is_string( stack_frame_t *frame ){
 		ret = alloc_token( );
 		ret->type = TYPE_BOOLEAN;
 		ret->smalldata = frame->expr->next->type == TYPE_STRING;
+
+	} else {
+		frame->error_call( frame, "[%s] Need moar tokenz\n", __func__ );
+	}
+
+	return ret;
+}
+
+token_t *builtin_string_ref( stack_frame_t *frame ){
+	token_t *ret = NULL;
+
+	if ( frame->ntokens == 3 ){
+		if ( frame->expr->next->type == TYPE_STRING ){
+			if ( frame->expr->next->next->type == TYPE_NUMBER ){
+				char *str = frame->expr->next->data;
+				unsigned n = frame->expr->next->next->smalldata;
+				unsigned len = strlen( str );
+
+				if ( n < len ){
+					ret = alloc_token( );
+					ret->type = TYPE_CHAR;
+					ret->smalldata = str[n];
+
+				} else {
+					frame->error_call( frame,
+						"[%s] Error: Index too large, string length is %u but index is %u\n",
+						__func__, len, n );
+				}
+
+			} else {
+				frame->error_call( frame,
+					"[%s] Expected number, but have %s\n",
+					__func__, type_str( frame->expr->next->next->type ));
+			}
+
+		} else {
+			frame->error_call( frame,
+				"[%s] Expected string, but have %s\n",
+				__func__, type_str( frame->expr->next->type ));
+		}
 
 	} else {
 		frame->error_call( frame, "[%s] Need moar tokenz\n", __func__ );
