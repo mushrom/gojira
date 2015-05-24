@@ -61,6 +61,10 @@ struct global_builtin {
 	{ "read-char",       builtin_read_char },
 	{ "write-char",      builtin_writechar },
 	{ "load!",           builtin_load_global_file },
+
+	{ "iterator",        builtin_iterator },
+	{ "iter-car",        builtin_iterator_access },
+	{ "iter-cdr",        builtin_iterator_next },
 };
 
 // Adds an "external function" to a frame, and handles registering the tokens for garbage collection

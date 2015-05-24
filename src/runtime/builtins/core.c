@@ -45,12 +45,106 @@ token_t *builtin_add( stack_frame_t *frame ){
 	return ret;
 }
 
+void iterator_free( void *ptr ){
+    iterator_t *iter = ptr;
+    printf( "[%s] Got here\n", __func__ );
+    shared_release( iter->procedure );
+    free( ptr );
+}
+
+token_t *builtin_iterator( stack_frame_t *frame ){
+    token_t *temp = frame->expr->next;
+    token_t *ret = NULL;
+    iterator_t *iter;
+
+    if ( frame->ntokens == 2 ){
+        if ( temp->type == TYPE_PROCEDURE ){
+            printf( "[%s] Got here, makin an iterator\n", __func__ );
+            iter = malloc( sizeof( iterator_t ));
+            iter->procedure = shared_aquire( temp->data );
+            iter->counter = 0;
+
+            ret = alloc_token( );
+            ret->type = TYPE_ITERATOR;
+            ret->flags = T_FLAG_HAS_SHARED;
+            ret->data = shared_new( iter, iterator_free );
+        }
+    }
+
+    return ret;
+}
+
+token_t *builtin_iterator_access( stack_frame_t *frame ){
+    token_t *ret = NULL;
+    token_t *temp = frame->expr->next;
+    token_t *proc;
+    token_t *num;
+    iterator_t *iter;
+    stack_frame_t *temp_frame;
+
+    if ( frame->ntokens == 2 ){
+        if ( temp->type == TYPE_ITERATOR ){
+            iter = shared_get( temp->data );
+            frame = calloc( 1, sizeof( stack_frame_t ));
+
+            num = alloc_token( );
+            num->type = TYPE_NUMBER;
+            num->smalldata = iter->counter;
+
+            proc = alloc_token( );
+            proc->type = TYPE_PROCEDURE;
+            proc->data = shared_aquire( iter->procedure );
+            proc->flags = T_FLAG_HAS_SHARED;
+            proc->next = num;
+
+            temp_frame = frame_create( NULL, proc );
+            eval_loop( temp_frame, NULL );
+
+            ret = temp_frame->value;
+            printf( "[%s] Got here, returning %p\n", __func__, ret );
+
+            /*
+            ret = alloc_token( );
+            ret->type = TYPE_NUMBER;
+            ret->smalldata = iter->counter;
+            */
+        }
+    }
+
+    return ret;
+}
+
+token_t *builtin_iterator_next( stack_frame_t *frame ){
+    token_t *ret = NULL;
+    token_t *temp = frame->expr->next;
+    iterator_t *iter, *other;
+
+    if ( frame->ntokens == 2 ){
+        if ( temp->type == TYPE_ITERATOR ){
+            other = shared_get( temp->data );
+
+            iter = malloc( sizeof( iterator_t ));
+            iter->counter = other->counter + 1;
+
+            ret = alloc_token( );
+            ret->type = TYPE_ITERATOR;
+            ret->flags = T_FLAG_HAS_SHARED;
+            ret->data = shared_new( iter, iterator_free );
+        }
+    }
+
+    return ret;
+}
+
 token_t *builtin_car( stack_frame_t *frame ){
 	token_t *move = frame->expr->next;
 	token_t *ret = move;
 
 	if ( move && move->type == TYPE_LIST && move->down ){
 		ret = move->down;
+
+    } else if ( move && move->type == TYPE_ITERATOR ){
+        ret = builtin_iterator_access( frame );
 
 	} else {
 		frame->error_call( frame, "[%s] Bad argument type \"%s\"\n", __func__,
@@ -68,6 +162,9 @@ token_t *builtin_cdr( stack_frame_t *frame ){
 		ret = alloc_token( );
 		ret->type = TYPE_LIST;
 		ret->down = move->down->next;
+
+    } else if ( move && move->type == TYPE_ITERATOR ){
+        ret = builtin_iterator_next( frame );
 
 	} else {
 		frame->error_call( frame, "[%s] Bad argument type \"%s\"\n", __func__,

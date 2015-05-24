@@ -46,6 +46,7 @@ typedef enum {
 	TYPE_SYNTAX,
 	TYPE_VARIABLE_REF,
 	TYPE_FILE,
+	TYPE_ITERATOR,
 
 	TYPE_END,
 } type_t;

@@ -8,6 +8,7 @@ extern "C" {
 #include <gojira/runtime/frame.h>
 #include <gojira/libs/list.h>
 #include <gojira/libs/hashmap.h>
+#include <gojira/libs/shared.h>
 #include <stdbool.h>
 
 typedef struct binding {
@@ -23,6 +24,11 @@ typedef struct procedure {
 
 	binding_t *bindings;
 } procedure_t;
+
+typedef struct iterator {
+	shared_t *procedure;
+	unsigned counter;
+} iterator_t;
 
 token_t *eval_loop( stack_frame_t *base, token_t *tokens );
 token_t *eval_loop_timed( stack_frame_t *base, token_t *tokens, unsigned limit );
