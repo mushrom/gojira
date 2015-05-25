@@ -28,6 +28,7 @@ typedef struct procedure {
 typedef struct iterator {
 	shared_t *procedure;
 	unsigned counter;
+	unsigned limit;
 } iterator_t;
 
 token_t *eval_loop( stack_frame_t *base, token_t *tokens );
