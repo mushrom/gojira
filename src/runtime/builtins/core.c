@@ -59,7 +59,6 @@ token_t *builtin_iterator( stack_frame_t *frame ){
 
 	if ( frame->ntokens == 2 ){
 		if ( temp->type == TYPE_PROCEDURE ){
-			printf( "[%s] Got here, makin an iterator\n", __func__ );
 			iter = malloc( sizeof( iterator_t ));
 			iter->procedure = shared_aquire( temp->data );
 			iter->counter = 0;
@@ -74,7 +73,6 @@ token_t *builtin_iterator( stack_frame_t *frame ){
 	} else if ( frame->ntokens == 3 ) {
 		if ( temp->type == TYPE_PROCEDURE ){
 			if ( temp->next->type == TYPE_NUMBER ){
-				printf( "[%s] Got here, makin an iterator with a limit\n", __func__ );
 				iter = malloc( sizeof( iterator_t ));
 				iter->procedure = shared_aquire( temp->data );
 				iter->counter = 0;

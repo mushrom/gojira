@@ -222,3 +222,31 @@ token_t *builtin_string_ref( stack_frame_t *frame ){
 
 	return ret;
 }
+
+token_t *builtin_string_length( stack_frame_t *frame ){
+	token_t *ret = NULL;
+	token_t *move;
+
+	if ( frame->ntokens == 2 ){
+		move = frame->expr->next;
+
+		if ( move->type == TYPE_STRING ){
+			ret = alloc_token( );
+			ret->type = TYPE_NUMBER;
+			ret->smalldata = strlen( move->data );
+
+		} else {
+			frame->error_call( frame,
+				"[%s] Error: Expected symbol as argument, but have \"%s\" and \"%s\"",
+				__func__,
+				type_str( move->type ));
+		}
+
+	} else {
+		frame->error_call( frame,
+			"[%s] Error: Expected 1 argument to \"string-length\"\n",
+			__func__ );
+	}
+
+	return ret;
+}

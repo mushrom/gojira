@@ -49,11 +49,13 @@ struct global_builtin {
 	{ "list->string",    builtin_char_to_string },
 	{ "string?",         builtin_is_string },
 	{ "string-ref",      builtin_string_ref },
+	{ "string-length",   builtin_string_length },
 
 	// vector functions
 	{ "vector?",         builtin_is_vector },
 	{ "vector-ref",      builtin_vector_ref },
 	{ "vector-set!",     builtin_vector_set },
+	{ "vector-length",   builtin_vector_length },
 
 	// file functions
 	{ "open",            builtin_open },

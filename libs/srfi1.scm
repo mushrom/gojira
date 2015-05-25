@@ -11,33 +11,14 @@
 
 (define gen_range
   (lambda (count start step)
-
-    ;(define iter
-    (intern-set 'iter
-      (lambda (i accum xs)
-        (if (not (eq? i count))
-          (cons accum
-            (iter
-              (+ i 1)
-              (+ accum step)
-              '()))
-          '())))
-
-    (iter 0 start '())))
-
-(define old_gen_range
-  (lambda (count start step)
-
-    (define iter
-      (lambda (i sum xs)
-        (if (not (eq? i count))
-          (iter
-            (+ i 1)
-            (+ sum step)
-            (append xs (cons sum '())))
-          xs)))
-
-    (iter 0 start '())))
+    (if (and (not (eq? start 0)) (not (eq? step 1)))
+      (iterator (lambda (n) (+ (* n step) start)) count)
+    (if (not (eq? start 0))
+      (iterator (lambda (n) (+ n start)) count)
+    (if (not (eq? step 1))
+      (iterator (lambda (n) (* n step)) count)
+     else
+      (iterator (lambda (n) n) count))))))
 
 (define any
   (lambda (fn xs)

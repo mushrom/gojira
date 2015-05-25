@@ -104,3 +104,34 @@ token_t *builtin_vector_set( stack_frame_t *frame ){
 
 	return ret;
 }
+
+token_t *builtin_vector_length( stack_frame_t *frame ){
+	token_t *ret = NULL;
+	token_t *move;
+	dlist_t *dlst;
+
+	if ( frame->ntokens == 2 ){
+		move = frame->expr->next;
+
+		if ( move->type == TYPE_VECTOR ){
+			dlst = shared_get( move->data );
+
+			ret = alloc_token( );
+			ret->type = TYPE_NUMBER;
+			ret->smalldata = dlist_used( dlst );
+
+		} else {
+			frame->error_call( frame,
+				"[%s] Error: Expected vector as argument, but have \"%s\"\n",
+				__func__,
+				type_str( move->type ));
+		}
+
+	} else {
+		frame->error_call( frame,
+			"[%s] Expected 1 argument, but have %d\n",
+			__func__, frame->ntokens - 1 );
+	}
+
+	return ret;
+}
