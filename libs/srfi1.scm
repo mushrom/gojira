@@ -38,3 +38,20 @@
 	  (if (eq? key (caar xs))
 		(car (cdr (car xs)))
 		(assq key (cdr xs))))))
+
+(define take)
+(define take
+  (lambda (x i)
+    (if (or (eq? i 0) (null? x))
+      '()
+     else
+      (cons (car x)
+            (take (cdr x) (- i 1))))))
+
+(define drop)
+(define drop
+  (lambda (x i)
+    (if (or (eq? i 0) (null? x))
+      x
+     else
+      (drop (cdr x) (- i 1)))))
