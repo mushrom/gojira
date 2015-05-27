@@ -13,9 +13,10 @@ To build
 - - - - -
 After cloning the repository,
 
-    make          # Use PREFIX=/.../ to set the install location, the default is /usr/local
-	make install  # PREFIX is needed for this too, if used
-	make test
+    ./configure   # the default prefix is /usr/local, use --prefix= to change it
+    make
+    make install
+    make test
     gojira
 
 To run a file,

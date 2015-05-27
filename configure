@@ -1,0 +1,56 @@
+#!/bin/dash
+
+CONF_PREFIX=/usr/local
+CONF_SYSROOT=
+CONF_GOJIRA_LIBDIR=
+
+# Parse the given options
+for arg in $@; do
+	OPT_KEY="`echo $arg | cut -d= -f1`"
+	OPT_VAL="`echo $arg | cut -d= -f2`"
+
+	case "$OPT_KEY" in
+		--prefix)
+			CONF_PREFIX="$OPT_VAL"
+			;;
+
+		--sysroot)
+			CONF_SYSROOT="$OPT_VAL"
+			;;
+
+		--help|-h)
+			cat <<- END_OF_HELP
+				This script sets configuration values for Gojira v0.0.1.
+
+				Options:
+				  -h, --help            Display this help message and exit.
+				      --prefix=[path]   Set the installation root to the given path.
+				      --sysroot=[path]  Set the path for the system root. This is prepended
+				                        to the PREFIX variable when copying files, and is
+				                        useful for cross-compiling, chroot installs, etc.
+			END_OF_HELP
+			exit 0
+			;;
+
+		*)
+			echo "Unknown option \"$OPT_KEY\""
+			exit 1
+	esac
+done;
+
+echo "PREFIX  = $CONF_PREFIX"
+echo "SYSROOT = $CONF_SYSROOT"
+echo "Full install path: $CONF_SYSROOT$CONF_PREFIX"
+
+# Write the options to the makefile
+echo "Generating makefile..."
+echo "PREFIX=$CONF_PREFIX"   >  Makefile
+echo "SYSROOT=$CONF_SYSROOT" >> Makefile
+cat Makefile.conf >> Makefile
+
+# Set flags in config.h
+echo "Generating config.h..."
+sed "s#SOME_PREFIX_HERE#$CONF_PREFIX/share/gojira#" < include/gojira/config.h.tmp > include/gojira/config.h
+
+# And we're finished
+echo "Done"
