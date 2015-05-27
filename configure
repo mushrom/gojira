@@ -1,8 +1,10 @@
-#!/bin/dash
+#!/bin/sh
 
 CONF_PREFIX=/usr/local
 CONF_SYSROOT=
 CONF_GOJIRA_LIBDIR=
+CONF_ENABLE_SOCKETS=1
+CONF_DEBUG=0
 
 # Parse the given options
 for arg in $@; do
@@ -32,8 +34,16 @@ for arg in $@; do
 			exit 0
 			;;
 
+		--disable-sockets)
+			CONF_ENABLE_SOCKETS=0
+			;;
+
+		--debug)
+			CONF_DEBUG=1
+			;;
+
 		*)
-			echo "Unknown option \"$OPT_KEY\""
+			echo "configure: error: Unknown option \"$OPT_KEY\""
 			exit 1
 	esac
 done;
@@ -51,6 +61,9 @@ cat Makefile.conf >> Makefile
 # Set flags in config.h
 echo "Generating config.h..."
 sed "s#SOME_PREFIX_HERE#$CONF_PREFIX/share/gojira#" < include/gojira/config.h.tmp > include/gojira/config.h
+echo "#define GOJIRA_ENABLE_SOCKETS $CONF_ENABLE_SOCKETS" >> include/gojira/config.h
+echo "#define GOJIRA_DEBUG $CONF_DEBUG" >> include/gojira/config.h
+echo "#endif" >> include/gojira/config.h
 
 # And we're finished
 echo "Done"
