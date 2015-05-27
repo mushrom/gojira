@@ -111,16 +111,16 @@
   (lambda (name)
     (string-append (string-append modpath name) ".scm")))
 
-(define import-mod!
+(define import!
   (lambda (modname)
     (if (not (member? modname modules))
-      (if (load! (as_modpath modname))
+      (if (load! (as_modpath (symbol->string modname)))
         (begin
           (intern-set! 'modules (cons modname modules))
           #t)
         #f)
       #f)))
 
-(define import!
+(define use!
   (lambda (modlist)
-    (map import-mod! modlist)))
+    (map import! modlist)))
