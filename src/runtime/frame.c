@@ -4,6 +4,7 @@
 #include <gojira/parse_debug.h>
 #include <gojira/libs/hashmap.h>
 #include <gojira/libs/shared.h>
+#include <gojira/config.h>
 
 #include <string.h>
 #include <stdlib.h>
@@ -67,6 +68,12 @@ struct global_builtin {
 	{ "iterator",        builtin_iterator },
 	{ "iter-car",        builtin_iterator_access },
 	{ "iter-cdr",        builtin_iterator_next },
+
+#if GOJIRA_ENABLE_SOCKETS
+	{ "tcp-socket",      builtin_tcp_socket },
+	{ "tcp-getchar",     builtin_tcp_getchar },
+	{ "tcp-putchar",     builtin_tcp_putchar },
+#endif
 };
 
 // Adds an "external function" to a frame, and handles registering the tokens for garbage collection

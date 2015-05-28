@@ -76,6 +76,10 @@ token_t *builtin_iterator_next( stack_frame_t *frame );
 token_t *builtin_iterator_access( stack_frame_t *frame );
 token_t *builtin_iterator( stack_frame_t *frame );
 
+token_t *builtin_tcp_socket( stack_frame_t *frame );
+token_t *builtin_tcp_getchar( stack_frame_t *frame );
+token_t *builtin_tcp_putchar( stack_frame_t *frame );
+
 #ifdef __cplusplus
 }
 #endif

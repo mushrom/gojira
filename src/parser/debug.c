@@ -35,6 +35,7 @@ char *debug_strings[] = {
 	"variable reference",
 	"file",
 	"iterator",
+	"socket",
 
 	"If you see this something has gone terribly wrong",
 };
