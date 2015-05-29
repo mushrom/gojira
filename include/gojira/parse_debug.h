@@ -5,6 +5,13 @@ extern "C" {
 #endif
 
 #include <gojira/tokens.h>
+#include <gojira/config.h>
+
+#if GOJIRA_DEBUG
+#define DEBUGP(format, ...) fprintf( stderr, format, __VA_ARGS__ );
+#else
+#define DEBUGP(format, ...) /* debug statement, format __VA_ARGS__ */;
+#endif
 
 char *type_str( type_t type );
 

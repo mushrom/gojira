@@ -7,7 +7,8 @@
 
 void iterator_free( void *ptr ){
 	iterator_t *iter = ptr;
-	printf( "[%s] Got here, %p\n", __func__, ptr );
+	//printf( "[%s] Got here, %p\n", __func__, ptr );
+	DEBUGP( "[%s] Got here, %p\n", __func__, ptr );
 	shared_release( iter->procedure );
 	free( ptr );
 }
@@ -28,6 +29,8 @@ token_t *builtin_iterator( stack_frame_t *frame ){
 			ret->type = TYPE_ITERATOR;
 			ret->flags = T_FLAG_HAS_SHARED;
 			ret->data = shared_new( iter, iterator_free );
+
+			DEBUGP( "[%s] Returning new iterator at %p (%p)\n", __func__, ret->data, iter );
 		}
 
 	} else if ( frame->ntokens == 3 ) {
@@ -42,6 +45,8 @@ token_t *builtin_iterator( stack_frame_t *frame ){
 				ret->type = TYPE_ITERATOR;
 				ret->flags = T_FLAG_HAS_SHARED;
 				ret->data = shared_new( iter, iterator_free );
+				DEBUGP( "[%s] Returning new iterator with limit %d at %p (%p)\n",
+					__func__, iter->limit, ret->data, iter );
 			}
 		}
 	}
@@ -57,6 +62,8 @@ token_t *builtin_iterator_access( stack_frame_t *frame ){
 	iterator_t *iter;
 	stack_frame_t *temp_frame;
 	stack_frame_t *foo_frame;
+
+	DEBUGP( "[%s] Got here\n", __func__ );
 
 	if ( frame->ntokens == 2 ){
 		if ( temp->type == TYPE_ITERATOR ){
@@ -76,6 +83,7 @@ token_t *builtin_iterator_access( stack_frame_t *frame ){
 			foo_frame = frame_create( NULL, NULL );
 			temp_frame = frame_create( foo_frame, proc );
 			eval_loop( temp_frame, NULL );
+
 			ret = foo_frame->expr;
 		}
 	}
@@ -87,6 +95,8 @@ token_t *builtin_iterator_next( stack_frame_t *frame ){
 	token_t *ret = NULL;
 	token_t *temp = frame->expr->next;
 	iterator_t *iter, *other;
+
+	DEBUGP( "[%s] Got here\n", __func__ );
 
 	if ( frame->ntokens == 2 ){
 		if ( temp->type == TYPE_ITERATOR ){
@@ -102,6 +112,7 @@ token_t *builtin_iterator_next( stack_frame_t *frame ){
 				ret->type = TYPE_ITERATOR;
 				ret->flags = T_FLAG_HAS_SHARED;
 				ret->data = shared_new( iter, iterator_free );
+				DEBUGP( "[%s] Returning new iterator at %p (%p)\n", __func__, ret->data, iter );
 
 			} else {
 				ret = alloc_token( );

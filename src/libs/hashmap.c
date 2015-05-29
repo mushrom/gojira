@@ -59,7 +59,7 @@ void hashmap_remove( hashmap_t *map, unsigned hash ){
 		list_remove_node( node );
 }
 
-unsigned hash_string( char *str ){
+unsigned hash_string_old( char *str ){
 	unsigned ret = 0, i;
 
 	for ( i = 0; str[i]; i++ ){
@@ -68,4 +68,16 @@ unsigned hash_string( char *str ){
 	}
 
 	return ret;
+}
+
+// djb2 hash function, see http://www.cse.yorku.ca/~oz/hash.html
+unsigned hash_string( char *str ){
+	unsigned hash = 5381;
+	int c;
+
+	while (( c = *str++ )){
+		hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+	}
+
+	return hash;
 }
