@@ -36,6 +36,7 @@ Currently supports:
 
 - basic scheme interpreting with some standard operators (+, -, display, null?, etc)
 - garbage collection
+- Tail call elimination
 - utf8 variable names
 - (incomplete) macros/syntax extensions
 - iterators
@@ -43,6 +44,5 @@ Currently supports:
 
 Coming soon:
 
-- Tail call elimination
 - First-class continuations
 - External (C function) linking
