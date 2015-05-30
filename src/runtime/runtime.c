@@ -122,11 +122,9 @@ bool eval_frame_subexpr( stack_frame_t **frame_ret, stack_frame_t *first ){
 
 		case TYPE_VARIABLE_REF:
 			{
-				shared_t *shr;
 				variable_t *var;
 
-				shr = shared_aquire( frame->ptr->data );
-				var = shared_get( shr );
+				var = shared_get( frame->ptr->data );
 				frame_add_token( frame, var->token );
 
 				if ( var->token->type != TYPE_SYNTAX ){

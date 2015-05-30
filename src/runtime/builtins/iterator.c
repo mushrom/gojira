@@ -1,5 +1,6 @@
 #include <gojira/runtime/runtime.h>
 #include <gojira/runtime/builtin.h>
+#include <gojira/runtime/garbage.h>
 #include <gojira/parse_debug.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -83,6 +84,10 @@ token_t *builtin_iterator_access( stack_frame_t *frame ){
 			foo_frame = frame_create( NULL, NULL );
 			temp_frame = frame_create( foo_frame, proc );
 			eval_loop( temp_frame, NULL );
+
+			gc_mark( foo_frame->expr );
+			gc_sweep( foo_frame->heap );
+			frame_free( foo_frame );
 
 			ret = foo_frame->expr;
 		}
