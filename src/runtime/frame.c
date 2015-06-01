@@ -273,8 +273,6 @@ token_t *frame_add_token_noclone( st_frame_t *frame, token_t *token ){
 
 variable_t *frame_find_var_struct_hash( st_frame_t *frame, unsigned hash, bool recurse ){
 	variable_t *ret = NULL;
-	list_node_t *temp;
-	variable_t *var;
 	shared_t *shr;
 
 	if ( frame ){
@@ -298,9 +296,6 @@ variable_t *frame_find_var_struct_hash( st_frame_t *frame, unsigned hash, bool r
 
 shared_t *frame_find_shared_struct_hash( st_frame_t *frame, unsigned hash, bool recurse ){
 	shared_t *ret = NULL;
-	list_node_t *temp;
-	variable_t *var;
-	shared_t *shr;
 
 	if ( frame ){
 		if ( frame->vars ){
@@ -363,7 +358,7 @@ shared_t *frame_find_shared_struct( st_frame_t *frame, char *key, bool recurse )
 void free_var( void *ptr ){
 	if ( ptr ){
 		variable_t *var = ptr;
-		printf( "[%s] Freeing variable with hash 0x%x\n", __func__, var->hash );
+		//printf( "[%s] Freeing variable with hash 0x%x\n", __func__, var->hash );
 		free_tokens( var->token );
 		free( var );
 	}
