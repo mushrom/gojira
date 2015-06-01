@@ -6,6 +6,7 @@ extern "C" {
 
 #include <gojira/tokens.h>
 #include <gojira/libs/list.h>
+#include <gojira/libs/hashmap.h>
 #include <gojira/libs/shared.h>
 #include <stdbool.h>
 
@@ -30,7 +31,8 @@ typedef struct stack_frame {
 	token_t *ret;         // pointer to original place in code (return position)
 	token_t *ptr;         // pointer to next token to evaluate
 
-	list_head_t *vars;    // Variable list, acts as the scope
+	//list_head_t *vars;    // Variable list, acts as the scope
+	hashmap_t *vars;    // Variable list, acts as the scope
 	token_t *expr;        // Token list built during evaluation
 	token_t *end;         // Last token in the expression
 	unsigned ntokens;     // Number of tokens in expr

@@ -117,6 +117,7 @@ void stack_trace( st_frame_t *frame ){
 	token_t *token = NULL;
 	list_node_t *vars;
 	variable_t *var;
+	hashmap_t *map;
 
 	unsigned i, k, limit = 3;
 	int start = 0, m;
@@ -124,14 +125,7 @@ void stack_trace( st_frame_t *frame ){
 	printf( "[stack trace]\n" );
 	for ( move = frame, i = 0; move; move = move->last, i++ ){
 		printf( "[%u] ", i );
-
 		token = move->expr;
-
-		if ( move->vars )
-			vars = move->vars->base;
-		else
-			vars = NULL;
-
 		start = move->ntokens - limit;
 
 		k = m = 0;
@@ -156,19 +150,22 @@ void stack_trace( st_frame_t *frame ){
 		}
 
 		printf( "\n" );
+		map = move->vars;
 
-		if ( vars ){
+		if ( map ){
 			printf( " `- has variables:\n    " );
-
 			k = 0;
-			foreach_in_list( vars ){
-				var = shared_get( vars->data );
-				//var = shr->data;
-				printf( "%s%*s", var->key, 16 - utf8len( var->key ), "" );
 
-				k = (k + 1) % 6;
-				if ( !k )
-					printf( "\n    " );
+			for ( m = 0; m < map->nbuckets; m++ ){
+				vars = map->buckets[m].base;
+				foreach_in_list( vars ){
+					var = shared_get( vars->data );
+					printf( "%s%*s", var->key, 16 - utf8len( var->key ), "" );
+
+					k = (k + 1) % 6;
+					if ( !k )
+						printf( "\n    " );
+				}
 			}
 
 			printf( "\n" );
@@ -207,22 +204,24 @@ st_frame_t *frame_create( st_frame_t *cur_frame, token_t *ptr ){
 }
 
 st_frame_t *frame_free( st_frame_t *frame ){
-	list_node_t *move;
-	//variable_t *var;
+	list_node_t *move, *temp;
+	hashmap_t *map;
+	unsigned i;
 
 	if ( frame ){
 		if ( frame->vars ){
-			move = frame->vars->base;
-			foreach_in_list( move ){
-				shared_release( move->data );
-				/*
-				var = move->data;
-				free( var->key );
-				free( var );
-				*/
+			map = frame->vars;
+			for ( i = 0; i < map->nbuckets; i++ ){
+				move = map->buckets[i].base;
+
+				for ( ; move; move = temp ){
+					temp = move->next;
+					shared_release( move->data );
+					free( move );
+				}
 			}
 
-			list_free( frame->vars );
+			hashmap_free( frame->vars );
 		}
 
 		free( frame );
@@ -280,16 +279,9 @@ variable_t *frame_find_var_struct_hash( st_frame_t *frame, unsigned hash, bool r
 
 	if ( frame ){
 		if ( frame->vars ){
-			// TODO: use hashmap here
-			temp = frame->vars->base;
-			foreach_in_list( temp ){
-				shr = temp->data;
-				var = shared_get( shr );
-
-				if ( hash == var->hash ){
-					ret = var;
-					break;
-				}
+			shr = hashmap_get( frame->vars, hash );
+			if ( shr ){
+				ret = shared_get( shr );
 			}
 
 			if ( !ret && recurse ){
@@ -312,17 +304,7 @@ shared_t *frame_find_shared_struct_hash( st_frame_t *frame, unsigned hash, bool 
 
 	if ( frame ){
 		if ( frame->vars ){
-			// TODO: use hashmap here
-			temp = frame->vars->base;
-			foreach_in_list( temp ){
-				shr = temp->data;
-				var = shared_get( shr );
-
-				if ( hash == var->hash ){
-					ret = shr;
-					break;
-				}
-			}
+			ret = hashmap_get( frame->vars, hash );
 
 			if ( !ret && recurse ){
 				ret = frame_find_shared_struct_hash( frame->last, hash, recurse );
@@ -381,7 +363,7 @@ shared_t *frame_find_shared_struct( st_frame_t *frame, char *key, bool recurse )
 void free_var( void *ptr ){
 	if ( ptr ){
 		variable_t *var = ptr;
-		//printf( "[%s] Freeing variable with hash 0x%x\n", __func__, var->hash );
+		printf( "[%s] Freeing variable with hash 0x%x\n", __func__, var->hash );
 		free_tokens( var->token );
 		free( var );
 	}
@@ -394,7 +376,8 @@ variable_t *frame_add_var( st_frame_t *frame, char *key, token_t *token, bool re
 
 	if ( frame ){
 		if ( !frame->vars )
-			frame->vars = list_create( 0 );
+			//frame->vars = list_create( 0 );
+			frame->vars = hashmap_create( 8 );
 
 		new_var = frame_find_var_struct( frame, key, recurse );
 
@@ -414,7 +397,8 @@ variable_t *frame_add_var( st_frame_t *frame, char *key, token_t *token, bool re
 		new_var->token = clone_token_tree( token );
 
 		if ( add_var ){
-			list_add_data( frame->vars, new_shared );
+			//list_add_data( frame->vars, new_shared );
+			hashmap_add( frame->vars, new_var->hash, new_shared );
 		}
 
 	} else {
