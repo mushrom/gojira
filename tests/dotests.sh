@@ -17,9 +17,9 @@ for thing in `ls src | grep -e ".scm$"`; do
 	fi
 done
 
-if [[ $failed -gt 1 ]]; then
+if [ $failed -gt 1 ]; then
     echo "$failed tests failed."
-elif [[ $failed -gt 0 ]]; then
+elif [ $failed -gt 0 ]; then
     echo "$failed test failed."
 else
     echo "All tests passed."
