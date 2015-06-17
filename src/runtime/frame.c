@@ -62,8 +62,9 @@ struct global_builtin {
 	{ "open",            builtin_open },
 	{ "readall",         builtin_readall },
 	{ "read-char",       builtin_read_char },
-	{ "write-char",      builtin_writechar },
+	{ "write-char",      builtin_write_char },
 	{ "load!",           builtin_load_global_file },
+	{ "eof?",            builtin_is_eof },
 
 	{ "iterator",        builtin_iterator },
 	{ "iter-car",        builtin_iterator_access },

@@ -62,7 +62,6 @@ token_t *builtin_return_first( stack_frame_t *frame );
 token_t *builtin_intern_set( stack_frame_t *frame );
 token_t *builtin_intern_set_global( stack_frame_t *frame );
 
-token_t *builtin_read_char( stack_frame_t *frame );
 token_t *builtin_cons( stack_frame_t *frame );
 token_t *builtin_list( stack_frame_t *frame );
 token_t *builtin_load_global_file( stack_frame_t *frame );
@@ -70,12 +69,16 @@ token_t *builtin_load_global_file( stack_frame_t *frame );
 // File functions
 token_t *builtin_open( stack_frame_t *frame );
 token_t *builtin_readall( stack_frame_t *frame );
-token_t *builtin_writechar( stack_frame_t *frame );
+token_t *builtin_read_char( stack_frame_t *frame );
+token_t *builtin_write_char( stack_frame_t *frame );
+token_t *builtin_is_eof( stack_frame_t *frame );
 
+// iterator functions
 token_t *builtin_iterator_next( stack_frame_t *frame );
 token_t *builtin_iterator_access( stack_frame_t *frame );
 token_t *builtin_iterator( stack_frame_t *frame );
 
+// networking functions
 token_t *builtin_tcp_socket( stack_frame_t *frame );
 token_t *builtin_tcp_getchar( stack_frame_t *frame );
 token_t *builtin_tcp_putchar( stack_frame_t *frame );
