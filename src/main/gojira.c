@@ -18,6 +18,12 @@ void print_help( );
 char *read_input_file( FILE *fp );
 char *read_with_parens( FILE *fp );
 
+void goj_linenoise_complete( const char *buf, linenoiseCompletions *lc );
+
+// needed because linenoise doesn't support passing some sort of datastructure
+// to the completion callback, sorry
+stack_frame_t *really_global_frame = NULL;
+
 int main( int argc, char *argv[] ){
 	int ret = 0;
 	signed char option;
@@ -92,6 +98,8 @@ int main( int argc, char *argv[] ){
 	// Go into the REPL if the interpreter flag is set
 	if ( interactive ){
 		linenoiseSetMultiLine( 1 );
+		linenoiseSetCompletionCallback( goj_linenoise_complete );
+		really_global_frame = global_frame;
 		char *buf = "";
 
 		while ( buf ){
@@ -134,6 +142,41 @@ int main( int argc, char *argv[] ){
 // Displays the handy help message dialog
 void print_help( ){
 	printf( "Usage: gojira [-hi] [files]\n" );
+}
+
+void goj_linenoise_complete( const char *buf, linenoiseCompletions *lc ){
+	const char        *pos, *move;
+	const st_frame_t  *frame = really_global_frame;
+	const hashmap_t   *map = frame->vars;
+	const list_node_t *node;
+	const variable_t  *var;
+	unsigned i, k, pos_num;
+
+	if ( map ){
+		for ( pos = move = buf, pos_num = k = 0; *move; move++, k++ ){
+			if ( strchr( " ()[]{}\t\n", *move )) {
+				pos = move + 1;
+				pos_num = k;
+			}
+		}
+
+		for ( i = 0; i < map->nbuckets; i++ ){
+			node = map->buckets[i].base;
+			foreach_in_list( node ){
+				var = shared_get( node->data );
+				if ( strstr( var->key, pos )){
+					//fprintf( stderr, "Got here\n" );
+					char *newbuf = malloc( sizeof( char[ strlen( buf ) + strlen( var->key ) + 4 ] ));
+					strcpy( newbuf, buf );
+					strncpy( newbuf + pos_num + (pos_num? 1 : 0), var->key, strlen( var->key ) + 1 );
+					linenoiseAddCompletion( lc, newbuf );
+					free( newbuf );
+				}
+			}
+		}
+	}
+
+	//linenoiseAddCompletion( lc, "foo" );
 }
 
 // Allocates a buffer, reads a complete (meaning with matching parenthesis) statement into it,
