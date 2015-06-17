@@ -4,6 +4,7 @@ CONF_PREFIX=/usr/local
 CONF_SYSROOT=
 CONF_GOJIRA_LIBDIR=
 CONF_ENABLE_SOCKETS=1
+CONF_ENABLE_FILES=1
 CONF_DEBUG=0
 
 # Parse the given options
@@ -25,21 +26,36 @@ for arg in $@; do
 				This script sets configuration values for Gojira v0.0.1.
 
 				Options:
-				  -h, --help            Display this help message and exit.
-				      --prefix=[path]   Set the installation root to the given path.
-				      --sysroot=[path]  Set the path for the system root. This is prepended
-				                        to the PREFIX variable when copying files, and is
-				                        useful for cross-compiling, chroot installs, etc.
+				  -h, --help             Display this help message and exit.
+				      --prefix=[path]    Set the installation root to the given path.
+				      --sysroot=[path]   Set the path for the system root. This is prepended
+				                         to the PREFIX variable when copying files, and is
+				                         useful for cross-compiling, chroot installs, etc.
+				  -d, --debug            Specify that this is a debug build. This option
+				                         toggles some debugging messages.
+				      --disable-sockets  Disable the built-in networking functions.
+				      --disable-files    Disable the built-in file functions.
+				      --disable-all      Disable everything extra, and just build the core
+				                         interpreter.
 			END_OF_HELP
 			exit 0
+			;;
+
+		--debug|-d)
+			CONF_DEBUG=1
 			;;
 
 		--disable-sockets)
 			CONF_ENABLE_SOCKETS=0
 			;;
 
-		--debug)
-			CONF_DEBUG=1
+		--disable-files)
+			CONF_ENABLE_FILES=0
+			;;
+
+		--disable-all)
+			CONF_ENABLE_SOCKETS=0
+			CONF_ENABLE_FILES=0
 			;;
 
 		*)
@@ -62,6 +78,7 @@ cat Makefile.conf >> Makefile
 echo "Generating config.h..."
 sed "s#SOME_PREFIX_HERE#$CONF_PREFIX/share/gojira#" < include/gojira/config.h.tmp > include/gojira/config.h
 echo "#define GOJIRA_ENABLE_SOCKETS $CONF_ENABLE_SOCKETS" >> include/gojira/config.h
+echo "#define GOJIRA_ENABLE_FILES $CONF_ENABLE_FILES" >> include/gojira/config.h
 echo "#define GOJIRA_DEBUG $CONF_DEBUG" >> include/gojira/config.h
 echo "#endif" >> include/gojira/config.h
 

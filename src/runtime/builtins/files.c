@@ -1,10 +1,13 @@
+#include <gojira/config.h>
+#include <string.h>
+#include <errno.h>
+
+#if GOJIRA_ENABLE_FILES
 #include <gojira/runtime/runtime.h>
 #include <gojira/runtime/garbage.h>
 #include <gojira/runtime/builtin.h>
 #include <gojira/runtime/files.h>
 #include <gojira/parse_debug.h>
-#include <string.h>
-#include <errno.h>
 
 // needed because fclose() technically doesn't match the type specification
 // of shared_dtor, which requres a void return
@@ -187,3 +190,4 @@ token_t *builtin_is_eof( stack_frame_t *frame ){
 
 	return ret;
 }
+#endif

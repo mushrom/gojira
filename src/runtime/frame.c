@@ -58,6 +58,7 @@ struct global_builtin {
 	{ "vector-set!",     builtin_vector_set },
 	{ "vector-length",   builtin_vector_length },
 
+#if GOJIRA_ENABLE_FILES
 	// file functions
 	{ "open",            builtin_open },
 	{ "readall",         builtin_readall },
@@ -65,12 +66,15 @@ struct global_builtin {
 	{ "write-char",      builtin_write_char },
 	{ "load!",           builtin_load_global_file },
 	{ "eof?",            builtin_is_eof },
+#endif
 
+	// iterator functions
 	{ "iterator",        builtin_iterator },
 	{ "iter-car",        builtin_iterator_access },
 	{ "iter-cdr",        builtin_iterator_next },
 
 #if GOJIRA_ENABLE_SOCKETS
+	// networking functions
 	{ "tcp-socket",      builtin_tcp_socket },
 	{ "tcp-getchar",     builtin_tcp_getchar },
 	{ "tcp-putchar",     builtin_tcp_putchar },
