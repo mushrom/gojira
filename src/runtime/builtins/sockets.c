@@ -49,7 +49,15 @@ token_t *builtin_tcp_socket( stack_frame_t *frame ){
 					frame->error_call( frame, "[%s] Could not open socket\n",
 						__func__, frame->ntokens - 1 );
 				}
+
+			} else {
+				frame->error_call( frame, "[%s] Expected argument 2 to be a number, but have %s\n",
+					__func__, type_str( move->next->type ));
 			}
+
+		} else {
+			frame->error_call( frame, "[%s] Expected argument 1 to be a string, but have %s\n",
+				__func__, type_str( move->type ));
 		}
 		
 	} else {
@@ -83,7 +91,15 @@ token_t *builtin_tcp_getchar( stack_frame_t *frame ){
 				ret->type = TYPE_BOOLEAN;
 				ret->smalldata = false;
 			}
+
+		} else {
+			frame->error_call( frame, "[%s] Expected argument 1 to be a socket, but have %s\n",
+				__func__, type_str( move->type ));
 		}
+
+	} else {
+		frame->error_call( frame, "[%s] Expected 1 argument, but have %d\n",
+			__func__, frame->ntokens - 1 );
 	}
 
 	return ret;
@@ -109,7 +125,15 @@ token_t *builtin_tcp_putchar( stack_frame_t *frame ){
 					ret->smalldata = ch;
 				}
 			}
+
+		} else {
+			frame->error_call( frame, "[%s] Expected argument 1 to be a socket, but have %s\n",
+				__func__, type_str( move->type ));
 		}
+
+	} else {
+		frame->error_call( frame, "[%s] Expected 1 argument, but have %d\n",
+			__func__, frame->ntokens - 1 );
 	}
 
 	return ret;
