@@ -187,6 +187,12 @@ static token_return_t get_token_from_str( char *string ){
 					ret.token->smalldata = '\n';
 					ret.found = true;
 
+				} else if ( strncmp( string + 2, "return", 6 ) == 0 ){
+					ret.string = string + 8;
+					ret.token->type = TYPE_CHAR;
+					ret.token->smalldata = '\r';
+					ret.found = true;
+
 				} else {
 					ret.string = string + 3;
 					ret.token->type = TYPE_CHAR;

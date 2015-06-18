@@ -29,10 +29,12 @@ void print_token( token_t *token ){
 				break;
 
 			case TYPE_CHAR:
-				if ( token->smalldata != '\n' ){
-					printf( "#\\%c", token->smalldata );
-				} else {
+				if ( token->smalldata == '\n' ){
 					printf( "#\\newline" );
+				} else if ( token->smalldata == '\r' ){
+					printf( "#\\return" );
+				} else {
+					printf( "#\\%c", token->smalldata );
 				}
 				break;
 

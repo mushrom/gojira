@@ -151,12 +151,14 @@ void goj_linenoise_complete( const char *buf, linenoiseCompletions *lc ){
 	const list_node_t *node;
 	const variable_t  *var;
 	unsigned i, k, pos_num;
+	bool has_punct = false;
 
 	if ( map ){
 		for ( pos = move = buf, pos_num = k = 0; *move; move++, k++ ){
 			if ( strchr( " ()[]{}\t\n", *move )) {
 				pos = move + 1;
 				pos_num = k;
+				has_punct = true;
 			}
 		}
 
@@ -165,10 +167,9 @@ void goj_linenoise_complete( const char *buf, linenoiseCompletions *lc ){
 			foreach_in_list( node ){
 				var = shared_get( node->data );
 				if ( strstr( var->key, pos )){
-					//fprintf( stderr, "Got here\n" );
-					char *newbuf = malloc( sizeof( char[ strlen( buf ) + strlen( var->key ) + 4 ] ));
+					char *newbuf = malloc( sizeof( char[ strlen(buf) + strlen(var->key) + 4 ]));
 					strcpy( newbuf, buf );
-					strncpy( newbuf + pos_num + (pos_num? 1 : 0), var->key, strlen( var->key ) + 1 );
+					strncpy( newbuf + pos_num + has_punct, var->key, strlen(var->key) + 1 );
 					linenoiseAddCompletion( lc, newbuf );
 					free( newbuf );
 				}
