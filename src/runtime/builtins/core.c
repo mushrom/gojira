@@ -213,7 +213,8 @@ token_t *builtin_greaterthan( stack_frame_t *frame ){
 token_t *builtin_intern_set( stack_frame_t *frame ){
 	token_t *ret;
 	token_t *move;
-	token_t *var;
+	token_t *temp;
+	variable_t *var;
 
 	ret = alloc_token( );
 	ret->type = TYPE_NULL;
@@ -222,19 +223,28 @@ token_t *builtin_intern_set( stack_frame_t *frame ){
 
 	if ( move ){
 		if ( move->type == TYPE_SYMBOL ){
-			var = move;
-
 			if ( move->next ){
-				frame_add_var( frame->last, var->data, move->next, NO_RECURSE );
+				frame_add_var( frame->last, move->data, move->next, NO_RECURSE );
+
 			} else {
-				frame->error_call( frame, "[%s] Error: Invalid set, expected value after symbol\n", __func__ );
+				frame->error_call( frame, "[%s] Error: Invalid set, expected value after symbol\n",
+					__func__ );
 			}
 
+		} else if ( move->type == TYPE_VARIABLE_REF ){
+			var = shared_get( move->data );
+			temp = var->token;
+			var->token = clone_token( move->next );
+			frame_register_tokens( frame, temp );
+
 		} else {
-			frame->error_call( frame, "[%s] Error: expected symbol, but got \"%s\"\n", __func__, type_str( move->type ));
+			frame->error_call( frame, "[%s] Error: expected symbol or variable reference, but got \"%s\"\n",
+				__func__, type_str( move->type ));
 		}
+
 	} else {
-		frame->error_call( frame, "[%s] Error: expected symbol, but have no arguments.\n", __func__ );
+		frame->error_call(
+				frame, "[%s] Error: expected symbol, but have no arguments.\n", __func__ );
 	}
 
 	return ret;
