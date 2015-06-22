@@ -55,3 +55,52 @@
       x
      else
       (drop (cdr x) (- i 1)))))
+
+(define foreach)
+(define foreach
+  (lambda (xs f)
+    (if (null? xs)
+      '()
+      (begin
+        (f (car xs))
+        (foreach (cdr xs) f)))))
+
+(define list-replace
+  (lambda (xs old new)
+    (if (null? xs)
+      '()
+    (if (eq? (car xs) old)
+      (cons new (list-replace (cdr xs) old new))
+     else
+      (cons (car xs) (list-replace (cdr xs) old new))))))
+
+(define delim
+  (lambda (xs token)
+    (if (null? xs)
+      '()
+    (if (eq? (car xs) token)
+      '()
+      (cons (car xs) (delim (cdr xs) token))))))
+
+(define after
+  (lambda (xs token)
+    (if (null? xs)
+      '()
+    (if (eq? (car xs) token)
+      (cdr xs)
+     else
+      (after (cdr xs) token)))))
+
+(define list-split
+  (lambda (xs token)
+    (if (null? xs)
+      '()
+      (cons (delim xs token) (list-split (after xs token) token)))))
+
+(define list-ref
+  (lambda (xs n)
+    (if (null? xs)
+      '()
+    (if (eq? n 0)
+      (car xs)
+      (list-ref (cdr xs) (- n 1))))))

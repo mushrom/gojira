@@ -1,14 +1,6 @@
 #!/usr/bin/env gojira
-(import! 'srfi1)
+(import! 'lists)
 
-(define foreach
-  (lambda (xs f)
-    (if (null? xs)
-      '()
-      (begin
-        (f (car xs))
-        (foreach (cdr xs) f)))))
-        
 (define fizzbuzz
   (lambda (limit)
     (foreach (iota limit 1)
