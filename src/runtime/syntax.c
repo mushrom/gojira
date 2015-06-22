@@ -224,7 +224,7 @@ stack_frame_t *expand_procedure_old( stack_frame_t *frame, token_t *tokens ){
 					add->down = clone_token_tree( move );
 
 					gc_unmark( add );
-					frame_register_token( frame, add );
+					frame_register_token_tree( frame, add );
 
 					body = replace_symbol_safe( body, add, var_name );
 					move = move->next;
@@ -248,10 +248,10 @@ stack_frame_t *expand_procedure_old( stack_frame_t *frame, token_t *tokens ){
 			temp = ext_proc_token( builtin_return_last );
 			frame_add_token_noclone( ret, temp );
 
-			frame_register_token( ret, body );
+			frame_register_token_tree( ret, body );
 
 			for ( temp = body->next; temp; temp = temp->next )
-				frame_register_token( ret, temp );
+				frame_register_token_tree( ret, temp );
 
 			ret->ptr = body;
 
@@ -302,7 +302,7 @@ token_t *expand_syntax_rules( stack_frame_t *frame, token_t *tokens ){
 				}
 
 				gc_unmark( ret );
-				frame_register_token( frame, ret );
+				frame_register_token_tree( frame, ret );
 			}
 		}
 

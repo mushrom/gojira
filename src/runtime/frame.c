@@ -83,7 +83,7 @@ struct global_builtin {
 
 // Adds an "external function" to a frame, and handles registering the tokens for garbage collection
 variable_t *global_add_func( st_frame_t *frame, char *name, scheme_func handle ){
-	return frame_add_var( frame, name, frame_register_token( frame, ext_proc_token( handle )), NO_RECURSE );
+	return frame_add_var( frame, name, frame_register_one_token( frame, ext_proc_token( handle )), NO_RECURSE );
 }
 
 st_frame_t *init_global_frame( st_frame_t *frame ){
@@ -240,13 +240,15 @@ token_t *frame_add_token( st_frame_t *frame, token_t *token ){
 	token_t *meh;
 
 	if ( !frame->expr ){
-		frame->expr = frame->end = meh = clone_token_tree( token );
-		frame_register_token( frame, meh );
+		//frame->expr = frame->end = meh = clone_token_tree( token );
+		//frame_register_token_tree( frame, meh );
+		frame->expr = frame->end = meh = clone_token( token );
+		frame_register_one_token( frame, meh );
 		meh->status = GC_UNMARKED;
 		
 	} else {
 		frame->end->next = clone_token_tree( token );
-		frame->end->next = frame_register_token( frame, frame->end->next );
+		frame->end->next = frame_register_token_tree( frame, frame->end->next );
 		frame->end->next->status = GC_UNMARKED;
 		frame->end = frame->end->next;
 	}
@@ -261,12 +263,13 @@ token_t *frame_add_token_noclone( st_frame_t *frame, token_t *token ){
 
 	if ( !frame->expr ){
 		frame->expr = frame->end = token;
-		frame_register_token( frame, token );
+		//frame_register_token_tree( frame, token );
+		frame_register_one_token( frame, token );
 		token->status = GC_UNMARKED;
 		
 	} else {
 		frame->end->next = token;
-		frame->end->next = frame_register_token( frame, frame->end->next );
+		frame->end->next = frame_register_token_tree( frame, frame->end->next );
 		frame->end->next->status = GC_UNMARKED;
 		frame->end = frame->end->next;
 	}
@@ -421,7 +424,7 @@ token_t *frame_register_tokens( st_frame_t *frame, token_t *token ){
 	return token;
 }
 
-token_t *frame_register_token( st_frame_t *frame, token_t *token ){
+token_t *frame_register_token_tree( st_frame_t *frame, token_t *token ){
 	if ( token ){
 		frame_register_tokens( frame, token->down );
 
@@ -432,6 +435,16 @@ token_t *frame_register_token( st_frame_t *frame, token_t *token ){
 	return token;
 }
 
+token_t *frame_register_one_token( st_frame_t *frame, token_t *token ){
+	if ( token ){
+		token->gc_link = frame->heap;
+		frame->heap = token;
+	}
+
+	return token;
+}
+
+
 token_t *frame_alloc_token( st_frame_t *frame ){
-	return frame_register_token( frame, alloc_token( ));
+	return frame_register_one_token( frame, alloc_token( ));
 }
