@@ -6,6 +6,7 @@ extern "C" {
 
 #include <gojira/runtime/runtime.h>
 #include <gojira/tokens.h>
+#include <gojira/debugger/debugger.h>
 
 typedef token_t *(*scheme_func)( stack_frame_t * );
 
@@ -82,6 +83,9 @@ token_t *builtin_iterator( stack_frame_t *frame );
 token_t *builtin_tcp_socket( stack_frame_t *frame );
 token_t *builtin_tcp_getchar( stack_frame_t *frame );
 token_t *builtin_tcp_putchar( stack_frame_t *frame );
+
+// debugger breakpoint function
+token_t *debugger_loop( stack_frame_t *frame );
 
 #ifdef __cplusplus
 }

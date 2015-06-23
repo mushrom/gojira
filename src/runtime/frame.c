@@ -42,6 +42,9 @@ struct global_builtin {
 	{ "true",            builtin_true },
 	{ "false",           builtin_false },
 
+	// debugger breakpoint
+	{ "debug-break",     debugger_loop },
+
 	// string functions
 	{ "string-append",   builtin_string_append },
 	{ "string-contains", builtin_string_contains },
