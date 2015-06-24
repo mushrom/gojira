@@ -118,7 +118,7 @@ int main( int argc, char *argv[] ){
 					linenoiseHistoryAdd( buf );
 					global_frame->ptr = tree;
 
-					eval_loop( global_frame, tree );
+					eval_loop( global_frame );
 					print_token( global_frame->end );
 					putchar( '\n' );
 

@@ -37,7 +37,7 @@ bool evaluate_file( stack_frame_t *frame, char *filename ){
 
             if ( foo ){
                 frame->ptr = foo;
-                eval_loop( frame, foo );
+                eval_loop( frame );
                 free_tokens( foo );
             }
 

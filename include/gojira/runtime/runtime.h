@@ -37,10 +37,17 @@ typedef struct iterator {
 	};
 } iterator_t;
 
-token_t *eval_loop( stack_frame_t *base, token_t *tokens );
-token_t *eval_loop_timed( stack_frame_t *base, token_t *tokens, unsigned limit );
-bool eval_frame_subexpr( stack_frame_t **frame_ret, stack_frame_t *first );
-bool eval_frame_expr( stack_frame_t **frame_ret, stack_frame_t *first );
+typedef enum {
+	EVAL_STATUS_NONE,
+	EVAL_STATUS_ERROR,
+	EVAL_STATUS_RUNNING,
+} eval_ret_t;
+
+eval_ret_t eval_step( stack_frame_t **frame );
+token_t *eval_loop( stack_frame_t *base );
+token_t *eval_loop_timed( stack_frame_t *base, unsigned limit );
+bool eval_frame_subexpr( stack_frame_t **frame_ret );
+bool eval_frame_expr( stack_frame_t **frame_ret );
 
 #ifdef __cplusplus
 }

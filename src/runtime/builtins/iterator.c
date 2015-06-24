@@ -101,7 +101,7 @@ token_t *builtin_iterator_access( stack_frame_t *frame ){
 
 			foo_frame = frame_create( NULL, NULL );
 			temp_frame = frame_create( foo_frame, proc );
-			eval_loop( temp_frame, NULL );
+			eval_loop( temp_frame );
 
 			gc_mark( foo_frame->expr );
 			gc_sweep( foo_frame->heap );
@@ -185,7 +185,7 @@ token_t *builtin_iterator_next( stack_frame_t *frame ){ token_t *ret = NULL;
 
 						foo_frame = frame_create( NULL, NULL );
 						temp_frame = frame_create( foo_frame, proc );
-						eval_loop( temp_frame, NULL );
+						eval_loop( temp_frame );
 
 						gc_mark( foo_frame->expr );
 						gc_sweep( foo_frame->heap );

@@ -10,24 +10,18 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-typedef enum {
-	EVAL_STATUS_NONE,
-	EVAL_STATUS_ERROR,
-	EVAL_STATUS_RUNNING,
-} eval_ret_t;
-
-eval_ret_t eval_step( stack_frame_t *base, stack_frame_t **frame, token_t *tokens ){
+eval_ret_t eval_step( stack_frame_t **frame ){
 	eval_ret_t ret = EVAL_STATUS_RUNNING;
 
 	// Evaluate sub-expressions
 	if ( (*frame)->ptr ){
-		if ( eval_frame_subexpr( frame, base ) == true )
+		if ( eval_frame_subexpr( frame ) == true )
 			ret = EVAL_STATUS_ERROR;
 
 	// Evaluation finished, apply function
 	} else {
 		if ( (*frame)->last ){
-			if ( eval_frame_expr( frame, base ) == true )
+			if ( eval_frame_expr( frame ) == true )
 				ret = EVAL_STATUS_ERROR;
 
 		} else {
@@ -38,14 +32,14 @@ eval_ret_t eval_step( stack_frame_t *base, stack_frame_t **frame, token_t *token
 	return ret;
 }
 
-token_t *eval_loop( stack_frame_t *base, token_t *tokens ){
+token_t *eval_loop( stack_frame_t *base ){
 	stack_frame_t *frame = base;
-	token_t *ret = tokens;
+	token_t *ret = NULL;
 
 	eval_ret_t status = EVAL_STATUS_RUNNING;
 
 	while ( status == EVAL_STATUS_RUNNING ){
-		status = eval_step( base, &frame, tokens );
+		status = eval_step( &frame );
 	}
 
 	ret = base->expr;
@@ -53,15 +47,15 @@ token_t *eval_loop( stack_frame_t *base, token_t *tokens ){
 	return ret;
 }
 
-token_t *eval_loop_timed( stack_frame_t *base, token_t *tokens, unsigned limit ){
+token_t *eval_loop_timed( stack_frame_t *base, unsigned limit ){
 	stack_frame_t *frame = base;
-	token_t *ret = tokens;
+	token_t *ret = NULL;
 
 	eval_ret_t status = EVAL_STATUS_RUNNING;
 	unsigned cycles = 0;
 
 	while ( status == EVAL_STATUS_RUNNING && cycles < limit ){
-		status = eval_step( base, &frame, tokens );
+		status = eval_step( &frame );
 		cycles++;
 	}
 
@@ -70,7 +64,7 @@ token_t *eval_loop_timed( stack_frame_t *base, token_t *tokens, unsigned limit )
 	return ret;
 }
 
-bool eval_frame_subexpr( stack_frame_t **frame_ret, stack_frame_t *first ){
+bool eval_frame_subexpr( stack_frame_t **frame_ret ){
 	bool ret = false;
 	stack_frame_t *frame = *frame_ret;
 	token_t *move;
@@ -180,7 +174,7 @@ bool eval_frame_subexpr( stack_frame_t **frame_ret, stack_frame_t *first ){
 	return ret;
 }
 
-bool eval_frame_expr( stack_frame_t **frame_ret, stack_frame_t *first ){
+bool eval_frame_expr( stack_frame_t **frame_ret ){
 	bool ret = false;
 	bool apply = true;
 	stack_frame_t *frame = *frame_ret;
