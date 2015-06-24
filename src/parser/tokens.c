@@ -25,7 +25,7 @@ void print_token( token_t *token ){
 
 			case TYPE_STRING:
 			case TYPE_SYMBOL:
-				printf( "%s", (char *)token->data );
+				printf( "%s", (char *)shared_get( token->data ));
 				break;
 
 			case TYPE_CHAR:
@@ -92,6 +92,7 @@ void print_token_no_recurse( token_t *token ){
 			case TYPE_NUMBER:
 				printf( "%d", token->smalldata );
 				break;
+
 			case TYPE_BOOLEAN:
 				printf( "#%c", (token->smalldata == true)? 't' : 'f' );
 				break;
@@ -104,6 +105,7 @@ void print_token_no_recurse( token_t *token ){
 			case TYPE_SYMBOL:
 				printf( "%s", (char *)token->data );
 				break;
+
 			default:
 				printf( "#<%s>", type_str( token->type ));
 				break;
@@ -302,7 +304,7 @@ token_t *replace_symbol( token_t *tokens, token_t *replace, char *name ){
 	token_t *ret = tokens;
 
 	if ( tokens ){
-		if ( tokens->type == TYPE_SYMBOL && ( strcmp( tokens->data, name )) == 0 ){
+		if ( tokens->type == TYPE_SYMBOL && ( strcmp( shared_get( tokens->data ), name )) == 0 ){
 			ret = clone_token_tree( replace );
 			ret->next = replace_symbol( tokens->next, replace, name );
 			free_token_tree( tokens );

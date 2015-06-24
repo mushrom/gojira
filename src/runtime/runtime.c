@@ -86,29 +86,33 @@ bool eval_frame_subexpr( stack_frame_t **frame_ret ){
 			break;
 
 		case TYPE_SYMBOL:
-			if ( *(char *)frame->ptr->data == ':' ){
-				frame_add_token( frame, frame->ptr );
-				frame->ptr = frame->ptr->next;
+			{
+				char *varname = shared_get( frame->ptr->data );
 
-			} else {
-				move = frame_find_var( frame, frame->ptr->data, RECURSE );
-
-				if ( move ){
-					frame_add_token( frame, move );
-
-					if ( move->type != TYPE_SYNTAX ){
-						frame->ptr = frame->ptr->next;
-
-					} else {
-						for ( frame->ptr = frame->ptr->next; frame->ptr; frame->ptr = frame->ptr->next )
-							frame_add_token( frame, frame->ptr );
-					}
+				if ( *varname == ':' ){
+					frame_add_token( frame, frame->ptr );
+					frame->ptr = frame->ptr->next;
 
 				} else {
-					frame->error_call( frame, "[%s] Error: undefined variable \"%s\"\n",
-							__func__, (char *)frame->ptr->data );
+					move = frame_find_var( frame, varname, RECURSE );
 
-					ret = true;
+					if ( move ){
+						frame_add_token( frame, move );
+
+						if ( move->type != TYPE_SYNTAX ){
+							frame->ptr = frame->ptr->next;
+
+						} else {
+							for ( frame->ptr = frame->ptr->next; frame->ptr; frame->ptr = frame->ptr->next )
+								frame_add_token( frame, frame->ptr );
+						}
+
+					} else {
+						frame->error_call( frame, "[%s] Error: undefined variable \"%s\"\n",
+								__func__, varname );
+
+						ret = true;
+					}
 				}
 			}
 

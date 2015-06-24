@@ -17,7 +17,7 @@ bool has_symbol( token_t *tokens, char *sym ){
 
 	move = tokens;
 	foreach_in_list( move ){
-		if ( move->type == TYPE_SYMBOL && strcmp( move->data, sym ) == 0 ){
+		if ( move->type == TYPE_SYMBOL && strcmp( shared_get( move->data ), sym ) == 0 ){
 			ret = true;
 			break;
 		}
@@ -29,11 +29,15 @@ bool has_symbol( token_t *tokens, char *sym ){
 token_t *compile_lambda( stack_frame_t *frame, token_t *args, token_t *tokens ){
 	token_t *ret = tokens;
 	shared_t *shr;
+	char *varname;
 
 	if ( tokens ){
 		if ( tokens->type == TYPE_SYMBOL ){
-			if ( !has_symbol( args, tokens->data ) &&
-			      frame_find_var( frame, tokens->data, RECURSE )){
+			varname = shared_get( tokens->data );
+			if ( !has_symbol( args, varname ) &&
+			      //shr = frame_find_var( frame, varname, RECURSE )){
+			     ( shr = frame_find_shared_struct( frame, varname, RECURSE )))
+			{
 
 				ret = alloc_token( );
 				ret->type = TYPE_VARIABLE_REF;
@@ -41,7 +45,7 @@ token_t *compile_lambda( stack_frame_t *frame, token_t *args, token_t *tokens ){
 				ret->next = tokens->next;
 				ret->down = NULL;
 
-				shr = frame_find_shared_struct( frame, tokens->data, RECURSE );
+				//shr = frame_find_shared_struct( frame, varname, RECURSE );
 				ret->data = shared_aquire( shr );
 
 				free_token( tokens );
@@ -156,7 +160,7 @@ stack_frame_t *expand_procedure( stack_frame_t *frame, token_t *tokens ){
 
 		foreach_in_list( temp ){
 			if ( temp->type == TYPE_SYMBOL ){
-				var_name = temp->data;
+				var_name = shared_get( temp->data );
 
 				if ( !move ){
 					frame->error_call( frame, "[%s] Error: Have unbound variable \"%s\"\n", __func__, var_name );
@@ -298,7 +302,7 @@ token_t *expand_syntax_rules( stack_frame_t *frame, token_t *tokens ){
 				for ( move = pattern, foo = tokens; move && foo;
 						move = move->next, foo = foo->next )
 				{
-					ret = replace_symbol( ret, foo, move->data );
+					ret = replace_symbol( ret, foo, shared_get( move->data ));
 				}
 
 				gc_unmark( ret );

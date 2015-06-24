@@ -25,8 +25,9 @@ token_t *builtin_tcp_socket( stack_frame_t *frame ){
 			if ( move->next->type == TYPE_NUMBER ){
 				struct hostent *host;
 				struct sockaddr_in server_addr;
+				char *hostname = shared_get( move->data );
 
-				host = gethostbyname( move->data );
+				host = gethostbyname( hostname );
 
 				if ( host && ( sock = socket( AF_INET, SOCK_STREAM, 0 )) >= 0 ){
 					server_addr.sin_family = AF_INET;

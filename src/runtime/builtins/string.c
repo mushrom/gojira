@@ -7,10 +7,13 @@
 #include <stdio.h>
 #include <string.h>
 
+extern void free_string( void *ptr );
+
 token_t *builtin_string_append( stack_frame_t *frame ){
 	token_t *ret = NULL;
 	token_t *op1, *op2;
 	char *str;
+	char *op1_str, *op2_str;
 
 	if ( frame->ntokens - 1 == 2 ){
 		op1 = frame->expr->next;
@@ -20,12 +23,17 @@ token_t *builtin_string_append( stack_frame_t *frame ){
 			ret = alloc_token( );
 			ret->type = TYPE_STRING;
 
-			size_t len = strlen( op1->data ) + strlen( op2->data );
-			str = calloc( 1, sizeof( char[len + 8]));
-			strcpy( str, op1->data );
-			strcat( str, op2->data );
+			op1_str = shared_get( op1->data );
+			op2_str = shared_get( op2->data );
 
-			ret->data = str;
+			size_t len = strlen( op1_str ) + strlen( op2_str );
+			str = calloc( 1, sizeof( char[len + 8]));
+			strcpy( str, op1_str );
+			strcat( str, op2_str );
+
+			//ret->data = str;
+			ret->data = shared_new( str, free_string );
+			ret->flags = T_FLAG_HAS_SHARED;
 
 		} else {
 			frame->error_call( frame, "[%s] Error: Expected strings as arguments, but have \"%s\" and \"%s\"", __func__,
@@ -43,6 +51,7 @@ token_t *builtin_string_contains( stack_frame_t *frame ){
 	token_t *ret = NULL;
 	token_t *op1, *op2;
 	char *str;
+	char *op1_str, *op2_str;
 
 	if ( frame->ntokens - 1 == 2 ){
 		op1 = frame->expr->next;
@@ -51,9 +60,12 @@ token_t *builtin_string_contains( stack_frame_t *frame ){
 		if ( op1->type == TYPE_STRING && op2->type == TYPE_STRING ){
 			ret = alloc_token( );
 
-			if (( str = strstr( op1->data, op2->data ))){
+			op1_str = shared_get( op1->data );
+			op2_str = shared_get( op2->data );
+
+			if (( str = strstr( op1_str, op2_str ))){
 				ret->type = TYPE_NUMBER;
-				ret->smalldata = (unsigned)((unsigned long)str - (unsigned long)op1->data );
+				ret->smalldata = (unsigned)((unsigned long)str - (unsigned long)op1_str );
 
 			} else {
 				ret->type = TYPE_BOOLEAN;
@@ -82,12 +94,11 @@ token_t *builtin_string_to_symbol( stack_frame_t *frame ){
 		if ( op1->type == TYPE_STRING ){
 			ret = alloc_token( );
 			ret->type = TYPE_SYMBOL;
-
-			ret->data = op1->data;
+			ret->data = shared_aquire( op1->data );
 
 		} else {
 			frame->error_call( frame, "[%s] Error: Expected symbol as argument, but have \"%s\" and \"%s\"", __func__,
-					type_str( op1->type  ));
+					type_str( op1->type ));
 		}
 
 	} else {
@@ -107,8 +118,7 @@ token_t *builtin_symbol_to_string( stack_frame_t *frame ){
 		if ( op1->type == TYPE_SYMBOL ){
 			ret = alloc_token( );
 			ret->type = TYPE_STRING;
-
-			ret->data = op1->data;
+			ret->data = shared_aquire( op1->data );
 
 		} else {
 			frame->error_call( frame, "[%s] Error: Expected symbol as argument, but have \"%s\" and \"%s\"", __func__,
@@ -152,14 +162,18 @@ token_t *builtin_char_to_string( stack_frame_t *frame ){
 				str[i] = 0;
 				ret = alloc_token( );
 				ret->type = TYPE_STRING;
-				ret->data = str;
+				//ret->data = str;
+				ret->data = shared_new( str, free_string );
+
 			} else {
 				free( str );
 			}
+
 		} else {
 			frame->error_call( frame, "[%s] Expected list, but have %s\n",
 					__func__, type_str( frame->expr->next->type ));
 		}
+
 	} else {
 		frame->error_call( frame, "[%s] Expected 1 argument, but have %d\n",
 				__func__, frame->ntokens - 1 );
@@ -189,7 +203,7 @@ token_t *builtin_string_ref( stack_frame_t *frame ){
 	if ( frame->ntokens == 3 ){
 		if ( frame->expr->next->type == TYPE_STRING ){
 			if ( frame->expr->next->next->type == TYPE_NUMBER ){
-				char *str = frame->expr->next->data;
+				char *str = shared_get( frame->expr->next->data );
 				unsigned n = frame->expr->next->next->smalldata;
 				unsigned len = strlen( str );
 
@@ -233,7 +247,7 @@ token_t *builtin_string_length( stack_frame_t *frame ){
 		if ( move->type == TYPE_STRING ){
 			ret = alloc_token( );
 			ret->type = TYPE_NUMBER;
-			ret->smalldata = strlen( move->data );
+			ret->smalldata = strlen( shared_get( move->data ));
 
 		} else {
 			frame->error_call( frame,

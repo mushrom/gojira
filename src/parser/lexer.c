@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <gojira/lexer.h>
+#include <gojira/libs/shared.h>
 
 #define ALPHABET	"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #define DIGITS		"0123456789"
@@ -21,6 +22,11 @@ typedef struct token_return {
 typedef bool (*char_pred)( char );
 
 static token_return_t get_token_from_str( char *string );
+
+void free_string( void *ptr ){
+	//printf( "[%s] Freeing string \"%s\"\n", __func__, (char *)ptr );
+	free( ptr );
+}
 
 // Extracts all possible tokens from the given string, returning a token tree
 // with all "next" fields pointing to the next token (so no "down" fields will be set)
@@ -149,7 +155,9 @@ static token_return_t get_token_from_str( char *string ){
 
 				foo[real_pos] = 0;
 
-				ret.token->data = foo;
+				//ret.token->data = foo;
+				ret.token->data = shared_new( foo, free_string );
+				ret.token->flags = T_FLAG_HAS_SHARED;
 				ret.string += i + 1;
 				ret.token->type = TYPE_STRING;
 				ret.found = true;
@@ -227,11 +235,12 @@ static token_return_t get_token_from_str( char *string ){
 			i = spanchars( is_identifier_char, string );
 
 			ret.string = string + i;
-			ret.token->type = TYPE_SYMBOL;
 			ret.found = true;
 
-			temp = ret.token->data = malloc( sizeof( char[i + 1] ));
-			strncpy( ret.token->data, string, i );
+			//temp = ret.token->data = malloc( sizeof( char[i + 1] ));
+			//strncpy( ret.token->data, string, i );
+			temp = malloc( sizeof( char[i + 1] ));
+			strncpy( temp, string, i );
 			temp[i] = 0;
 
 			//printf( "> Have identifier \"%s\"\n", temp );
@@ -239,9 +248,16 @@ static token_return_t get_token_from_str( char *string ){
 			if ( strcmp( temp, "lambda" ) == 0   || strcmp( temp, "λ" ) == 0 ||
 			     strcmp( temp, "function" ) == 0 || strcmp( temp, "func" ) == 0 ){
 				ret.token->type = TYPE_LAMBDA;
+				free( temp );
 
 			} else if ( strcmp( temp, "syntax-rules" ) == 0 ){
 				ret.token->type = TYPE_SYNTAX_RULES;
+				free( temp );
+
+			} else {
+				ret.token->type = TYPE_SYMBOL;
+				ret.token->data = shared_new( temp, free_string );
+				ret.token->flags = T_FLAG_HAS_SHARED;
 			}
 		}
 	}

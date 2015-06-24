@@ -168,7 +168,8 @@ token_t *builtin_equal( stack_frame_t *frame ){
 
 		if (( op1->type == TYPE_SYMBOL && op2->type == TYPE_SYMBOL ) ||
 		    ( op1->type == TYPE_STRING && op2->type == TYPE_STRING )){
-			val = strcmp( op1->data, op2->data ) == 0;
+
+			val = strcmp( shared_get( op1->data ), shared_get( op2->data )) == 0;
 
 		} else {
 			val =	( op1->type      == op2->type      ) &&
@@ -223,8 +224,11 @@ token_t *builtin_intern_set( stack_frame_t *frame ){
 
 	if ( move ){
 		if ( move->type == TYPE_SYMBOL ){
+			char *varname = shared_get( move->data );
+
 			if ( move->next ){
-				frame_add_var( frame->last, move->data, move->next, NO_RECURSE );
+				//frame_add_var( frame->last, move->data, move->next, NO_RECURSE );
+				frame_add_var( frame->last, varname, move->next, NO_RECURSE );
 
 			} else {
 				frame->error_call( frame, "[%s] Error: Invalid set, expected value after symbol\n",
@@ -263,12 +267,12 @@ token_t *builtin_intern_set_global( stack_frame_t *frame ){
 
 	if ( move ){
 		if ( move->type == TYPE_SYMBOL ){
-			var = move;
+			char *varname = shared_get( move->data );
 
 			if ( move->next ){
 				for ( first = frame; first->last; first = first->last );
+				frame_add_var( first, varname, move->next, NO_RECURSE );
 
-				frame_add_var( first, var->data, move->next, NO_RECURSE );
 			} else {
 				frame->error_call( frame, "[%s] Error: Invalid set, expected value after symbol\n", __func__ );
 			}
@@ -514,13 +518,13 @@ token_t *builtin_load_global_file( stack_frame_t *frame ){
 
 	if ( frame->ntokens == 2 ){
 		if ( frame->expr->next->type == TYPE_STRING ){
+			char *fname = shared_get( frame->expr->next->data );
 			tempframe = frame;
 			for ( ; tempframe->last; tempframe = tempframe->last );
 
 			oldptr = tempframe->ptr;
-			eval_return = evaluate_file( tempframe, frame->expr->next->data );
+			eval_return = evaluate_file( tempframe, fname );
 			tempframe->ptr = oldptr;
-			//frame->status = EVAL_STATUS_RUNNING;
 
 			ret = alloc_token( );
 			ret->type      = TYPE_BOOLEAN;
