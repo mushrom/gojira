@@ -3,17 +3,16 @@
 #include <stdbool.h>
 
 void gc_mark( token_t *tree ){
-	//if ( tree && tree->status == GC_UNMARKED ){
 	if ( tree ){
 		tree->status = GC_MARKED;
-
-		/*
-		printf( "Marked token: " );
-		print_token( tree );
-		printf( "\n" );
-		*/
-
 		gc_mark( tree->next );
+		gc_mark( tree->down );
+	}
+}
+
+void gc_mark_tree( token_t *tree ){
+	if ( tree ){
+		tree->status = GC_MARKED;
 		gc_mark( tree->down );
 	}
 }
@@ -21,14 +20,14 @@ void gc_mark( token_t *tree ){
 void gc_unmark( token_t *tree ){
 	if ( tree ){
 		tree->status = GC_UNMARKED;
-
-		/*
-		printf( "Unmarked token: " );
-		print_token( tree );
-		printf( "\n" );
-		*/
-
 		gc_unmark( tree->next );
+		gc_unmark( tree->down );
+	}
+}
+
+void gc_unmark_tree( token_t *tree ){
+	if ( tree ){
+		tree->status = GC_UNMARKED;
 		gc_unmark( tree->down );
 	}
 }

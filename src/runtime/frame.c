@@ -371,6 +371,7 @@ void free_var( void *ptr ){
 		variable_t *var = ptr;
 		//printf( "[%s] Freeing variable with hash 0x%x\n", __func__, var->hash );
 		free_tokens( var->token );
+		free( var->key );
 		free( var );
 	}
 }
@@ -391,12 +392,12 @@ variable_t *frame_add_var( st_frame_t *frame, char *key, token_t *token, bool re
 			new_var = calloc( 1, sizeof( variable_t ));
 			new_var->key = strdup( key );
 			new_var->hash = hash_string( key );
-
 			new_shared = shared_new( new_var, free_var );
-
 			add_var = true;
 
 			//printf( "[%s] Adding variable with hash 0x%x\n", __func__, new_var->hash );
+		} else {
+			free_tokens( new_var->token );
 		}
 
 		//new_var->token = frame_register_token( frame, clone_token_tree( token ));

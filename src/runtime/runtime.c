@@ -272,8 +272,9 @@ bool eval_frame_expr( stack_frame_t **frame_ret ){
 	if ( apply && !ret ){
 		temp_frame = frame->last;
 
-		gc_mark( frame->value );
+		gc_mark_tree( frame->value );
 		frame->heap = gc_sweep( frame->heap );
+		frame->value->next = NULL;
 
 		frame_add_token_noclone( temp_frame, frame->value );
 

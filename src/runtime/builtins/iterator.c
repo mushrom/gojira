@@ -104,8 +104,12 @@ token_t *builtin_iterator_access( stack_frame_t *frame ){
 			eval_loop( temp_frame );
 
 			gc_mark( foo_frame->expr );
-			gc_sweep( foo_frame->heap );
+			foo_frame->heap = gc_sweep( foo_frame->heap );
 			frame_free( foo_frame );
+
+			free_token( proc );
+			free_token( num );
+			frame_free( frame );
 
 			ret = foo_frame->expr;
 		}

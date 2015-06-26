@@ -13,7 +13,9 @@ enum {
 };
 
 void gc_mark( token_t *tree );
+void gc_mark_tree( token_t *tree );
 void gc_unmark( token_t *tree );
+void gc_unmark_tree( token_t *tree );
 token_t *gc_sweep( token_t *tree );
 
 void gc_dump( stack_frame_t *frame );
