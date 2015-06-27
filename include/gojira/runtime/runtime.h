@@ -43,6 +43,8 @@ typedef enum {
 	EVAL_STATUS_RUNNING,
 } eval_ret_t;
 
+void free_string( void *ptr );
+
 eval_ret_t eval_step( stack_frame_t **frame );
 token_t *eval_loop( stack_frame_t *base );
 token_t *eval_loop_timed( stack_frame_t *base, unsigned limit );

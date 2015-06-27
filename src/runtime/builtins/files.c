@@ -26,10 +26,10 @@ token_t *builtin_open( stack_frame_t *frame ){
 
 	if ( frame->ntokens >= 3 ){
 		if ( frame->expr->next->type == TYPE_STRING ){
-			fname = frame->expr->next->data;
+			fname = shared_get( frame->expr->next->data );
 
 			if ( frame->expr->next->next->type == TYPE_STRING ){
-				mode = frame->expr->next->next->data;
+				mode = shared_get( frame->expr->next->next->data );
 
 				if (( fp = fopen( fname, mode ))){
 					ret = alloc_token( );
@@ -73,7 +73,7 @@ token_t *builtin_readall( stack_frame_t *frame ){
 
 			ret = alloc_token( );
 			ret->type = TYPE_STRING;
-			ret->data = dat;
+			ret->data = shared_new( dat, free_string );
 
 		} else {
 			frame->error_call( frame, "[%s] Expected file, but have %s\n",

@@ -7,8 +7,6 @@
 #include <stdio.h>
 #include <string.h>
 
-extern void free_string( void *ptr );
-
 token_t *builtin_string_append( stack_frame_t *frame ){
 	token_t *ret = NULL;
 	token_t *op1, *op2;
