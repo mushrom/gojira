@@ -45,9 +45,12 @@ typedef enum {
 	TYPE_EXTERN_PROC,
 	TYPE_SYNTAX,
 	TYPE_VARIABLE_REF,
+
+	// Types for custom extensions
 	TYPE_FILE,
 	TYPE_ITERATOR,
 	TYPE_SOCKET,
+	TYPE_HASHMAP,
 
 	TYPE_END,
 } type_t;

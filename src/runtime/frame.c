@@ -82,6 +82,10 @@ struct global_builtin {
 	{ "tcp-getchar",     builtin_tcp_getchar },
 	{ "tcp-putchar",     builtin_tcp_putchar },
 #endif
+
+	//hashmap functions
+	{ "hashmap",         builtin_hashmap_make },
+	{ "hashmap-get",     builtin_hashmap_get },
 };
 
 // Adds an "external function" to a frame, and handles registering the tokens for garbage collection
@@ -248,7 +252,7 @@ token_t *frame_add_token( st_frame_t *frame, token_t *token ){
 		frame->expr = frame->end = meh = clone_token( token );
 		frame_register_one_token( frame, meh );
 		meh->status = GC_UNMARKED;
-		
+
 	} else {
 		frame->end->next = clone_token_tree( token );
 		frame->end->next = frame_register_token_tree( frame, frame->end->next );
@@ -269,7 +273,7 @@ token_t *frame_add_token_noclone( st_frame_t *frame, token_t *token ){
 		//frame_register_token_tree( frame, token );
 		frame_register_one_token( frame, token );
 		token->status = GC_UNMARKED;
-		
+
 	} else {
 		frame->end->next = token;
 		frame->end->next = frame_register_token_tree( frame, frame->end->next );

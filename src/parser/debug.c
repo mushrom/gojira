@@ -36,6 +36,7 @@ char *debug_strings[] = {
 	"file",
 	"iterator",
 	"socket",
+	"hashmap",
 
 	"If you see this something has gone terribly wrong",
 };

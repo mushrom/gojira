@@ -263,6 +263,19 @@ bool eval_frame_expr( stack_frame_t **frame_ret ){
 
 			break;
 
+		case TYPE_HASHMAP:
+			{
+				foo = ext_proc_token( builtin_hashmap_get );
+				frame_register_one_token( frame, foo );
+
+				foo->next = frame->expr;
+				frame->expr = foo;
+				frame->ntokens++;
+				apply = false;
+			}
+
+			break;
+
 		default:
 			frame->error_call( frame, "[%s] Can't apply \"%s\"\n", __func__, type_str( frame->expr->type ));
 			ret = true;

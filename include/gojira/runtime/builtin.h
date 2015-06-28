@@ -87,6 +87,10 @@ token_t *builtin_tcp_putchar( stack_frame_t *frame );
 // debugger breakpoint function
 token_t *debugger_loop( stack_frame_t *frame );
 
+// hashmap things
+token_t *builtin_hashmap_get( stack_frame_t *frame );
+token_t *builtin_hashmap_make( stack_frame_t *frame );
+
 #ifdef __cplusplus
 }
 #endif
