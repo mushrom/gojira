@@ -1,5 +1,6 @@
 #include <gojira/runtime/runtime.h>
 #include <gojira/runtime/builtin.h>
+#include <gojira/runtime/garbage.h>
 #include <gojira/parse_debug.h>
 #include <gojira/libs/hashmap.h>
 #include <gojira/libs/shared.h>
@@ -75,12 +76,13 @@ token_t *builtin_hashmap_get( stack_frame_t *frame ){
 
 	if ( frame->ntokens == 3 ){
 		if ( frame->expr->next->type == TYPE_HASHMAP ){
-			if ( frame->expr->next->next->type == TYPE_SYMBOL ){
+			if ( frame->expr->next->next->type == TYPE_SYMBOL ||
+					frame->expr->next->next->type == TYPE_STRING )
+			{
 				//token_t *map_tok = frame->expr->next;
 				token_t *sym = frame->expr->next->next;
 				char *buf = shared_get( sym->data );
 				hashmap_t *map = shared_get( frame->expr->next->data );
-
 				token_t *temp = hashmap_get( map, hash_string( buf ));
 
 				if ( temp ){
@@ -91,7 +93,6 @@ token_t *builtin_hashmap_get( stack_frame_t *frame ){
 					ret->type = TYPE_BOOLEAN;
 					ret->smalldata = false;
 				}
-
 
 			} else {
 				frame->error_call(
