@@ -77,7 +77,6 @@ bool eval_frame_subexpr( stack_frame_t **frame_ret ){
 			if ( move->down == NULL ){
 				frame->error_call( frame, "[%s] Error: Empty expression\n", __func__ );
 
-				//stack_trace( frame );
 				ret = true;
 				break;
 			}
@@ -97,14 +96,15 @@ bool eval_frame_subexpr( stack_frame_t **frame_ret ){
 					move = frame_find_var( frame, varname, RECURSE );
 
 					if ( move ){
-						frame_add_token( frame, move );
-
-						if ( move->type != TYPE_SYNTAX ){
+						if ( move->type != TYPE_SYNTAX || frame->expr ){
+							frame_add_token( frame, move );
 							frame->ptr = frame->ptr->next;
 
 						} else {
-							for ( frame->ptr = frame->ptr->next; frame->ptr; frame->ptr = frame->ptr->next )
-								frame_add_token( frame, frame->ptr );
+							frame->expr = clone_token( move );
+							frame_register_one_token( frame, frame->expr );
+							frame->expr->next = frame->ptr->next;
+							frame->ptr = NULL;
 						}
 
 					} else {
@@ -121,16 +121,17 @@ bool eval_frame_subexpr( stack_frame_t **frame_ret ){
 		case TYPE_VARIABLE_REF:
 			{
 				variable_t *var;
-
 				var = shared_get( frame->ptr->data );
-				frame_add_token( frame, var->token );
 
-				if ( var->token->type != TYPE_SYNTAX ){
+				if ( var->token->type != TYPE_SYNTAX || frame->expr ){
+					frame_add_token( frame, var->token );
 					frame->ptr = frame->ptr->next;
 
 				} else {
-					for ( frame->ptr = frame->ptr->next; frame->ptr; frame->ptr = frame->ptr->next )
-						frame_add_token( frame, frame->ptr );
+					frame->expr = clone_token( var->token );
+					frame_register_one_token( frame, frame->expr );
+					frame->expr->next = frame->ptr->next;
+					frame->ptr = NULL;
 				}
 			}
 
