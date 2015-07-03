@@ -11,6 +11,8 @@
 #define DELIMITER	"()[]{} "
 #define IDENTIFIER	ALPHANUM "!@#$%^&*_-=+/?<>.~:"
 #define SEPERATOR	" \t\n\r"
+#define INDENT		" \t"
+#define NEWLINE     "\n\r"
 
 /* Used to return multiple values from get_token_from_str */
 typedef struct token_return {
@@ -82,7 +84,7 @@ static inline unsigned spanchars( char_pred predicate, char *s ){
 static token_return_t get_token_from_str( char *string ){
 	token_return_t ret;
 	char *temp, *foo;
-	unsigned i;
+	unsigned i, indent = 0;
 	
 	ret = (token_return_t){
 		.token 	= calloc( 1, sizeof( token_t )),
@@ -90,9 +92,16 @@ static token_return_t get_token_from_str( char *string ){
 		.found	= false,
 	};
 
-	for ( ; *string && strchr( SEPERATOR, *string ); string++ );
+	for ( indent = 0; *string && strchr( INDENT, *string ); string++, indent++ );
+	//for ( ; *string && strchr( SEPERATOR, *string ); string++ );
 
-	if ( *string ){
+	if ( indent ){
+		ret.string = string;
+		ret.token->type = TYPE_INDENT;
+		ret.token->smalldata = indent;
+		ret.found = true;
+
+	} else if ( *string ){
 		// Check for parenthesis
 		if ( *string == '(' || *string == '{' || *string == '[' ){
 			ret.string = string + 1;
@@ -120,6 +129,16 @@ static token_return_t get_token_from_str( char *string ){
 		} else if ( *string == '.' && strchr( SEPERATOR, string[1])){
 			ret.string = string + 1;
 			ret.token->type = TYPE_PERIOD;
+			ret.found = true;
+
+		} else if ( strchr( NEWLINE, *string )){
+			ret.string = string + 1;
+			ret.token->type = TYPE_NEWLINE;
+			ret.found = true;
+
+		} else if ( *string == ':' && strchr( SEPERATOR, string[1] )){
+			ret.string = string + 1;
+			ret.token->type = TYPE_COLON;
 			ret.found = true;
 
 		// Check for strings
@@ -171,7 +190,6 @@ static token_return_t get_token_from_str( char *string ){
 		} else if ( *string == ';' || (*string == '#' && string[1] == '!')){
 			for ( i = 0; string[i] && string[i + 1] != '\n'; i++ );
 			ret = get_token_from_str( string + i + 1 );
-
 
 		} else if ( *string == '#' ){
 			/* could be either vector, boolean or character

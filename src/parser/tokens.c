@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <gojira/parse_debug.h>
+#include <gojira/parser.h>
+#include <gojira/lexer.h>
 #include <gojira/tokens.h>
 #include <stdbool.h>
 #include <string.h>
@@ -103,7 +105,7 @@ void print_token_no_recurse( token_t *token ){
 
 			case TYPE_STRING:
 			case TYPE_SYMBOL:
-				printf( "%s", (char *)token->data );
+				printf( "%s", (char *)shared_get( token->data ));
 				break;
 
 			default:
@@ -192,6 +194,16 @@ token_t *strip_token( token_t *tokens, type_t type ){
 	return ret;
 }
 
+token_t *remove_token_list( token_t *tokens, type_t remove[], unsigned n ){
+	token_t *ret = tokens;
+	int i;
+
+	for ( i = 0; ret && i < n; i++ )
+		ret = strip_token( ret, remove[i] );
+
+	return ret;
+}
+
 // Removes all "punctuation" tokens from a tree, which are unneeded after parsing is done
 token_t *remove_punc_tokens( token_t *tokens ){
 	token_t *ret = tokens;
@@ -200,19 +212,25 @@ token_t *remove_punc_tokens( token_t *tokens ){
 		TYPE_OCTOTHORPE, TYPE_TOKEN_LIST, TYPE_BASE_TOKEN, TYPE_NULL
 	};
 
-	int i;
 	int size = sizeof( remove ) / sizeof( type_t );
-
-	for ( i = 0; ret && i < size; i++ )
-		ret = strip_token( ret, remove[i] );
-
-	if ( ret ){
-		ret->down = remove_punc_tokens( ret->down );
-		ret->next = remove_punc_tokens( ret->next );
-	}
+	ret = remove_token_list( tokens, remove, size );
 
 	return ret;
 }
+
+// Removes all "metadata" tokens from a tree, which are only used in indentation-sensitive parsers
+token_t *remove_meta_tokens( token_t *tokens ){
+	token_t *ret = tokens;
+	type_t remove[] = {
+		TYPE_INDENT, TYPE_NEWLINE, TYPE_COLON, TYPE_PERIOD, TYPE_COMMA
+	};
+
+	int size = sizeof( remove ) / sizeof( type_t );
+	ret = remove_token_list( tokens, remove, size );
+
+	return ret;
+}
+
 
 bool has_shared_data( type_t type ){
 	return type == TYPE_VARIABLE_REF || type == TYPE_PROCEDURE;

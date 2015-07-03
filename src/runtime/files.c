@@ -28,11 +28,24 @@ bool evaluate_file( stack_frame_t *frame, char *filename ){
     bool ret = false;
     char *buf;
     token_t *foo;
+	token_t *(*token_parser)(char *) = parse_scheme_tokens;
 
     if ( fp ){
         buf = read_input_file( fp );
+
         if ( buf ){
-            foo = remove_punc_tokens( parse_tokens( lexerize( buf )));
+			char *type = strchr( filename, '.' );
+
+			//foo = lexerize( buf );
+
+			if ( type && (strcmp(type, ".mlisp") == 0 )){
+				//printf( "[%s] Got here, would use alternate parser\n", __func__ );
+				//foo = preprocess_mlisp( foo );
+				token_parser = parse_mlisp_tokens;
+			}
+
+			//foo = remove_punc_tokens( parse_tokens( remove_meta_tokens( foo )));
+            foo = token_parser( buf );
             gc_unmark( foo );
 
             if ( foo ){
@@ -46,6 +59,7 @@ bool evaluate_file( stack_frame_t *frame, char *filename ){
         }
 
         fclose( fp );
+
     } else {
         perror( filename );
     }

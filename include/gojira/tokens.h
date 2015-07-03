@@ -28,12 +28,17 @@ typedef enum {
 	TYPE_ASTERISK,
 	TYPE_COMMA,
 	TYPE_SEMICOLON,
+	TYPE_COLON,
 
 	// Generated from symbol names in lexer
 	TYPE_LAMBDA,
 	TYPE_IF,
 	TYPE_DEF_SYNTAX,
 	TYPE_SYNTAX_RULES,
+
+	// Generated as 'metadata' from the lexer
+	TYPE_NEWLINE,
+	TYPE_INDENT,
 
 	// Types used by parser
 	TYPE_BASE_TOKEN,
@@ -90,7 +95,9 @@ typedef struct token {
 void print_token( token_t *token );
 token_t *dump_tokens( token_t *tokens );
 token_t *strip_token( token_t *tokens, type_t type );
+token_t *remove_token_list( token_t *tokens, type_t remove[], unsigned n );
 token_t *remove_punc_tokens( token_t *tokens );
+token_t *remove_meta_tokens( token_t *tokens );
 
 bool has_shared_data( type_t type );
 token_t *clone_token( token_t *token );
@@ -102,6 +109,8 @@ unsigned tokens_length( token_t *tree );
 token_t *replace_symbol( token_t *tokens, token_t *replace, char *name );
 token_t *replace_symbol_safe( token_t *tokens, token_t *replace, char *name );
 token_t *replace_type( token_t *tokens, token_t *replace, type_t type );
+
+token_t *parse_scheme_tokens( char *buf );
 
 token_t *debug_print( token_t *tokens );
 

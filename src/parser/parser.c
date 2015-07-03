@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <gojira/parser.h>
+#include <gojira/lexer.h>
 #include <gojira/parse_debug.h>
 #include <gojira/scheme_rules.h>
 
@@ -113,10 +114,10 @@ token_t *reduce( token_t *tokens, type_t type ){
 
 token_t *parse_tokens( token_t *tokens ){
 	token_t *ret = NULL;
-
-	//printf( "-=[ Rules dump: \n" );
-	//dump_rules( 0, scheme_rules );
 	ret = reduce( tokens, TYPE_NULL );
-
 	return ret;
+}
+
+token_t *parse_scheme_tokens( char *buf ){
+	return remove_punc_tokens( parse_tokens( remove_meta_tokens( lexerize( buf ))));
 }

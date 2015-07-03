@@ -19,11 +19,15 @@ char *debug_strings[] = {
 	"*",
 	",",
 	";",
+	":",
 
 	"lambda",
 	"if",
 	"define-syntax",
 	"syntax-rules",
+
+	"newline",
+	"indent",
 
 	"base token",
 	"token_list",

@@ -110,7 +110,8 @@ int main( int argc, char *argv[] ){
 
 			if ( buf ){
 				// generate a parse tree, and make sure all tokens are "clean" for the GC
-				tree = remove_punc_tokens( parse_tokens( lexerize( buf )));
+				//tree = remove_punc_tokens( parse_tokens( remove_meta_tokens( lexerize( buf ))));
+				tree = parse_scheme_tokens( buf );
 				gc_unmark( tree );
 
 				// Only interpret the tree if there is a tree

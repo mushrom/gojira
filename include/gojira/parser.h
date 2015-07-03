@@ -28,6 +28,9 @@ token_t *reduceto( token_t *, type_t );
 token_t *reduce( token_t *, type_t );
 type_t predict( token_t * );
 rule_t *gen_cminus_rules( );
+token_t *parse_scheme_tokens( char *buf );
+token_t *parse_mlisp_tokens( char *buf );
+token_t *preprocess_mlisp( token_t *tokens );
 
 #ifdef __cplusplus
 }
