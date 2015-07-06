@@ -72,6 +72,8 @@ struct global_builtin {
 	{ "display",         builtin_display },
 	{ "newline",         builtin_newline },
 	{ "read",            builtin_read },
+	{ "mkdir",           builtin_mkdir },
+	{ "exists?",         builtin_file_exists },
 #endif
 
 	// iterator functions

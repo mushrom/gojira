@@ -1,6 +1,8 @@
 #include <gojira/config.h>
 #include <string.h>
 #include <errno.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #if GOJIRA_ENABLE_FILES
 #include <gojira/runtime/runtime.h>
@@ -274,4 +276,70 @@ token_t *builtin_read( stack_frame_t *frame ){
 
 	return ret;
 }
+
+token_t *builtin_mkdir( stack_frame_t *frame ){
+	token_t *ret = NULL;
+	token_t *temp;
+	int result;
+
+	if ( frame->ntokens == 2 ){
+		temp = frame->expr->next;
+		if ( temp->type == TYPE_STRING ){
+			result = mkdir( shared_get( temp->data ), 0755 );
+
+			if ( result == 0 ){
+				ret = alloc_token( );
+				ret->type = TYPE_BOOLEAN;
+				ret->smalldata = true;
+
+			} else {
+				frame->error_call( frame,
+					"[%s] Error: could not create directory\n",
+					__func__, frame->ntokens - 1 );
+			}
+
+		} else {
+			frame->error_call( frame,
+				"[%s] Error: expected string, but have %s\n",
+				__func__, type_str( temp->type ));
+		}
+
+	} else {
+		frame->error_call( frame,
+			"[%s] Error: expected 1 argument, but have %u\n",
+			__func__, frame->ntokens - 1 );
+	}
+
+	return ret;
+}
+
+token_t *builtin_file_exists( stack_frame_t *frame ){
+	token_t *ret = NULL;
+	token_t *temp;
+	int result;
+
+	if ( frame->ntokens == 2 ){
+		temp = frame->expr->next;
+		if ( temp->type == TYPE_STRING ){
+			result = access( shared_get( temp->data ), F_OK );
+
+			ret = alloc_token( );
+			ret->type = TYPE_BOOLEAN;
+			ret->smalldata = result == 0;
+
+		} else {
+			frame->error_call( frame,
+				"[%s] Error: expected string, but have %s\n",
+				__func__, type_str( temp->type ));
+		}
+
+	} else {
+		frame->error_call( frame,
+			"[%s] Error: expected 1 argument, but have %u\n",
+			__func__, frame->ntokens - 1 );
+	}
+
+	return ret;
+}
+
 #endif
