@@ -239,4 +239,39 @@ token_t *builtin_newline( stack_frame_t *frame ){
 
 	return ret;
 }
+
+token_t *builtin_read( stack_frame_t *frame ){
+	token_t *ret = NULL;
+	token_t *move;
+	char *buf;
+	FILE *fp;
+
+	move = frame->expr->next;
+	if ( frame->ntokens == 2 ){
+		if ( move->type == TYPE_FILE ){
+			fp = shared_get( move->data );
+			buf = read_input_file( fp );
+
+			ret = alloc_token( );
+			ret->type = TYPE_LIST;
+			ret->down = parse_scheme_tokens( buf );
+
+			free( buf );
+
+		} else {
+			frame->error_call(
+				frame,
+				"[%s] Error: expected file, but have %s\n",
+				__func__, type_str( move->type ));
+		}
+
+	} else {
+		frame->error_call(
+			frame,
+			"[%s] Error: expected 1 argument, but have %u\n",
+			__func__, frame->ntokens - 1 );
+	}
+
+	return ret;
+}
 #endif

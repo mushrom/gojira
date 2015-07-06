@@ -71,6 +71,7 @@ struct global_builtin {
 	{ "eof?",            builtin_is_eof },
 	{ "display",         builtin_display },
 	{ "newline",         builtin_newline },
+	{ "read",            builtin_read },
 #endif
 
 	// iterator functions

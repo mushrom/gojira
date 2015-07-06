@@ -73,6 +73,7 @@ token_t *builtin_readall( stack_frame_t *frame );
 token_t *builtin_read_char( stack_frame_t *frame );
 token_t *builtin_write_char( stack_frame_t *frame );
 token_t *builtin_is_eof( stack_frame_t *frame );
+token_t *builtin_read( stack_frame_t *frame );
 
 // iterator functions
 token_t *builtin_iterator_next( stack_frame_t *frame );
