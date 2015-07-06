@@ -67,9 +67,6 @@ token_t *gc_sweep( token_t *tree ){
 	token_t *temp;
 	token_t *ret = NULL;
 
-	//return tree;
-	//printf( "Doing garbage collection..." );
-
 	while ( move ){
 		switch( move->status ){
 			// don't free and unmark if marked as in-use
@@ -85,12 +82,6 @@ token_t *gc_sweep( token_t *tree ){
 
 			// free the token if not in use, and clean up heap
 			case GC_UNMARKED:
-				/*
-				printf( "Freeing token: " );
-				print_token( move );
-				printf( "\n" );
-				*/
-
 				temp = move->gc_link;
 				if ( last ){
 					last->gc_link = temp;
@@ -125,17 +116,14 @@ token_t *old_gc_sweep( token_t *tree ){
 		} else {
 			ret = gc_sweep( tree->gc_link );
 			free_token( tree );
-			//ret = free_all_unmarked( ret, tree->down );
-			//free_token_tree( tree );
-			/*
-			free_all_unmarked( tree->down );
-			*/
 		}
 	}
 
 	return ret;
 }
 
+#if GOJIRA_DEBUG
+#include <gojira/runtime/printer.h>
 void gc_dump_tokens( token_t *token ){
 	int i;
 	token_t *move;
@@ -153,3 +141,4 @@ void gc_dump( stack_frame_t *frame ){
 
 	gc_dump_tokens( frame->heap );
 }
+#endif

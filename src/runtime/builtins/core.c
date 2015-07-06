@@ -138,21 +138,6 @@ token_t *builtin_divide( stack_frame_t *frame ){
 	return ret;
 }
 
-token_t *builtin_display( stack_frame_t *frame ){
-	token_t *ret;
-	token_t *move;
-
-	ret = alloc_token( );
-	ret->type = TYPE_NULL;
-
-	move = frame->expr->next;
-	if ( move ){
-		print_token( move );
-	}
-
-	return ret;
-}
-
 token_t *builtin_equal( stack_frame_t *frame ){
 	token_t *ret;
 	bool val = false;
@@ -413,17 +398,6 @@ token_t *builtin_multiply( stack_frame_t *frame ){
 	return ret;
 }
 
-token_t *builtin_newline( stack_frame_t *frame ){
-	token_t *ret;
-
-	ret = alloc_token( );
-	ret->type = TYPE_NULL;
-
-	putchar( '\n' );
-
-	return ret;
-}
-
 token_t *builtin_return_first( stack_frame_t *frame ){
 	return frame->expr->next;
 }
@@ -437,7 +411,6 @@ token_t *builtin_stacktrace( stack_frame_t *frame ){
 
 	ret = alloc_token( );
 	ret->type = TYPE_NULL;
-
 	stack_trace( frame );
 
 	return ret;

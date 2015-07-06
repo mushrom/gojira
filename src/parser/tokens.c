@@ -10,85 +10,9 @@
 #include <gojira/libs/shared.h>
 #include <gojira/libs/dlist.h>
 #include <gojira/runtime/runtime.h>
+#include <gojira/runtime/garbage.h>
 
-void print_token( token_t *token ){
-	procedure_t *proc;
-	shared_t *shr;
-
-	if ( token ){
-		switch ( token->type ){
-			case TYPE_NUMBER:
-				printf( "%d", token->smalldata );
-				break;
-
-			case TYPE_BOOLEAN:
-				printf( "#%c", (token->smalldata == true)? 't' : 'f' );
-				break;
-
-			case TYPE_STRING:
-			case TYPE_SYMBOL:
-				printf( "%s", (char *)shared_get( token->data ));
-				break;
-
-			case TYPE_CHAR:
-				if ( token->smalldata == '\n' ){
-					printf( "#\\newline" );
-				} else if ( token->smalldata == '\r' ){
-					printf( "#\\return" );
-				} else {
-					printf( "#\\%c", token->smalldata );
-				}
-				break;
-
-			case TYPE_LIST:
-				putchar( '(' );
-				dump_tokens( token->down );
-				putchar( ')' );
-				break;
-
-			case TYPE_PROCEDURE:
-				shr = token->data;
-				proc = shared_get( shr );
-
-				printf( "#<%s (", type_str( token->type ));
-				dump_tokens( proc->args );
-				printf( ") @ %p>", (void *)shr );
-
-				/* TODO: add some sort of debugging flag to print the body tokens
-				printf( "(" );
-				dump_tokens( proc->body );
-				printf( ")" );
-				*/
-				break;
-
-			case TYPE_VECTOR:
-				shr = token->data;
-
-				printf( "#(" );
-
-				if ( token->flags & T_FLAG_HAS_SHARED ){
-					dlist_t *foo = shared_get( shr );
-					unsigned i;
-
-					foreach_in_dlist( i, foo ){
-						if ( i > 0 )
-							putchar( ' ' );
-
-						dump_tokens( dlist_get( foo, i ));
-					}
-				}
-
-				printf( ")" );
-				break;
-
-			default:
-				printf( "#<%s>", type_str( token->type ));
-				break;
-		}
-	}
-}
-
-void print_token_no_recurse( token_t *token ){
+void debug_print_token( token_t *token ){
 	if ( token ){
 		switch ( token->type ){
 			case TYPE_NUMBER:
@@ -115,20 +39,6 @@ void print_token_no_recurse( token_t *token ){
 	}
 }
 
-// Prints all the tokens in a given tree
-token_t *dump_tokens( token_t *tokens ){
-	token_t *move;
-
-	for ( move = tokens; move; move = move->next ){
-		print_token( move );
-		if ( move->next )
-			putchar( ' ' );
-	}
-
-	return tokens;
-}
-
-#include <gojira/runtime/garbage.h>
 token_t *debug_print_iter( token_t *tokens, unsigned level ){
 	if ( tokens ){
 		unsigned i;
@@ -145,7 +55,7 @@ token_t *debug_print_iter( token_t *tokens, unsigned level ){
 		for ( i = 0; i < level; i++ )
 			printf( "    " );
 
-		print_token_no_recurse( tokens );
+		debug_print_token( tokens );
 		printf( "\n" );
 
 		debug_print_iter( tokens->down, level + 1 );

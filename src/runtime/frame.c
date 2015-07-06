@@ -6,6 +6,8 @@
 #include <gojira/libs/shared.h>
 #include <gojira/config.h>
 
+#include <gojira/runtime/printer.h>
+
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -23,8 +25,6 @@ struct global_builtin {
 	{ "modulo",          builtin_modulo },
 	{ "-",               builtin_subtract },
 	{ "/",               builtin_divide },
-	{ "display",         builtin_display },
-	{ "newline",         builtin_newline },
 	{ "stacktrace",      builtin_stacktrace },
 	{ "eq?",             builtin_equal },
 	{ "<",               builtin_lessthan },
@@ -69,6 +69,8 @@ struct global_builtin {
 	{ "write-char",      builtin_write_char },
 	{ "load!",           builtin_load_global_file },
 	{ "eof?",            builtin_is_eof },
+	{ "display",         builtin_display },
+	{ "newline",         builtin_newline },
 #endif
 
 	// iterator functions

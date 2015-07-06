@@ -6,6 +6,7 @@
 #include <gojira/runtime/runtime.h>
 #include <gojira/runtime/garbage.h>
 #include <gojira/runtime/builtin.h>
+#include <gojira/runtime/printer.h>
 #include <gojira/runtime/files.h>
 #include <gojira/parse_debug.h>
 
@@ -103,7 +104,7 @@ token_t *builtin_read_char( stack_frame_t *frame ){
 			if ( !feof( fp )){
 				ret = alloc_token( );
 				ret->type = TYPE_CHAR;
-				ret->smalldata = c; 
+				ret->smalldata = c;
 
 			} else {
 				ret = alloc_token( );
@@ -186,6 +187,54 @@ token_t *builtin_is_eof( stack_frame_t *frame ){
 			frame->error_call( frame, "[%s] Expected file, but have %s\n",
 				__func__, type_str( frame->expr->next->type ));
 		}
+	}
+
+	return ret;
+}
+
+token_t *builtin_display( stack_frame_t *frame ){
+	token_t *ret = NULL;
+	token_t *move;
+	token_t *file_tok;
+	FILE *fp;
+
+
+	move = frame->expr->next;
+	if ( move ){
+		ret = alloc_token( );
+		ret->type = TYPE_NULL;
+		file_tok = move->next;
+
+		if ( file_tok && file_tok->type == TYPE_FILE ){
+			fp = shared_get( file_tok->data );
+			file_print_token( fp, move );
+
+		} else {
+			file_print_token( stdout, move );
+		}
+
+	} else {
+		frame->error_call(
+			frame,
+			"[%s] Error: expected 1 or 2 arguments, but have %u\n",
+			__func__, frame->ntokens - 1 );
+	}
+
+	return ret;
+}
+
+token_t *builtin_newline( stack_frame_t *frame ){
+	token_t *ret;
+
+	ret = alloc_token( );
+	ret->type = TYPE_NULL;
+
+	if ( frame->expr->next ){
+		FILE *fp = shared_get( frame->expr->next->data );
+		fputc( '\n', fp );
+
+	} else {
+		putchar( '\n' );
 	}
 
 	return ret;

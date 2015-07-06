@@ -92,8 +92,6 @@ typedef struct token {
 	struct token *gc_link;
 } token_t;
 
-void print_token( token_t *token );
-token_t *dump_tokens( token_t *tokens );
 token_t *strip_token( token_t *tokens, type_t type );
 token_t *remove_token_list( token_t *tokens, type_t remove[], unsigned n );
 token_t *remove_punc_tokens( token_t *tokens );
