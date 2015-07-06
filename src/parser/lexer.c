@@ -219,6 +219,30 @@ static token_return_t get_token_from_str( char *string ){
 					ret.token->smalldata = '\r';
 					ret.found = true;
 
+				} else if ( strncmp( string + 2, "space", 5 ) == 0 ){
+					ret.string = string + 7;
+					ret.token->type = TYPE_CHAR;
+					ret.token->smalldata = ' ';
+					ret.found = true;
+
+				} else if ( strncmp( string + 2, "tab", 3 ) == 0 ){
+					ret.string = string + 5;
+					ret.token->type = TYPE_CHAR;
+					ret.token->smalldata = '\t';
+					ret.found = true;
+
+				} else if ( strncmp( string + 2, "escape", 6 ) == 0 ){
+					ret.string = string + 8;
+					ret.token->type = TYPE_CHAR;
+					ret.token->smalldata = '\x1b';
+					ret.found = true;
+
+				} else if ( strncmp( string + 2, "backspace", 9 ) == 0 ){
+					ret.string = string + 11;
+					ret.token->type = TYPE_CHAR;
+					ret.token->smalldata = '\b';
+					ret.found = true;
+
 				} else {
 					ret.string = string + 3;
 					ret.token->type = TYPE_CHAR;

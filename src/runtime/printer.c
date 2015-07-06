@@ -35,6 +35,14 @@ void file_print_token( FILE *fp, token_t *token ){
 					fprintf( fp, "#\\newline" );
 				} else if ( token->smalldata == '\r' ){
 					fprintf( fp, "#\\return" );
+				} else if ( token->smalldata == ' ' ){
+					fprintf( fp, "#\\space" );
+				} else if ( token->smalldata == '\t' ){
+					fprintf( fp, "#\\tab" );
+				} else if ( token->smalldata == '\x1b' ){
+					fprintf( fp, "#\\escape" );
+				} else if ( token->smalldata == '\b' ){
+					fprintf( fp, "#\\backspace" );
 				} else {
 					fprintf( fp, "#\\%c", token->smalldata );
 				}
