@@ -104,3 +104,11 @@
     (if (eq? n 0)
       (car xs)
       (list-ref (cdr xs) (- n 1))))))
+
+(define filter
+  (lambda (sieve xs)
+    (if (null? xs)
+        . '()
+    (if (sieve (car xs))
+        (cons (car xs) (filter sieve (cdr xs)))
+        (filter sieve (cdr xs))))))
