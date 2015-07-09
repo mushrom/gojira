@@ -8,6 +8,28 @@
 #include <gojira/runtime/runtime.h>
 #include <gojira/runtime/printer.h>
 
+static void escaped_print_str( FILE *fp, const char *buf ){
+	const char *s = buf;
+
+	fputc( '"', fp );
+
+	for ( ; *s; s++ ){
+		switch (*s) {
+			case '\\':
+				fprintf( fp, "\\\\" );
+				break;
+			case '"':
+				fprintf( fp, "\\\"" );
+				break;
+			default:
+				fputc( *s, fp );
+				break;
+		}
+	}
+
+	fputc( '"', fp );
+}
+
 void file_print_token( FILE *fp, token_t *token ){
 	procedure_t *proc;
 	shared_t *shr;
@@ -23,7 +45,7 @@ void file_print_token( FILE *fp, token_t *token ){
 				break;
 
 			case TYPE_STRING:
-				fprintf( fp, "\"%s\"", (char *)shared_get( token->data ));
+				escaped_print_str( fp, (char *)shared_get( token->data ));
 				break;
 
 			case TYPE_SYMBOL:
