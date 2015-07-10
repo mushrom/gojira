@@ -47,7 +47,7 @@ token_t *builtin_add( stack_frame_t *frame ){
 
 token_t *builtin_car( stack_frame_t *frame ){
 	token_t *move = frame->expr->next;
-	token_t *ret = move;
+	token_t *ret = NULL;
 
 	if ( move && move->type == TYPE_LIST && move->down ){
 		ret = move->down;
@@ -56,7 +56,7 @@ token_t *builtin_car( stack_frame_t *frame ){
         ret = builtin_iterator_access( frame );
 
 	} else {
-		frame->error_call( frame, "[%s] Bad argument type \"%s\"\n", __func__,
+		frame->error_call( frame, "[%s] Expected list, but have %s\n", __func__,
 				type_str( move->type ));
 	}
 
@@ -65,7 +65,7 @@ token_t *builtin_car( stack_frame_t *frame ){
 
 token_t *builtin_cdr( stack_frame_t *frame ){
 	token_t *move = frame->expr->next;
-	token_t *ret = move;
+	token_t *ret = NULL;
 
 	if ( move && move->type == TYPE_LIST && move->down ){
 		ret = alloc_token( );
@@ -76,7 +76,7 @@ token_t *builtin_cdr( stack_frame_t *frame ){
         ret = builtin_iterator_next( frame );
 
 	} else {
-		frame->error_call( frame, "[%s] Bad argument type \"%s\"\n", __func__,
+		frame->error_call( frame, "[%s] Expected list, but have %s\n", __func__,
 				type_str( move->type ));
 	}
 
@@ -110,30 +110,55 @@ token_t *builtin_cons( stack_frame_t *frame ){
 }
 
 token_t *builtin_divide( stack_frame_t *frame ){
-	token_t *ret;
+	token_t *ret = NULL;
 	token_t *move;
 	int sum = 1;
-
-	ret = alloc_token( );
-	ret->type = TYPE_NUMBER;
+	bool error = false;
 
 	move = frame->expr->next;
+
 	if ( move ){
-		sum = move->smalldata;
-		move = move->next;
+		if ( move->type == TYPE_NUMBER ){
+			sum = move->smalldata;
+			move = move->next;
 
-		foreach_in_list( move ){
-			if ( move->type == TYPE_NUMBER ){
-				sum /= move->smalldata;
+			foreach_in_list( move ){
+				if ( move->type == TYPE_NUMBER ){
+					sum /= move->smalldata;
 
-			} else {
-				frame->error_call( frame, "[%s] Error: Bad argument type \"%s\"\n", __func__, type_str( move->type ));
-				break;
+				} else {
+					frame->error_call( frame,
+						"[%s] Error: Bad argument type \"%s\"\n",
+						__func__,
+						type_str( move->type ));
+
+					error = true;
+					break;
+				}
 			}
+
+		} else {
+			frame->error_call( frame,
+				"[%s] Error: Bad argument type \"%s\"\n",
+				__func__,
+				type_str( move->type ));
+
+			error = true;
 		}
+	} else {
+		frame->error_call( frame,
+			"[%s] Error: Expected at least one argument, but have %u\n",
+			__func__,
+			frame->ntokens - 1);
+
+		error = true;
 	}
 
-	ret->smalldata = sum;
+	if ( !error ){
+		ret = alloc_token( );
+		ret->type = TYPE_NUMBER;
+		ret->smalldata = sum;
+	}
 
 	return ret;
 }
