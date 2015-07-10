@@ -8,6 +8,21 @@ extern "C" {
 #include <gojira/tokens.h>
 #include <gojira/debugger/debugger.h>
 
+
+// Convenience macros for displaying various errors builtins may have
+#define FRAME_ERROR( frame, msg, ... ) \
+	frame->error_call( frame, "[%s] Error: " msg "\n", \
+		__func__, __VA_ARGS__ );
+
+#define FRAME_ERROR_ARGTYPE( frame, expected, actual ) \
+	frame->error_call( frame, "[%s] Error: expected " #expected ", but got %s\n", \
+		__func__, type_str( actual ));
+
+#define FRAME_ERROR_ARGNUM( frame, expected ) \
+	frame->error_call( frame, \
+		"[%s] Error: Expected " #expected " arguments, but have %u\n", \
+		__func__, frame->ntokens - 1 );
+
 typedef token_t *(*scheme_func)( stack_frame_t * );
 
 typedef struct ext_proc {
