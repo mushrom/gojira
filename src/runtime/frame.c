@@ -95,7 +95,9 @@ struct global_builtin {
 
 // Adds an "external function" to a frame, and handles registering the tokens for garbage collection
 variable_t *global_add_func( st_frame_t *frame, char *name, scheme_func handle ){
-	return frame_add_var( frame, name, frame_register_one_token( frame, ext_proc_token( handle )), NO_RECURSE );
+	return frame_add_var( frame, name,
+		frame_register_one_token( frame, ext_proc_token( handle )),
+			NO_RECURSE, VAR_IMMUTABLE );
 }
 
 st_frame_t *init_global_frame( st_frame_t *frame ){
@@ -385,14 +387,12 @@ void free_var( void *ptr ){
 	}
 }
 
-variable_t *frame_add_var( st_frame_t *frame, char *key, token_t *token, bool recurse ){
+variable_t *frame_add_var( st_frame_t *frame, char *key, token_t *token, bool recurse, bool mutable ){
 	variable_t *new_var = NULL;
 	shared_t *new_shared = NULL;
-	bool add_var = false;
 
 	if ( frame ){
 		if ( !frame->vars )
-			//frame->vars = list_create( 0 );
 			frame->vars = hashmap_create( 8 );
 
 		new_var = frame_find_var_struct( frame, key, recurse );
@@ -401,20 +401,21 @@ variable_t *frame_add_var( st_frame_t *frame, char *key, token_t *token, bool re
 			new_var = calloc( 1, sizeof( variable_t ));
 			new_var->key = strdup( key );
 			new_var->hash = hash_string( key );
+			new_var->is_mutable = mutable;
+			new_var->token = clone_token_tree( token );
 			new_shared = shared_new( new_var, free_var );
-			add_var = true;
 
-			//printf( "[%s] Adding variable with hash 0x%x\n", __func__, new_var->hash );
-		} else {
-			free_tokens( new_var->token );
-		}
-
-		//new_var->token = frame_register_token( frame, clone_token_tree( token ));
-		new_var->token = clone_token_tree( token );
-
-		if ( add_var ){
-			//list_add_data( frame->vars, new_shared );
 			hashmap_add( frame->vars, new_var->hash, new_shared );
+
+		} else if ( new_var->is_mutable ){
+			new_var->token = clone_token_tree( token );
+
+		} else {
+			/* TODO: existing variable isn't mutable, so error out */
+			printf( "[%s] Error: variable \"%s\" is not mutable\n",
+					__func__, key );
+
+			stack_trace( frame );
 		}
 
 	} else {

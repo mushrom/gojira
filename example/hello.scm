@@ -4,9 +4,10 @@
 
 (define make-hello
   (lambda (str)
+    (define :mut localstr str)
     (lambda ()
-      (define str (string-append "hello, " str))
-      str)))
+      (define localstr (string-append "hello, " localstr))
+      localstr)))
 
 (define world (make-hello "world!"))
 

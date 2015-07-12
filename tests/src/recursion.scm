@@ -1,9 +1,3 @@
-(intern-set 'if
-  (syntax-rules ()
-    ((_ condition a b)
-     ((condition (lambda () a)
-                 (lambda () b))))))
-
 (intern-set 'recurse-func
   (lambda (x)
     (display x)

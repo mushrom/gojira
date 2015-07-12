@@ -151,12 +151,9 @@ stack_frame_t *expand_procedure( stack_frame_t *frame, token_t *tokens ){
 
 	if ( tokens->type == TYPE_PROCEDURE ){
 		shr = tokens->data;
-		//proc = tokens->data;
 		proc = shared_get( shr );
 		move = tokens->next;
 		temp = proc->args;
-
-		//dump_tokens( move );
 
 		foreach_in_list( temp ){
 			if ( temp->type == TYPE_SYMBOL ){
@@ -167,19 +164,18 @@ stack_frame_t *expand_procedure( stack_frame_t *frame, token_t *tokens ){
 					break;
 				}
 
-				//printf( "[%s] Adding \"%s\" as %p\n", __func__, var_name, move );
-				frame_add_var( frame, var_name, move, NO_RECURSE );
+				// TODO: allow specifying mutable parameters
+				//frame_add_var( frame, var_name, move, NO_RECURSE, VAR_IMMUTABLE );
+				frame_add_var( frame, var_name, move, NO_RECURSE, VAR_IMMUTABLE );
 				move = move->next;
 
 			} else {
 				frame->error_call( frame, "[%s] Error: expected symbol in procedure definition, have \"%s\"\n",
 						__func__, type_str( temp->type ));
-				//stack_trace( ret );
 			}
 		}
 
 		ret = frame;
-
 		ret->expr = ret->end = NULL;
 
 		temp = ext_proc_token( builtin_return_last );

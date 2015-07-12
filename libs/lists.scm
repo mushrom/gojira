@@ -39,7 +39,7 @@
 		(car (cdr (car xs)))
 		(assq key (cdr xs))))))
 
-(define take)
+;(define take)
 (define take
   (lambda (x i)
     (if (or (eq? i 0) (null? x))
@@ -48,7 +48,7 @@
       (cons (car x)
             (take (cdr x) (- i 1))))))
 
-(define drop)
+;(define drop)
 (define drop
   (lambda (x i)
     (if (or (eq? i 0) (null? x))
@@ -56,7 +56,7 @@
      else
       (drop (cdr x) (- i 1)))))
 
-(define foreach)
+;(define foreach)
 (define foreach
   (lambda (xs f)
     (if (null? xs)

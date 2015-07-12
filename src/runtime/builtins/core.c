@@ -208,39 +208,67 @@ token_t *builtin_greaterthan( stack_frame_t *frame ){
 	return ret;
 }
 
-token_t *builtin_intern_set( stack_frame_t *frame ){
-	token_t *ret = NULL;
-	token_t *move;
+static bool set_variable( stack_frame_t *frame, const token_t *tokens, bool mutable ){
 	token_t *temp;
 	variable_t *var;
+	bool ret = false;
 
-	if ( frame->ntokens == 3 ){
-		bool error = false;
-		move = frame->expr->next;
+	if ( tokens->type == TYPE_SYMBOL ){
+		char *varname = shared_get( tokens->data );
+		if ( frame_add_var( frame->last, varname, tokens->next, NO_RECURSE, mutable )){
+			ret = true;
+		}
 
-		if ( move->type == TYPE_SYMBOL ){
-			char *varname = shared_get( move->data );
-			frame_add_var( frame->last, varname, move->next, NO_RECURSE );
+	} else if ( tokens->type == TYPE_VARIABLE_REF ){
+		var = shared_get( tokens->data );
+		temp = var->token;
 
-		} else if ( move->type == TYPE_VARIABLE_REF ){
-			var = shared_get( move->data );
-			temp = var->token;
-			var->token = clone_token( move->next );
+		if ( var->is_mutable ){
+			var->token = clone_token( tokens->next );
 			frame_register_tokens( frame, temp );
+			ret = true;
 
 		} else {
 			FRAME_ERROR( frame,
-				"expected symbol or variable reference, but have %s",
-				type_str( move->type ));
-		}
-
-		if ( !error ){
-			ret = alloc_token( );
-			ret->type = TYPE_NULL;
+				"variable \"%s\" is not mutable",
+				var->key );
 		}
 
 	} else {
+		FRAME_ERROR( frame,
+			"expected symbol or variable reference, but have %s",
+			type_str( tokens->type ));
+	}
+
+	return ret;
+}
+
+token_t *builtin_intern_set( stack_frame_t *frame ){
+	token_t *ret = NULL;
+	token_t *move;
+	bool mutable = false;
+	bool error = false;
+
+	if ( frame->ntokens == 3 ){
+		move = frame->expr->next;
+
+	} else if ( frame->ntokens == 4 ){
+		move = frame->expr->next->next;
+		mutable = true;
+
+	} else {
 		FRAME_ERROR_ARGNUM( frame, 2 );
+		error = true;
+	}
+
+	if ( !error ){
+		if ( !set_variable( frame, move, mutable )){
+			error = true;
+
+		} else {
+			ret = alloc_token( );
+			ret->type = TYPE_NULL;
+		}
 	}
 
 	return ret;
@@ -258,7 +286,7 @@ token_t *builtin_intern_set_global( stack_frame_t *frame ){
 			char *varname = shared_get( move->data );
 
 			for ( first = frame; first->last; first = first->last );
-			frame_add_var( first, varname, move->next, NO_RECURSE );
+			frame_add_var( first, varname, move->next, NO_RECURSE, VAR_MUTABLE );
 
 			ret = alloc_token( );
 			ret->type = TYPE_NULL;

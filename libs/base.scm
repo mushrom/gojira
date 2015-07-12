@@ -1,6 +1,8 @@
 ; necessary bits of the language that aren't implemented by the interpreter
 (intern-set 'define
   (syntax-rules ()
+    ((_ mutable sym def)
+     (intern-set mutable 'sym def))
     ((_ sym def)
      (intern-set 'sym def))
     ((_ sym)
@@ -103,9 +105,8 @@
       (seq (length (cdr ls))))))
 
 ; A basic module system
-(define modules '("base"))
-;(define modpath "./libs/")
-(define modpath "")
+(define :mut modules '("base"))
+(define :mut modpath "")
 
 (define as_modpath
   (lambda (name)

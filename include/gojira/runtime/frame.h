@@ -15,12 +15,18 @@ enum recurse_vals {
 	RECURSE    = true
 };
 
+enum variable_mutability {
+	VAR_IMMUTABLE,
+	VAR_MUTABLE,
+};
+
 typedef struct variable {
 	token_t *token;
 	char *key;
 
 	unsigned references;
 	unsigned hash;
+	bool is_mutable;
 } variable_t;
 
 struct stack_frame;
@@ -57,7 +63,8 @@ token_t *frame_register_one_token( st_frame_t *frame, token_t *token );
 token_t *frame_register_tokens( st_frame_t *frame, token_t *token );
 token_t *frame_alloc_token( st_frame_t *frame );
 
-variable_t *frame_add_var( st_frame_t *frame, char *key, token_t *token, bool recurse );
+//variable_t *frame_add_var( st_frame_t *frame, char *key, token_t *token, bool recurse );
+variable_t *frame_add_var( st_frame_t *frame, char *key, token_t *token, bool recurse, bool mutable );
 variable_t *frame_find_var_struct( st_frame_t *frame, char *key, bool recurse );
 token_t *frame_find_var( st_frame_t *frame, char *key, bool recurse );
 shared_t *frame_find_shared_struct( st_frame_t *frame, char *key, bool recurse );
