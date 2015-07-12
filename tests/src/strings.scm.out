@@ -1,9 +1,9 @@
-Hello, world
+"Hello, world"
 #t
 5
 #f
-testing this
-testing
-testing"this \
-\\""\
-abc\d
+"testing this"
+"testing"
+"testing\"this \\"
+"\\\\\"\"\\"
+"abc\\d"
