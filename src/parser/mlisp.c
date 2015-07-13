@@ -12,6 +12,7 @@ typedef struct indent_pos {
 	unsigned parens;
 } indent_pos_t;
 
+static void expand_closing_parens( stack_t *stack, token_t **pos );
 static void expand_mlisp_indent( stack_t *stack, token_t *pos );
 static void expand_mlisp_newline( stack_t *stack, token_t *pos );
 
@@ -65,7 +66,8 @@ token_t *preprocess_mlisp( token_t *tokens ){
 				} else if ( next->type == TYPE_INDENT ){
 					expand_mlisp_indent( stack, move );
 
-				} else if ( move->next->type != TYPE_NEWLINE && move->next->type != TYPE_NULL ){
+				} else {
+					expand_closing_parens( stack, &move );
 					push_indent( stack, 0, 1 );
 					insert_token( &move, TYPE_OPEN_PAREN );
 				}
@@ -86,20 +88,26 @@ token_t *preprocess_mlisp( token_t *tokens ){
 	return ret;
 }
 
+static void expand_closing_parens( stack_t *stack, token_t **pos ){
+	indent_pos_t *foo = NULL;
+
+	if ( stack_peek( stack )){
+		for ( foo = stack_pop( stack ); foo; foo = stack_pop( stack )){
+			unsigned i = foo->parens;
+
+			for ( ; i; i-- ){
+				insert_token( pos, TYPE_CLOSE_PAREN );
+			}
+		}
+	}
+}
+
 static void expand_mlisp_newline( stack_t *stack, token_t *pos ){
 	token_t *next = pos->next;
 	indent_pos_t *foo;
 
 	if ( !( next->next && next->next->type == TYPE_INDENT )){
-		if ( stack_peek( stack )){
-			for ( foo = stack_pop( stack ); foo; foo = stack_pop( stack )){
-				unsigned i = foo->parens;
-
-				for ( ; i; i-- ){
-					insert_token( &pos, TYPE_CLOSE_PAREN );
-				}
-			}
-		}
+		expand_closing_parens( stack, &pos );
 	}
 }
 
