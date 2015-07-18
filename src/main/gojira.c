@@ -11,6 +11,7 @@
 #include <gojira/runtime/garbage.h>
 #include <gojira/libs/stack.h>
 #include <gojira/runtime/files.h>
+#include <gojira/runtime/printer.h>
 #include <linenoise/linenoise.h>
 
 // Some function definitions used only in this file.
@@ -101,12 +102,14 @@ int main( int argc, char *argv[] ){
 		linenoiseSetCompletionCallback( goj_linenoise_complete );
 		really_global_frame = global_frame;
 		char *buf = "";
+		unsigned n = 0;
 
 		while ( buf ){
 			// Read a statement
 			//printf( "> " );
 			//char *buf = read_with_parens( stdin );
 			buf = linenoise( "> " );
+			n++;
 
 			if ( buf ){
 				// generate a parse tree, and make sure all tokens are "clean" for the GC
@@ -116,10 +119,17 @@ int main( int argc, char *argv[] ){
 
 				// Only interpret the tree if there is a tree
 				if ( tree ){
+					char varexpr[64];
 					linenoiseHistoryAdd( buf );
 					global_frame->ptr = tree;
 
 					eval_loop( global_frame );
+
+					snprintf( varexpr, sizeof(varexpr) - 1, "..%u", n );
+					frame_add_var( global_frame, varexpr,
+						global_frame->end, NO_RECURSE, VAR_IMMUTABLE );
+
+					printf( "..%u = ", n );
 					print_token( global_frame->end );
 					putchar( '\n' );
 
