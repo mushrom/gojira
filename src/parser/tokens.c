@@ -12,7 +12,7 @@
 #include <gojira/runtime/runtime.h>
 #include <gojira/runtime/garbage.h>
 
-void debug_print_token( token_t *token ){
+void debug_print_token( const token_t *token ){
 	if ( token ){
 		switch ( token->type ){
 			case TYPE_NUMBER:
@@ -39,7 +39,7 @@ void debug_print_token( token_t *token ){
 	}
 }
 
-token_t *debug_print_iter( token_t *tokens, unsigned level ){
+const token_t *debug_print_iter( const token_t *tokens, unsigned level ){
 	if ( tokens ){
 		unsigned i;
 		if ( tokens->status == GC_MARKED ){
@@ -65,7 +65,7 @@ token_t *debug_print_iter( token_t *tokens, unsigned level ){
 	return tokens;
 }
 
-token_t *debug_print( token_t *tokens ){
+const token_t *debug_print( const token_t *tokens ){
 	return debug_print_iter( tokens, 0 );
 }
 
@@ -147,7 +147,7 @@ bool has_shared_data( type_t type ){
 }
 
 // Clones a single token
-token_t *clone_token( token_t *token ){
+token_t *clone_token( const token_t *token ){
 	token_t *ret = NULL;
 
 	ret = alloc_token( );
@@ -162,15 +162,10 @@ token_t *clone_token( token_t *token ){
 }
 
 // Clones every token reachable from the given token
-token_t *clone_tokens( token_t *tree ){
+token_t *clone_tokens( const token_t *tree ){
 	token_t *ret = NULL;
 
 	if ( tree ){
-		//ret = calloc( 1, sizeof( token_t ));
-		/*
-		ret = alloc_token( );
-		*ret = *tree;
-		*/
 		ret = clone_token( tree );
 
 		ret->down = clone_tokens( tree->down );
@@ -181,15 +176,10 @@ token_t *clone_tokens( token_t *tree ){
 }
 
 // Clones a token and all lower nodes
-token_t *clone_token_tree( token_t *tree ){
+token_t *clone_token_tree( const token_t *tree ){
 	token_t *ret = NULL;
 
 	if ( tree ){
-		//ret = calloc( 1, sizeof( token_t ));
-		/*
-		ret = alloc_token( );
-		memcpy( ret, tree, sizeof( token_t ));
-		*/
 		ret = clone_token( tree );
 
 		ret->down = clone_tokens( tree->down );
@@ -200,14 +190,10 @@ token_t *clone_token_tree( token_t *tree ){
 }
 
 // Clone only the topmost nodes of the tree, while keeping the lower nodes
-token_t *clone_token_spine( token_t *tree ){
+token_t *clone_token_spine( const token_t *tree ){
 	token_t *ret = NULL;
 
 	if ( tree ){
-		/*
-		ret = alloc_token( );
-		memcpy( ret, tree, sizeof( token_t ));
-		*/
 		ret = clone_token( tree );
 
 		ret->down = tree->down;
@@ -218,9 +204,9 @@ token_t *clone_token_spine( token_t *tree ){
 }
 
 // Returns the "horizontal" length of a tree, or how many "next" tokens there are
-unsigned tokens_length( token_t *tree ){
+unsigned tokens_length( const token_t *tree ){
 	unsigned ret;
-	token_t *move = tree;
+	const token_t *move = tree;
 
 	for ( ret = 0; move; move = move->next, ret++ );
 
@@ -228,7 +214,7 @@ unsigned tokens_length( token_t *tree ){
 }
 
 // Recursively replaces all symbol-type tokens named "name" with the "replace" token
-token_t *replace_symbol( token_t *tokens, token_t *replace, char *name ){
+token_t *replace_symbol( token_t *tokens, const token_t *replace, const char *name ){
 	token_t *ret = tokens;
 
 	if ( tokens ){
@@ -247,7 +233,8 @@ token_t *replace_symbol( token_t *tokens, token_t *replace, char *name ){
 }
 
 // Replaces tokens while preserving variable definitions in lambdas/procedures.
-token_t *replace_symbol_safe( token_t *tokens, token_t *replace, char *name ){
+// TODO: remove this in the future, if no use is found for it
+token_t *replace_symbol_safe( token_t *tokens, const token_t *replace, const char *name ){
 	token_t *ret = tokens;
 
 	if ( tokens ){
@@ -272,7 +259,7 @@ token_t *replace_symbol_safe( token_t *tokens, token_t *replace, char *name ){
 }
 
 // Recursively replaces all tokens of "type" with "replace"
-token_t *replace_type( token_t *tokens, token_t *replace, type_t type ){
+token_t *replace_type( token_t *tokens, const token_t *replace, type_t type ){
 	token_t *ret = tokens;
 	token_t *move;
 

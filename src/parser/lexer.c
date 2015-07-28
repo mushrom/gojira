@@ -17,13 +17,13 @@
 /* Used to return multiple values from get_token_from_str */
 typedef struct token_return {
 	token_t *token;
-	char *string;
+	const char *string;
 	bool found;
 } token_return_t;
 
 typedef bool (*char_pred)( char );
 
-static token_return_t get_token_from_str( char *string );
+static token_return_t get_token_from_str( const char *string );
 
 void free_string( void *ptr ){
 	//printf( "[%s] Freeing string \"%s\"\n", __func__, (char *)ptr );
@@ -32,7 +32,7 @@ void free_string( void *ptr ){
 
 // Extracts all possible tokens from the given string, returning a token tree
 // with all "next" fields pointing to the next token (so no "down" fields will be set)
-token_t *lexerize( char *string ){
+token_t *lexerize( const char *string ){
 	token_t *move;
 	token_t temp;
 	token_return_t foo;
@@ -66,7 +66,7 @@ static inline bool is_identifier_char( char c ){
 
 // like strspn, except instead of testing for chars in "accept", it tests for chars
 // for which predicate( char ) returns true.
-static inline unsigned spanchars( char_pred predicate, char *s ){
+static inline unsigned spanchars( char_pred predicate, const char *s ){
 	unsigned ret;
 
 	for ( ret = 0; s[ret] && predicate( s[ret] ); ret++ );
@@ -80,10 +80,12 @@ static inline unsigned spanchars( char_pred predicate, char *s ){
  * If a token wasn't found, "token" will be undefined, "found" will be false, and "string" undefined.
  *
  * TODO: possibly find a cleaner and less cumbersome way to return tokens.
+ *       split into smaller functions.
  */
-static token_return_t get_token_from_str( char *string ){
+static token_return_t get_token_from_str( const char *string ){
 	token_return_t ret;
-	char *temp, *foo;
+	const char *temp;
+	char *foo;
 	unsigned i, indent = 0;
 	
 	ret = (token_return_t){
@@ -262,15 +264,15 @@ static token_return_t get_token_from_str( char *string ){
 				( *string == '-' && strchr( DIGITS, *(string + 1)))) {
 
 			i = strspn( string, "-"DIGITS );
-			temp = malloc( sizeof( char[i + 1]));
-			strncpy( temp, string, i );
+			foo = malloc( sizeof( char[i + 1]));
+			strncpy( foo, string, i );
 
 			ret.string = string + i;
 			ret.token->type = TYPE_NUMBER;
 			ret.found = true;
-			ret.token->smalldata = atoi( temp );
+			ret.token->smalldata = atoi( foo );
 
-			free( temp );
+			free( foo );
 
 		// Check for an identifier
 		} else if ( is_identifier_char( *string )){
@@ -279,26 +281,22 @@ static token_return_t get_token_from_str( char *string ){
 			ret.string = string + i;
 			ret.found = true;
 
-			//temp = ret.token->data = malloc( sizeof( char[i + 1] ));
-			//strncpy( ret.token->data, string, i );
-			temp = malloc( sizeof( char[i + 1] ));
-			strncpy( temp, string, i );
-			temp[i] = 0;
+			foo = malloc( sizeof( char[i + 1] ));
+			strncpy( foo, string, i );
+			foo[i] = 0;
 
-			//printf( "> Have identifier \"%s\"\n", temp );
-
-			if ( strcmp( temp, "lambda" ) == 0   || strcmp( temp, "λ" ) == 0 ||
-			     strcmp( temp, "function" ) == 0 || strcmp( temp, "func" ) == 0 ){
+			if ( strcmp( foo, "lambda" ) == 0   || strcmp( foo, "λ" ) == 0 ||
+			     strcmp( foo, "function" ) == 0 || strcmp( foo, "func" ) == 0 ){
 				ret.token->type = TYPE_LAMBDA;
-				free( temp );
+				free( foo );
 
-			} else if ( strcmp( temp, "syntax-rules" ) == 0 ){
+			} else if ( strcmp( foo, "syntax-rules" ) == 0 ){
 				ret.token->type = TYPE_SYNTAX_RULES;
-				free( temp );
+				free( foo );
 
 			} else {
 				ret.token->type = TYPE_SYMBOL;
-				ret.token->data = shared_new( temp, free_string );
+				ret.token->data = shared_new( foo, free_string );
 				ret.token->flags = T_FLAG_HAS_SHARED;
 			}
 		}

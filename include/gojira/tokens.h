@@ -98,19 +98,19 @@ token_t *remove_punc_tokens( token_t *tokens );
 token_t *remove_meta_tokens( token_t *tokens );
 
 bool has_shared_data( type_t type );
-token_t *clone_token( token_t *token );
-token_t *clone_tokens( token_t *tree );
-token_t *clone_token_tree( token_t *tree );
-token_t *clone_token_spine( token_t *tree );
+token_t *clone_token( const token_t *token );
+token_t *clone_tokens( const token_t *tree );
+token_t *clone_token_tree( const token_t *tree );
+token_t *clone_token_spine( const token_t *tree );
 
-unsigned tokens_length( token_t *tree );
-token_t *replace_symbol( token_t *tokens, token_t *replace, char *name );
-token_t *replace_symbol_safe( token_t *tokens, token_t *replace, char *name );
-token_t *replace_type( token_t *tokens, token_t *replace, type_t type );
+unsigned tokens_length( const token_t *tree );
+token_t *replace_symbol( token_t *tokens, const token_t *replace, const char *name );
+token_t *replace_symbol_safe( token_t *tokens, const token_t *replace, const char *name );
+token_t *replace_type( token_t *tokens, const token_t *replace, type_t type );
 
 token_t *parse_scheme_tokens( char *buf );
 
-token_t *debug_print( token_t *tokens );
+const token_t *debug_print( const token_t *tokens );
 
 #include <gojira/runtime/allocate.h>
 

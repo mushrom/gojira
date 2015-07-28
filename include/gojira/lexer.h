@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-token_t *lexerize( char *string );
+token_t *lexerize( const char *string );
 
 #ifdef __cplusplus
 }
