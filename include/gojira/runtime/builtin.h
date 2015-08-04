@@ -51,6 +51,7 @@ token_t *builtin_car( stack_frame_t *frame );
 token_t *builtin_cdr( stack_frame_t *frame );
 token_t *builtin_is_null( stack_frame_t *frame );
 token_t *builtin_is_list( stack_frame_t *frame );
+token_t *builtin_is_symbol( stack_frame_t *frame );
 
 // String functions
 token_t *builtin_string_append( stack_frame_t *frame );

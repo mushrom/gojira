@@ -36,6 +36,7 @@ struct global_builtin {
 	{ "null?",           builtin_is_null },
 	{ "list",            builtin_list },
 	{ "list?",           builtin_is_list },
+	{ "symbol?",         builtin_is_symbol },
 	{ "intern-set",      builtin_intern_set },
 	{ "intern-set!",     builtin_intern_set_global },
 	{ "intern-sleep",    builtin_sleep },

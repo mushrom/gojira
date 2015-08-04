@@ -338,6 +338,24 @@ token_t *builtin_is_null( stack_frame_t *frame ){
 	return ret;
 }
 
+token_t *builtin_is_symbol( stack_frame_t *frame ){
+	token_t *ret = NULL;
+	token_t *tok;
+
+	if ( frame->ntokens == 2 ){
+		tok = frame->expr->next;
+
+		ret = alloc_token( );
+		ret->type = TYPE_BOOLEAN;
+		ret->smalldata = tok->type == TYPE_SYMBOL && tok->down == NULL;
+
+	} else {
+		FRAME_ERROR_ARGNUM( frame, 1 );
+	}
+
+	return ret;
+}
+
 token_t *builtin_lessthan( stack_frame_t *frame ){
 	token_t *ret = NULL;
 	token_t *op1, *op2;
