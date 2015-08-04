@@ -14,5 +14,6 @@ void *hashmap_add( hashmap_t *map, unsigned hash, void *val );
 void *hashmap_get( hashmap_t *map, unsigned hash );
 void hashmap_remove( hashmap_t *map, unsigned hash );
 unsigned hash_string( char *str );
+unsigned hash_string_accum( char *str, unsigned hash );
 
 #endif

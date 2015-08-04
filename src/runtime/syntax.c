@@ -44,9 +44,17 @@ token_t *compile_lambda( stack_frame_t *frame, token_t *args, token_t *tokens ){
 				ret->flags |= T_FLAG_HAS_SHARED;
 				ret->next = tokens->next;
 				ret->down = NULL;
-
-				//shr = frame_find_shared_struct( frame, varname, RECURSE );
 				ret->data = shared_aquire( shr );
+
+				{
+					variable_t *foo = shared_get( shr );
+					token_t *wut = foo->token;
+
+					if ( !foo->is_mutable && wut->type == TYPE_SYNTAX ){
+						DEBUGP( "[%s] Possible optimization here\n", __func__ );
+					}
+				}
+
 
 				free_token( tokens );
 			}
@@ -268,6 +276,164 @@ stack_frame_t *expand_procedure_old( stack_frame_t *frame, token_t *tokens ){
 	return ret;
 }
 
+bool syntax_matches( const token_t *pattern, const token_t *args ){
+	bool ret = (pattern && args) || (!pattern && !args);
+
+	if ( pattern && args ){
+		switch ( pattern->type ){
+			case TYPE_LIST:
+				ret = args->type == TYPE_LIST && syntax_matches( pattern->down, args->down );
+				ret = ret && syntax_matches( pattern->next, args->next );
+				break;
+
+			case TYPE_SYMBOL:
+				if ( pattern->next && pattern->next->type == TYPE_SYMBOL ){
+					char *str = shared_get( pattern->next->data );
+					if ( strcmp(str, "...") == 0 ){
+						DEBUGP( "[%s] Have variable-length pattern\n", __func__ );
+						ret = true;
+
+					} else {
+						ret = syntax_matches( pattern->next, args->next );
+					}
+
+				} else {
+					ret = syntax_matches( pattern->next, args->next );
+				}
+
+				break;
+
+			default:
+				DEBUGP( "[%s] Matching a literal value, %d==%d, %d\n",
+						__func__, pattern->smalldata, args->smalldata, ret );
+				ret =  ( pattern->type      == args->type )
+				    && ( pattern->smalldata == args->smalldata )
+				    && syntax_matches( pattern->next, args->next );
+				break;
+		}
+
+	} else if ( pattern ){
+		if ( pattern->type == TYPE_STRING ){
+			char *str = shared_get( pattern->data );
+
+			if ( strcmp(str, "...") == 0 )
+				ret = true;
+		}
+	}
+
+	return ret;
+}
+
+hashmap_t *syntax_get_names( const token_t *pattern, token_t *args, hashmap_t *map ){
+	hashmap_t *ret = map? map : hashmap_create(4);
+
+	if ( pattern && args ){
+		switch ( pattern->type ){
+			case TYPE_LIST:
+			case TYPE_QUOTED_TOKEN:
+				ret = syntax_get_names( pattern->down, args->down, ret );
+				ret = syntax_get_names( pattern->next, args->next, ret );
+				break;
+
+			case TYPE_SYMBOL: {
+				char *name = shared_get( pattern->data );
+
+				if ( pattern->next && pattern->next->type == TYPE_SYMBOL ){
+					char *str = shared_get( pattern->next->data );
+
+					if ( strcmp(str, "...") == 0 ){
+						unsigned hash = hash_string( name );
+						unsigned varhash = hash_string_accum( " #vararg", hash );
+						hashmap_add( ret, varhash, args );
+						hashmap_add( ret, hash, args );
+						DEBUGP( "[%s] Have variable-length pattern\n", __func__ );
+
+					} else {
+						DEBUGP( "[%s] Adding name \"%s\"\n", __func__, name );
+						hashmap_add( ret, hash_string( name ), args );
+						ret = syntax_get_names( pattern->next, args->next, ret );
+					}
+
+				} else {
+					hashmap_add( ret, hash_string( name ), args );
+					ret = syntax_get_names( pattern->next, args->next, ret );
+				}
+
+				break;
+		    }
+
+			default:
+				ret = syntax_get_names( pattern->next, args->next, ret );
+				break;
+		}
+	}
+
+	return ret;
+}
+
+token_t *syntax_expand( token_t *args, hashmap_t *map ){
+	token_t *ret = NULL;
+	token_t *temp;
+
+	if ( args ){
+		switch( args->type ){
+			case TYPE_LIST:
+				ret = alloc_token( );
+				ret->type = TYPE_LIST;
+				ret->down = syntax_expand( args->down, map );
+				ret->next = syntax_expand( args->next, map );
+				break;
+
+			case TYPE_QUOTED_TOKEN:
+				ret = alloc_token( );
+				ret->type = TYPE_QUOTED_TOKEN;
+				ret->down = syntax_expand( args->down, map );
+				ret->next = syntax_expand( args->next, map );
+				break;
+
+			case TYPE_SYMBOL: {
+				char *name = shared_get( args->data );
+
+				if ( args->next && args->next->type == TYPE_SYMBOL ){
+					char *str = shared_get( args->next->data );
+
+					if ( strcmp(str, "...") == 0 ){
+						unsigned hash = hash_string( name );
+						hash = hash_string_accum( " #vararg", hash );
+
+						ret = clone_tokens( hashmap_get( map, hash ));
+
+					} else {
+						temp = hashmap_get( map, hash_string( name ));
+
+						ret = temp? clone_token_tree( temp )
+						          : clone_token( args );
+
+						ret->next = syntax_expand( args->next, map );
+					}
+
+				} else {
+					temp = hashmap_get( map, hash_string( name ));
+
+					ret = temp? clone_token_tree( temp )
+					          : clone_token( args );
+
+					ret->next = syntax_expand( args->next, map );
+				}
+
+				break;
+		    }
+
+			default:
+				ret = clone_token_tree( args );
+				ret->next = syntax_expand( args->next, map );
+				break;
+		}
+	}
+
+	return ret;
+}
+
 token_t *expand_syntax_rules( stack_frame_t *frame, token_t *tokens ){
 	token_t *ret = NULL;
 
@@ -275,14 +441,11 @@ token_t *expand_syntax_rules( stack_frame_t *frame, token_t *tokens ){
 	token_t *pattern;
 	token_t *template;
 
-	token_t *move, *foo;
 	bool matched = false;
-	int args;
 	int len;
 
 	cur = tokens->down;
 	len = tokens_length( cur );
-	args = tokens_length( tokens );
 
 	if ( len >= 3 ){
 		cur = cur->next->next;
@@ -291,18 +454,28 @@ token_t *expand_syntax_rules( stack_frame_t *frame, token_t *tokens ){
 			pattern = cur->down->down;
 			template = cur->down->next;
 
-			if ( tokens_length( pattern ) == args ){
-				matched = true;
-				ret = clone_token_tree( template );
+			if ( syntax_matches( pattern, tokens )){
+				hashmap_t *map;
+				unsigned i;
 
-				for ( move = pattern, foo = tokens; move && foo;
-						move = move->next, foo = foo->next )
-				{
-					ret = replace_symbol( ret, foo, shared_get( move->data ));
+				DEBUGP( "[%s] matched successfully\n", __func__ );
+
+				matched = true;
+				map = syntax_get_names( pattern, tokens, NULL );
+				ret = syntax_expand( template, map );
+
+				// free the map's resources
+				for ( i = 0; i < map->nbuckets; i++ ){
+					list_free_nodes( map->buckets[i].base );
 				}
+				hashmap_free( map );
 
 				gc_unmark( ret );
 				frame_register_token_tree( frame, ret );
+				break;
+
+			} else {
+				DEBUGP( "[%s] Didn't match pattern, continuing...\n", __func__ );
 			}
 		}
 

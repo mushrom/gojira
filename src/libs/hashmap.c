@@ -81,3 +81,14 @@ unsigned hash_string( char *str ){
 
 	return hash;
 }
+
+// this is to allow 'concatenating' hashes
+unsigned hash_string_accum( char *str, unsigned hash ){
+	int c;
+
+	while (( c = *str++ )){
+		hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+	}
+
+	return hash;
+}
