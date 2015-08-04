@@ -1,10 +1,28 @@
 ; necessary bits of the language that aren't implemented by the interpreter
 (intern-set 'define
   (syntax-rules ()
+    ((_ mutable (funcname args ...) body ...)
+     (intern-set mutable 'funcname
+                    (lambda (args ...) body ...)))
+
+    ((_ (funcname args ...) body ...)
+     (intern-set 'funcname
+                    (lambda (args ...) body ...)))
+
+    ((_ mutable (funcname) body ...)
+     (intern-set mutable 'funcname
+                    (lambda () body ...)))
+
+    ((_ (funcname) body ...)
+     (intern-set 'funcname
+                    (lambda () body ...)))
+
     ((_ mutable sym def)
      (intern-set mutable 'sym def))
+
     ((_ sym def)
      (intern-set 'sym def))
+
     ((_ sym)
      (intern-set 'sym 0))))
 
@@ -44,6 +62,18 @@
        (if _op2_
          #t
          #f)
+       #f))))
+
+(define-syntax cond
+  (syntax-rules ()
+    ((_ (pred body ...) more ...)
+     (if pred
+       (begin body ...)
+       (cond more ...)))
+
+    ((_ (pred body ...))
+     (if pred
+       (begin body ...)
        #f))))
 
 (define = eq?)
