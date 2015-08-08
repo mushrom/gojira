@@ -48,6 +48,11 @@
 ; TODO: Fix symbol clashes between procedures and macro expansion
 (define-syntax or
   (syntax-rules ()
+    ((_ _op1_ _op2_ more ...)
+     (if _op1_
+       #f
+       (or _op2_ more ...)))
+
     ((_ _op1_ _op2_)
      (if _op1_
        #t
@@ -57,6 +62,11 @@
 
 (define-syntax and
   (syntax-rules ()
+    ((_ _op1_ _op2_ more ...)
+     (if _op1_
+       (and _op2_ more ...)
+       #f))
+
     ((_ _op1_ _op2_)
      (if _op1_
        (if _op2_
