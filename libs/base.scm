@@ -86,6 +86,20 @@
        (begin body ...)
        #f))))
 
+(define-syntax let
+  (syntax-rules ()
+    ((_ ((varname expression) e2 ...) body ...)
+     (begin
+       (intern-set 'varname expression)
+       (let (e2 ...) body ...)))
+
+    ((_ ((varname expression)) body ...)
+     (begin
+       (intern-set 'varname expression)
+        body ...))))
+
+(define let* let)
+
 (define = eq?)
 
 (define <=
