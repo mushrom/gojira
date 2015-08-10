@@ -1,21 +1,39 @@
 ; necessary bits of the language that aren't implemented by the interpreter
+
+; todo: make this simpler
 (intern-set 'define
   (syntax-rules ()
     ((_ mutable (funcname args ...) body ...)
      (intern-set mutable 'funcname
-                    (lambda (args ...) body ...)))
+        (begin
+          (intern-set :mut 'funcname 0)
+          (intern-set :mut 'funcname
+                      (lambda (args ...) body ...))
+          funcname)))
 
     ((_ (funcname args ...) body ...)
      (intern-set 'funcname
-                    (lambda (args ...) body ...)))
+        (begin
+          (intern-set :mut 'funcname 0)
+          (intern-set :mut 'funcname
+             (lambda (args ...) body ...))
+          funcname)))
 
     ((_ mutable (funcname) body ...)
      (intern-set mutable 'funcname
-                    (lambda () body ...)))
+        (begin
+          (intern-set :mut 'funcname 0)
+          (intern-set :mut 'funcname
+                      (lambda (args ...) body ...))
+          funcname)))
 
     ((_ (funcname) body ...)
      (intern-set 'funcname
-                    (lambda () body ...)))
+        (begin
+          (intern-set :mut 'funcname 0)
+          (intern-set :mut 'funcname
+                      (lambda (args ...) body ...))
+          funcname)))
 
     ((_ mutable sym def)
      (intern-set mutable 'sym def))
@@ -88,10 +106,20 @@
 
 (define-syntax let
   (syntax-rules ()
+    ((_ ((varname mutable expression) e2 ...) body ...)
+     (begin
+       (intern-set mutable 'varname expression)
+       (let (e2 ...) body ...)))
+
     ((_ ((varname expression) e2 ...) body ...)
      (begin
        (intern-set 'varname expression)
        (let (e2 ...) body ...)))
+
+    ((_ ((varname mutable expression)) body ...)
+     (begin
+       (intern-set mutable 'varname expression)
+        body ...))
 
     ((_ ((varname expression)) body ...)
      (begin
