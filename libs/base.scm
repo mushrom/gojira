@@ -3,14 +3,6 @@
 ; todo: make this simpler
 (intern-set 'define
   (syntax-rules ()
-    ((_ mutable (funcname args ...) body ...)
-     (intern-set mutable 'funcname
-        (begin
-          (intern-set :mut 'funcname 0)
-          (intern-set :mut 'funcname
-                      (lambda (args ...) body ...))
-          funcname)))
-
     ((_ (funcname args ...) body ...)
      (intern-set 'funcname
         (begin
@@ -19,7 +11,7 @@
              (lambda (args ...) body ...))
           funcname)))
 
-    ((_ mutable (funcname) body ...)
+    ((_ mutable (funcname args ...) body ...)
      (intern-set mutable 'funcname
         (begin
           (intern-set :mut 'funcname 0)
@@ -32,7 +24,15 @@
         (begin
           (intern-set :mut 'funcname 0)
           (intern-set :mut 'funcname
-                      (lambda (args ...) body ...))
+                      (lambda () body ...))
+          funcname)))
+
+    ((_ mutable (funcname) body ...)
+     (intern-set mutable 'funcname
+        (begin
+          (intern-set :mut 'funcname 0)
+          (intern-set :mut 'funcname
+                      (lambda () body ...))
           funcname)))
 
     ((_ mutable sym def)
@@ -54,14 +54,6 @@
     ((_ condition a b)
      ((condition (lambda () a)
                  (lambda () b))))))
-
-(define help "To see the gojira scheme tutorial, visit https://example.com. To see the currently defined variables, try (stacktrace).")
-
-(define not
-  (lambda (x)
-    (if x
-      #f
-      #t)))
 
 ; TODO: Fix symbol clashes between procedures and macro expansion
 (define-syntax or
@@ -128,82 +120,78 @@
 
 (define let* let)
 
+(define help "To see the gojira scheme tutorial, visit https://example.com. To see the currently defined variables, try (stacktrace).")
+
+(define (not x)
+  (if x
+    #f
+    #t))
+
 (define = eq?)
 
-(define <=
-  (lambda (a b)
-	(or
-	  (< a b)
-	  (eq? a b))))
+(define (<= a b)
+  (or
+    (< a b)
+    (eq? a b)))
 
-(define >=
-  (lambda (a b)
-	(or
-	  (> a b)
-	  (eq? a b))))
+(define (>= a b)
+  (or
+    (> a b)
+    (eq? a b)))
 
-(define caar
-  (lambda (x)
-	(car (car x))))
+(define (caar x)
+  (car (car x)))
 
-(define caaar
-  (lambda (x)
-	(car (caar x))))
+(define (caaar x)
+  (car (caar x)))
 
-(define print
-  (lambda (x)
-    (display x)
-	(newline)))
+(define (print x)
+  (display x)
+  (newline))
 
-(define map
-  (lambda (fn set)
-    (if (null? set)
-      '()
-      (cons
-        (fn (car set))
-        (map fn (cdr set))))))
+(define (map fn set)
+  (if (null? set)
+    '()
+    (cons
+      (fn (car set))
+      (map fn (cdr set)))))
 
-(define member?
-  (lambda (obj xs)
-    (if (not (null? xs))
-      (if (eq? obj (car xs))
-        #t
-        (member? obj (cdr xs)))
-      #f)))
+(define (member? obj xs)
+  (if (not (null? xs))
+    (if (eq? obj (car xs))
+      #t
+      (member? obj (cdr xs)))
+    #f))
+
 (define ∈ member?)
 
-(define append
-  (lambda (xs obj)
-    (if (null? xs)
-      obj
+(define (append xs obj)
+  (if (null? xs)
+    obj
     (if (null? (cdr xs))
       (cons (car xs) obj)
-      (cons (car xs) (append (cdr xs) obj))))))
+      (cons (car xs) (append (cdr xs) obj)))))
 
-(define length
-  (lambda (ls)
-    (if (null? ls)
-      0
-      (seq (length (cdr ls))))))
+(define (length ls)
+  (if (null? ls)
+    0
+    (seq (length (cdr ls)))))
 
 ; A basic module system
-(define :mut modules '("base"))
+(define :mut modules '(base))
 (define :mut modpath "")
 
-(define as_modpath
-  (lambda (name)
-    (string-append (string-append modpath name) ".scm")))
+(define (as_modpath name)
+    (string-append (string-append modpath name) ".scm"))
 
-(define import!
-  (lambda (modname)
-    (if (not (member? modname modules))
-      (if (load! (as_modpath (symbol->string modname)))
-        (begin
-          (intern-set! 'modules (cons modname modules))
-          #t)
-        #f)
-      #f)))
+(define (import! modname)
+  (if (not (member? modname modules))
+    (if (load! (as_modpath (symbol->string modname)))
+      (begin
+        (intern-set! 'modules (cons modname modules))
+        #t)
+      #f)
+    #f))
 
-(define use!
-  (lambda (modlist)
-    (map import! modlist)))
+(define (use! modlist)
+  (map import! modlist))
