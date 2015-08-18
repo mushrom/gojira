@@ -16,8 +16,8 @@
 // of shared_dtor, which requres a void return
 static void free_file( void *ptr ){
 	if ( ptr ){
+		DEBUGP( "[%s] Closing file at %p\n", __func__, ptr );
 		fclose( (FILE *)ptr );
-		printf( "got here\n" );
 	}
 }
 
