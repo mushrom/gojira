@@ -43,6 +43,9 @@ struct global_builtin {
 	{ "true",            builtin_true },
 	{ "false",           builtin_false },
 
+	{ "eval",            builtin_eval },
+	{ "apply",           builtin_apply },
+
 	// debugger breakpoint
 	{ "debug-break",     debugger_loop },
 
@@ -214,11 +217,15 @@ st_frame_t *frame_create( st_frame_t *cur_frame, token_t *ptr ){
 	ret->value = NULL;
 	ret->expr = NULL;
 	ret->status = TYPE_NULL;
+	ret->flags  = RUNTIME_FLAG_NULL;
 
-	if ( cur_frame )
+	if ( cur_frame ){
 		ret->error_call = cur_frame->error_call;
-	else
+		ret->flags |= cur_frame->flags & RUNTIME_FLAG_TRACE;
+
+	} else {
 		ret->error_call = default_error_printer;
+	}
 
 	return ret;
 }

@@ -294,6 +294,10 @@ bool eval_frame_expr( stack_frame_t **frame_ret ){
 
 		frame_add_token_noclone( temp_frame, frame->value );
 
+		if ( frame->flags & RUNTIME_FLAG_BREAK ){
+			ret = true;
+		}
+
 		frame_free( frame );
 		*frame_ret = temp_frame;
 	}

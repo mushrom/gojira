@@ -109,6 +109,7 @@ token_t *builtin_iterator_access( stack_frame_t *frame ){
 
 			free_token( proc );
 			free_token( num );
+			// FIXME: this is a bug right?
 			frame_free( frame );
 
 			ret = foo_frame->expr;

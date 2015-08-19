@@ -15,6 +15,13 @@ enum recurse_vals {
 	RECURSE    = true
 };
 
+enum runtime_flags {
+	RUNTIME_FLAG_NULL  = 0,
+	RUNTIME_FLAG_TRACE = 1, // flag for function input/output tracing
+	RUNTIME_FLAG_BREAK = 2, // signals that execution should stop
+	                        // after this frame
+};
+
 enum variable_mutability {
 	VAR_IMMUTABLE,
 	VAR_MUTABLE,
@@ -43,6 +50,7 @@ typedef struct stack_frame {
 	token_t *end;         // Last token in the expression
 	unsigned ntokens;     // Number of tokens in expr
 	unsigned status;
+	unsigned flags;       // various runtime flags
 
 	token_t *value;       // value to return to last continuation
 	token_t *heap;        // List of all tokens allocated in the frame
