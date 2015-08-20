@@ -51,7 +51,8 @@ token_t *builtin_apply( stack_frame_t *frame ){
 				stack_frame_t *tempframe;
 
 				code->next = arglist->down;
-				tempframe = frame_create( frame, code );
+				tempframe = frame_create( frame, NULL );
+				tempframe->expr = code;
 				tempframe->flags |= RUNTIME_FLAG_BREAK;
 
 				eval_loop( tempframe );
