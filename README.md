@@ -34,15 +34,17 @@ Status
 
 Currently supports:
 
-- basic scheme interpreting with some standard operators (+, -, display, null?, etc)
-- garbage collection
-- Tail call elimination
-- utf8 variable names
-- (incomplete) macros/syntax extensions
-- iterators
-- applicable booleans
+- Basic scheme interpreting with some standard operators (+, -, display, null?, etc)
+- Garbage collection
+- Utf8 variable names
+- (Incomplete, unhygenic) macros/syntax extensions with pattern matching and list expansions
+- Iterators
+- Applicable booleans
+- A simple module system
 
 Coming soon:
 
+- More documentation, with a built-in doc function
+- Tail call elimination
 - First-class continuations
 - External (C function) linking
