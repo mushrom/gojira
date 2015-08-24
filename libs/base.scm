@@ -139,11 +139,18 @@
     (> a b)
     (eq? a b)))
 
-(define (caar x)
-  (car (car x)))
-
-(define (caaar x)
-  (car (caar x)))
+(define (caaar xs) (car (car (car xs))))
+(define (caadr xs) (car (car (cdr xs))))
+(define (caar  xs) (car (car xs)))
+(define (cadar xs) (car (cdr (car xs))))
+(define (caddr xs) (car (cdr (cdr xs))))
+(define (cadr  xs) (car (cdr xs)))
+(define (cdaar xs) (cdr (car (car xs))))
+(define (cdadr xs) (cdr (car (cdr xs))))
+(define (cdar  xs) (cdr (car xs)))
+(define (cddar xs) (cdr (cdr (car xs))))
+(define (cdddr xs) (cdr (cdr (cdr xs))))
+(define (cddr  xs) (cdr (cdr xs)))
 
 (define (print x)
   (display x)

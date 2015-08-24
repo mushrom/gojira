@@ -99,3 +99,19 @@
     (if (sieve (car xs))
       (cons (car xs) (filter sieve (cdr xs)))
       (filter sieve (cdr xs)))))
+
+(define (zip xs ys)
+  (if (or (null? xs)
+          (null? ys))
+    '()
+   else
+    (cons (list (car xs) (car ys))
+          (zip  (cdr xs) (cdr ys)))))
+
+(define (where pred funct xs)
+  (cond 
+    ((null? xs) '())
+    ((pred xs) (cons (funct (car xs))
+                     (where pred funct (cdr xs))))
+    (true (cons (car xs)
+                (where pred funct (cdr xs))))))
