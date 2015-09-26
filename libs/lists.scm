@@ -115,3 +115,31 @@
                      (where pred funct (cdr xs))))
     (true (cons (car xs)
                 (where pred funct (cdr xs))))))
+
+(define (safecar xs)
+  (if (null? xs)
+    '()
+    (car xs)))
+
+(define (safecdr xs)
+  (if (null? xs)
+    '()
+    (cdr xs)))
+
+(define-syntax with
+  (syntax-rules (as)
+    ((_ xs as (a1 a2 ...) body ...)
+     (let ((a1 (safecar xs)))
+       (with (safecdr xs) as (a2 ...) body ...)))
+
+    ((_ xs as (a1 a2) body ...)
+     (let ((a1 (safecar xs)))
+       (with (safecdr xs) as (a2) body ...)))
+
+    ((_ xs as (a1) body ...)
+     (let ((a1 (safecar xs)))
+       body ...))))
+
+(define infinity
+  (iterator
+    (lambda (x) x)))
