@@ -167,19 +167,48 @@ stack_frame_t *expand_procedure( stack_frame_t *frame, token_t *tokens ){
 			if ( temp->type == TYPE_SYMBOL ){
 				var_name = shared_get( temp->data );
 
-				if ( !move ){
-					frame->error_call( frame, "[%s] Error: Have unbound variable \"%s\"\n", __func__, var_name );
-					break;
+				// Handle variable-length arguments, which use the :rest keyword
+				if ( strcmp( var_name, ":rest" ) == 0 ){
+					if ( temp->next && temp->next->type == TYPE_SYMBOL ){
+						token_t *newlist;
+
+						var_name = shared_get( temp->next->data );
+						newlist  = alloc_token( );
+						newlist->type = TYPE_LIST;
+						newlist->down = move;
+
+						frame_add_var( frame, var_name, newlist, NO_RECURSE, VAR_IMMUTABLE );
+
+						free_token( newlist );
+						break;
+
+					} else {
+						frame->error_call( frame,
+							"[%s] Error: Have unbound variable after :rest\n",
+							__func__ );
+						break;
+					}
+
+				// otherwise handle regular variable bindings
+				} else {
+					if ( move ){
+						// TODO: allow specifying mutable parameters
+						//frame_add_var( frame, var_name, move, NO_RECURSE, VAR_IMMUTABLE );
+						frame_add_var( frame, var_name, move, NO_RECURSE, VAR_IMMUTABLE );
+						move = move->next;
+
+					} else {
+						frame->error_call( frame,
+							"[%s] Error: Have unbound variable \"%s\"\n",
+							__func__, var_name );
+						break;
+					}
 				}
 
-				// TODO: allow specifying mutable parameters
-				//frame_add_var( frame, var_name, move, NO_RECURSE, VAR_IMMUTABLE );
-				frame_add_var( frame, var_name, move, NO_RECURSE, VAR_IMMUTABLE );
-				move = move->next;
-
 			} else {
-				frame->error_call( frame, "[%s] Error: expected symbol in procedure definition, have \"%s\"\n",
-						__func__, type_str( temp->type ));
+				frame->error_call( frame,
+					"[%s] Error: expected symbol in procedure definition, have \"%s\"\n",
+					__func__, type_str( temp->type ));
 			}
 		}
 
@@ -192,7 +221,9 @@ stack_frame_t *expand_procedure( stack_frame_t *frame, token_t *tokens ){
 		ret->ptr = proc->body;
 
 	} else {
-		frame->error_call( frame, "[%s] Error: Trying to apply non-procedure as procedure (?!)\n", __func__ );
+		frame->error_call( frame,
+			"[%s] Error: Trying to apply non-procedure as procedure (?!)\n",
+			__func__ );
 	}
 
 	return ret;

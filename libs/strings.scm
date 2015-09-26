@@ -10,9 +10,7 @@
     (string-append (car xs)
                    (string-concat (cdr xs)))))
 
-(define string+ string-append)
+(define (concat :rest strs)
+  (string-concat strs))
 
-(define concat
-  (syntax-rules ()
-    ((_ strings ...)
-     (string-concat (list strings ...)))))
+(define string+ concat)
