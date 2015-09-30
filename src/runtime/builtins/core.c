@@ -226,6 +226,7 @@ static bool set_variable( stack_frame_t *frame, const token_t *tokens, bool muta
 		if ( var->is_mutable ){
 			var->token = clone_token( tokens->next );
 			frame_register_tokens( frame, temp );
+			gc_mark_tree( tokens->next );
 			ret = true;
 
 		} else {
