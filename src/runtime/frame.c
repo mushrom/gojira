@@ -64,6 +64,8 @@ struct global_builtin {
 	{ "vector-ref",      builtin_vector_ref },
 	{ "vector-set!",     builtin_vector_set },
 	{ "vector-length",   builtin_vector_length },
+	{ "make-vector",     builtin_make_vector },
+	{ "list->vector",    builtin_vector_from_list },
 
 #if GOJIRA_ENABLE_FILES
 	// file functions
