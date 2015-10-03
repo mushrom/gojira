@@ -46,6 +46,9 @@ struct global_builtin {
 	{ "eval",            builtin_eval },
 	{ "apply",           builtin_apply },
 
+	// misc
+	{ "random-int",      builtin_random_int },
+
 	// debugger breakpoint
 	{ "debug-break",     debugger_loop },
 
@@ -232,7 +235,7 @@ st_frame_t *frame_create( st_frame_t *cur_frame, token_t *ptr ){
 	return ret;
 }
 
-st_frame_t *frame_free( st_frame_t *frame ){
+st_frame_t *frame_free_vars( st_frame_t *frame ){
 	list_node_t *move, *temp;
 	hashmap_t *map;
 	unsigned i;
@@ -251,8 +254,22 @@ st_frame_t *frame_free( st_frame_t *frame ){
 			}
 
 			hashmap_free( frame->vars );
+			frame->vars = NULL;
 		}
+	}
 
+	return NULL;
+}
+
+st_frame_t *frame_free( st_frame_t *frame ){
+	/*
+	list_node_t *move, *temp;
+	hashmap_t *map;
+	unsigned i;
+	*/
+
+	if ( frame ){
+		frame_free_vars( frame );
 		free( frame );
 	}
 

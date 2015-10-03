@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <time.h>
 
 token_t *ext_proc_token( scheme_func handle ){
 	token_t *ret = NULL;
@@ -443,6 +444,22 @@ token_t *builtin_multiply( stack_frame_t *frame ){
 	} else {
 		FRAME_ERROR_ARGNUM( frame, 2 );
 	}
+
+	return ret;
+}
+
+token_t *builtin_random_int( stack_frame_t *frame ){
+	static bool seeded = false;
+	token_t *ret = NULL;
+
+	if ( !seeded ){
+		srand( time( NULL ));
+		seeded = true;
+	}
+
+	ret = alloc_token( );
+	ret->type = TYPE_NUMBER;
+	ret->smalldata = rand( );
 
 	return ret;
 }

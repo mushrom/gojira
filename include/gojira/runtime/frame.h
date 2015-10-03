@@ -63,6 +63,7 @@ variable_t *global_add_func( st_frame_t *frame, char *name, scheme_func handle )
 st_frame_t *init_global_frame( st_frame_t *frame );
 st_frame_t *frame_create( st_frame_t *cur_frame, token_t *ptr );
 st_frame_t *frame_free( st_frame_t *frame );
+st_frame_t *frame_free_vars( st_frame_t *frame );
 
 token_t *frame_add_token( st_frame_t *frame, token_t *token );
 token_t *frame_add_token_noclone( st_frame_t *frame, token_t *token );
