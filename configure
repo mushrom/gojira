@@ -6,6 +6,7 @@ CONF_GOJIRA_LIBDIR=
 CONF_ENABLE_SOCKETS=1
 CONF_ENABLE_FILES=1
 CONF_DEBUG=0
+CONF_CFLAGS=""
 
 # Parse the given options
 for arg in $@; do
@@ -37,6 +38,7 @@ for arg in $@; do
 				      --disable-files    Disable the built-in file functions.
 				      --disable-all      Disable everything extra, and just build the core
 				                         interpreter.
+				      --static           Output a static executable.
 			END_OF_HELP
 			exit 0
 			;;
@@ -57,6 +59,9 @@ for arg in $@; do
 			CONF_ENABLE_SOCKETS=0
 			CONF_ENABLE_FILES=0
 			;;
+		--static)
+			CONF_CFLAGS+="-static"
+			;;
 
 		*)
 			echo "configure: error: Unknown option \"$OPT_KEY\""
@@ -72,6 +77,7 @@ echo "Full install path: $CONF_SYSROOT$CONF_PREFIX"
 echo "Generating makefile..."
 echo "PREFIX=$CONF_PREFIX"   >  Makefile
 echo "SYSROOT=$CONF_SYSROOT" >> Makefile
+echo "CONF_CFLAGS=$CONF_CFLAGS" >> Makefile
 cat Makefile.conf >> Makefile
 
 # Set flags in config.h

@@ -182,7 +182,7 @@
 (define (length ls)
   (if (null? ls)
     0
-    (seq (length (cdr ls)))))
+    (+ (length (cdr ls)) 1)))
 
 ; A basic module system
 (define :mut modules '(base))
