@@ -19,6 +19,7 @@ typedef struct token_return {
 	token_t *token;
 	const char *string;
 	bool found;
+	bool freed;
 } token_return_t;
 
 typedef bool (*char_pred)( char );
@@ -92,6 +93,7 @@ static token_return_t get_token_from_str( const char *string ){
 		.token 	= calloc( 1, sizeof( token_t )),
 		.string	= NULL,
 		.found	= false,
+		.freed  = false,
 	};
 
 	for ( indent = 0; *string && strchr( INDENT, *string ); string++, indent++ );
@@ -190,7 +192,8 @@ static token_return_t get_token_from_str( const char *string ){
 
 		// Check for comments
 		} else if ( *string == ';' || (*string == '#' && string[1] == '!')){
-			for ( i = 0; string[i] && string[i + 1] != '\n'; i++ );
+			for ( i = 0; string[i] && string[i + 1] && string[i + 1] != '\n'; i++ );
+			// Token in original ret lost here?
 			ret = get_token_from_str( string + i + 1 );
 
 		} else if ( *string == '#' ){
@@ -303,8 +306,10 @@ static token_return_t get_token_from_str( const char *string ){
 	}
 
 	// If no token is found, clean up
-	if ( !ret.found )
+	if ( !ret.found && !ret.freed ){
 		free( ret.token );
+		ret.freed = true;
+	}
 
 	return ret;
 } 
