@@ -269,6 +269,7 @@ static token_return_t get_token_from_str( const char *string ){
 			i = strspn( string, "-"DIGITS );
 			foo = malloc( sizeof( char[i + 1]));
 			strncpy( foo, string, i );
+			foo[i] = 0;
 
 			ret.string = string + i;
 			ret.token->type = TYPE_NUMBER;
