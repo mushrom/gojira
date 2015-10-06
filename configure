@@ -27,18 +27,20 @@ for arg in $@; do
 				This script sets configuration values for Gojira v0.0.1.
 
 				Options:
-				  -h, --help             Display this help message and exit.
-				      --prefix=[path]    Set the installation root to the given path.
-				      --sysroot=[path]   Set the path for the system root. This is prepended
-				                         to the PREFIX variable when copying files, and is
-				                         useful for cross-compiling, chroot installs, etc.
-				  -d, --debug            Specify that this is a debug build. This option
-				                         toggles some debugging messages.
-				      --disable-sockets  Disable the built-in networking functions.
-				      --disable-files    Disable the built-in file functions.
-				      --disable-all      Disable everything extra, and just build the core
-				                         interpreter.
-				      --static           Output a static executable.
+				  -h,  --help             Display this help message and exit.
+				       --prefix=[path]    Set the installation root to the given path.
+				       --sysroot=[path]   Set the path for the system root. This is prepended
+				                          to the PREFIX variable when copying files, and is
+				                          useful for cross-compiling, chroot installs, etc.
+				  -d,  --debug            Specify that this is a debug build. This option
+				                          toggles some debugging messages.
+				  -ds, --disable-sockets  Disable the built-in networking functions.
+				  -df, --disable-files    Disable the built-in file functions.
+				  -da, --disable-all      Disable everything extra, and just build the core
+				                          interpreter.
+				  -s,  --static           Output a static executable.
+				  -p,  --public           Specify that this will have input from untrusted sources,
+				                          and should not perform/output possibly sensitive operations.
 			END_OF_HELP
 			exit 0
 			;;
@@ -47,22 +49,24 @@ for arg in $@; do
 			CONF_DEBUG=1
 			;;
 
-		--disable-sockets)
+		--disable-sockets|-ds)
 			CONF_ENABLE_SOCKETS=0
 			;;
 
-		--disable-files)
+		--disable-files|-df)
 			CONF_ENABLE_FILES=0
 			;;
 
-		--disable-all)
+		--disable-all|-da)
 			CONF_ENABLE_SOCKETS=0
 			CONF_ENABLE_FILES=0
 			;;
-		--static)
-			CONF_CFLAGS+="-static"
+		--static|-s)
+			CONF_CFLAGS="$CONF_FLAGS -static"
 			;;
-
+		--public-mode|-p)
+			CONF_PUBLIC_MODE=1
+			;;
 		*)
 			echo "configure: error: Unknown option \"$OPT_KEY\""
 			exit 1
@@ -86,6 +90,7 @@ sed "s#SOME_PREFIX_HERE#$CONF_PREFIX/share/gojira#" < include/gojira/config.h.tm
 echo "#define GOJIRA_ENABLE_SOCKETS $CONF_ENABLE_SOCKETS" >> include/gojira/config.h
 echo "#define GOJIRA_ENABLE_FILES $CONF_ENABLE_FILES" >> include/gojira/config.h
 echo "#define GOJIRA_DEBUG $CONF_DEBUG" >> include/gojira/config.h
+echo "#define GOJIRA_PUBLIC_MODE $CONF_PUBLIC_MODE" >> include/gojira/config.h
 echo "#endif" >> include/gojira/config.h
 
 # And we're finished

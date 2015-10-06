@@ -25,7 +25,6 @@ struct global_builtin {
 	{ "modulo",          builtin_modulo },
 	{ "-",               builtin_subtract },
 	{ "/",               builtin_divide },
-	{ "stacktrace",      builtin_stacktrace },
 	{ "eq?",             builtin_equal },
 	{ "<",               builtin_lessthan },
 	{ ">",               builtin_greaterthan },
@@ -39,18 +38,16 @@ struct global_builtin {
 	{ "symbol?",         builtin_is_symbol },
 	{ "intern-set",      builtin_intern_set },
 	{ "intern-set!",     builtin_intern_set_global },
-	{ "intern-sleep",    builtin_sleep },
 	{ "true",            builtin_true },
 	{ "false",           builtin_false },
 
 	{ "eval",            builtin_eval },
 	{ "apply",           builtin_apply },
 
-	// misc
-	{ "random-int",      builtin_random_int },
-
-	// debugger breakpoint
-	{ "debug-break",     debugger_loop },
+	// iterator functions
+	{ "iterator",        builtin_iterator },
+	{ "iter-car",        builtin_iterator_access },
+	{ "iter-cdr",        builtin_iterator_next },
 
 	// string functions
 	{ "string-append",   builtin_string_append },
@@ -70,6 +67,21 @@ struct global_builtin {
 	{ "make-vector",     builtin_make_vector },
 	{ "list->vector",    builtin_vector_from_list },
 
+	//hashmap functions
+	{ "hashmap",         builtin_hashmap_make },
+	{ "hashmap-get",     builtin_hashmap_get },
+
+	// misc
+	{ "random-int",      builtin_random_int },
+
+#if ! GOJIRA_PUBLIC_MODE
+	{ "stacktrace",      builtin_stacktrace },
+	{ "intern-sleep",    builtin_sleep },
+
+	// debugger breakpoint
+	{ "debug-break",     debugger_loop },
+#endif
+
 #if GOJIRA_ENABLE_FILES
 	// file functions
 	{ "open",            builtin_open },
@@ -85,21 +97,12 @@ struct global_builtin {
 	{ "exists?",         builtin_file_exists },
 #endif
 
-	// iterator functions
-	{ "iterator",        builtin_iterator },
-	{ "iter-car",        builtin_iterator_access },
-	{ "iter-cdr",        builtin_iterator_next },
-
 #if GOJIRA_ENABLE_SOCKETS
 	// networking functions
 	{ "tcp-socket",      builtin_tcp_socket },
 	{ "tcp-getchar",     builtin_tcp_getchar },
 	{ "tcp-putchar",     builtin_tcp_putchar },
 #endif
-
-	//hashmap functions
-	{ "hashmap",         builtin_hashmap_make },
-	{ "hashmap-get",     builtin_hashmap_get },
 };
 
 // Adds an "external function" to a frame, and handles registering the tokens for garbage collection
@@ -205,7 +208,9 @@ void default_error_printer( stack_frame_t *frame, char *fmt, ... ){
 	va_list args;
 	va_start( args, fmt );
 
+#if ! GOJIRA_PUBLIC_MODE
 	stack_trace( frame );
+#endif
 	vprintf( fmt, args );
 	//printf( "[%s] got here\n", __func__ );
 

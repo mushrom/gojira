@@ -82,7 +82,11 @@ void file_print_token( FILE *fp, token_t *token ){
 
 				fprintf( fp, "#<%s (", type_str( token->type ));
 				file_dump_tokens( fp, proc->args );
+#if GOJIRA_PUBLIC_MODE
+				fprintf( fp, ")>" );
+#else
 				fprintf( fp, ") @ %p>", (void *)shr );
+#endif
 				break;
 
 			case TYPE_VECTOR:
