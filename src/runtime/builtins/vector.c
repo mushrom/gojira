@@ -17,7 +17,7 @@ token_t *builtin_is_vector( stack_frame_t *frame ){
 	if ( frame->ntokens == 2 ){
 		ret = alloc_token( );
 		ret->type = TYPE_BOOLEAN;
-		ret->smalldata = frame->expr->next->type == TYPE_VECTOR;
+		ret->boolean = frame->expr->next->type == TYPE_VECTOR;
 
 	} else {
 		FRAME_ERROR_ARGNUM( frame, 2 );
@@ -39,8 +39,8 @@ token_t *builtin_vector_ref( stack_frame_t *frame ){
 				shr = frame->expr->next->data;
 				dlst = shared_get( shr );
 
-				if ( foo->smalldata < dlist_used( dlst )){
-					ret = clone_tokens( dlist_get( dlst, foo->smalldata ));
+				if ( foo->number.u_int < dlist_used( dlst )){
+					ret = clone_tokens( dlist_get( dlst, foo->number.u_int ));
 
 				} else {
 					frame->error_call( frame, "[%s] Error: Index is out of range\n", __func__ );
@@ -75,9 +75,9 @@ token_t *builtin_vector_set( stack_frame_t *frame ){
 				shr = frame->expr->next->data;
 				dlst = shared_get( shr );
 
-				if ( foo->smalldata < dlist_used( dlst )){
+				if ( foo->number.u_int < dlist_used( dlst )){
 					elem = clone_token_tree( frame->expr->next->next->next );
-					dlist_set( dlst, foo->smalldata, elem );
+					dlist_set( dlst, foo->number.u_int, elem );
 
 					ret = frame->expr->next;
 
@@ -113,7 +113,7 @@ token_t *builtin_vector_length( stack_frame_t *frame ){
 
 			ret = alloc_token( );
 			ret->type = TYPE_NUMBER;
-			ret->smalldata = dlist_used( dlst );
+			ret->number = as_int_number( dlist_used( dlst ));
 
 		} else {
 			frame->error_call( frame,
@@ -138,19 +138,24 @@ token_t *builtin_make_vector( stack_frame_t *frame ){
 		token_t *move = frame->expr->next;
 
 		if ( move->type == TYPE_NUMBER ){
-			dlist_t *nlist = dlist_create( 1, move->smalldata );
-			shared_t *shr = shared_new( nlist, free_vector );
-			unsigned i;
+			if ( move->number.s_int >= 0 ){
+				dlist_t *nlist = dlist_create( 1, move->number.u_int );
+				shared_t *shr = shared_new( nlist, free_vector );
+				unsigned i;
 
-			for ( i = 0; i < move->smalldata; i++ ){
-				token_t *temp = clone_token_tree( move->next );
-				dlist_add( nlist, temp );
+				for ( i = 0; i < move->number.u_int; i++ ){
+					token_t *temp = clone_token_tree( move->next );
+					dlist_add( nlist, temp );
+				}
+
+				ret = alloc_token( );
+				ret->type = TYPE_VECTOR;
+				ret->data = shr;
+				ret->flags |= T_FLAG_HAS_SHARED;
+
+			} else {
+				FRAME_ERROR( frame, "cannot make negatively-sized vector %d", move->number.s_int );
 			}
-
-			ret = alloc_token( );
-			ret->type = TYPE_VECTOR;
-			ret->data = shr;
-			ret->flags |= T_FLAG_HAS_SHARED;
 
 		} else {
 			FRAME_ERROR_ARGTYPE( frame, "number", move->type );

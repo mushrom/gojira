@@ -102,7 +102,7 @@ static token_return_t get_token_from_str( const char *string ){
 	if ( indent ){
 		ret.string = string;
 		ret.token->type = TYPE_INDENT;
-		ret.token->smalldata = indent;
+		ret.token->character = indent;
 		ret.found = true;
 
 	} else if ( *string ){
@@ -207,7 +207,7 @@ static token_return_t get_token_from_str( const char *string ){
 			if ( string[1] == 'f' || string[1] == 't' ){
 				ret.string = string + 2;
 				ret.token->type = TYPE_BOOLEAN;
-				ret.token->smalldata = (string[1] == 't')? true : false;
+				ret.token->boolean = (string[1] == 't')? true : false;
 				ret.found = true;
 
 			// Check for characters
@@ -215,43 +215,43 @@ static token_return_t get_token_from_str( const char *string ){
 				if ( strncmp( string + 2, "newline", 7 ) == 0 ){
 					ret.string = string + 9;
 					ret.token->type = TYPE_CHAR;
-					ret.token->smalldata = '\n';
+					ret.token->character = '\n';
 					ret.found = true;
 
 				} else if ( strncmp( string + 2, "return", 6 ) == 0 ){
 					ret.string = string + 8;
 					ret.token->type = TYPE_CHAR;
-					ret.token->smalldata = '\r';
+					ret.token->character = '\r';
 					ret.found = true;
 
 				} else if ( strncmp( string + 2, "space", 5 ) == 0 ){
 					ret.string = string + 7;
 					ret.token->type = TYPE_CHAR;
-					ret.token->smalldata = ' ';
+					ret.token->character = ' ';
 					ret.found = true;
 
 				} else if ( strncmp( string + 2, "tab", 3 ) == 0 ){
 					ret.string = string + 5;
 					ret.token->type = TYPE_CHAR;
-					ret.token->smalldata = '\t';
+					ret.token->character = '\t';
 					ret.found = true;
 
 				} else if ( strncmp( string + 2, "escape", 6 ) == 0 ){
 					ret.string = string + 8;
 					ret.token->type = TYPE_CHAR;
-					ret.token->smalldata = '\x1b';
+					ret.token->character = '\x1b';
 					ret.found = true;
 
 				} else if ( strncmp( string + 2, "backspace", 9 ) == 0 ){
 					ret.string = string + 11;
 					ret.token->type = TYPE_CHAR;
-					ret.token->smalldata = '\b';
+					ret.token->character = '\b';
 					ret.found = true;
 
 				} else {
 					ret.string = string + 3;
 					ret.token->type = TYPE_CHAR;
-					ret.token->smalldata = string[2];
+					ret.token->character = string[2];
 					ret.found = true;
 				}
 
@@ -264,17 +264,27 @@ static token_return_t get_token_from_str( const char *string ){
 
 		// Check for numbers
 		} else if ( strchr( DIGITS, *string ) ||
-				( *string == '-' && strchr( DIGITS, *(string + 1)))) {
+				( *string == '-' && strchr( DIGITS, *(string + 1))) ||
+				( *string == '.' && strchr( DIGITS, *(string + 1)))) {
 
-			i = strspn( string, "-"DIGITS );
+			i = strspn( string, "-+e."DIGITS );
 			foo = malloc( sizeof( char[i + 1]));
 			strncpy( foo, string, i );
 			foo[i] = 0;
 
-			ret.string = string + i;
-			ret.token->type = TYPE_NUMBER;
-			ret.found = true;
-			ret.token->smalldata = atoi( foo );
+			if ( strchr( foo, '.' )){
+				ret.string = string + i;
+				ret.token->type = TYPE_REAL;
+				ret.token->number = as_real_number( atof( foo ));
+				ret.found = true;
+
+			} else {
+				ret.string = string + i;
+				ret.token->type = TYPE_NUMBER;
+				ret.found = true;
+				//ret.token->smalldata = atoi( foo );
+				ret.token->number = as_int_number( atoi( foo ));
+			}
 
 			free( foo );
 

@@ -2,6 +2,7 @@
 #include <gojira/runtime/garbage.h>
 #include <gojira/runtime/builtin.h>
 #include <gojira/runtime/files.h>
+#include <gojira/libs/numbers.h>
 #include <gojira/parse_debug.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -23,13 +24,15 @@ token_t *ext_proc_token( scheme_func handle ){
 token_t *builtin_add( stack_frame_t *frame ){
 	token_t *ret = NULL;
 	token_t *move;
-	int sum = 0;
+	number_t sum = as_int_number( 0 ); 
 	bool error = false;
 
 	move = frame->expr->next;
 	foreach_in_list( move ){
-		if ( move->type == TYPE_NUMBER ){
-			sum += move->smalldata;
+		//if ( move->type == TYPE_NUMBER ){
+			//sum += move->smalldata;
+		if ( has_number_type( move )) {
+			sum = number_add( sum, move->number );
 
 		} else {
 			error = true;
@@ -40,8 +43,8 @@ token_t *builtin_add( stack_frame_t *frame ){
 
 	if ( !error ){
 		ret = alloc_token( );
-		ret->type = TYPE_NUMBER;
-		ret->smalldata = sum;
+		ret->type = sum.type;
+		ret->number = sum;
 	}
 
 	return ret;
@@ -112,19 +115,20 @@ token_t *builtin_cons( stack_frame_t *frame ){
 token_t *builtin_divide( stack_frame_t *frame ){
 	token_t *ret = NULL;
 	token_t *move;
-	int sum = 1;
+	//int sum = 1;
+	number_t sum = as_int_number( 1 );
 	bool error = false;
 
 	move = frame->expr->next;
 
 	if ( move ){
-		if ( move->type == TYPE_NUMBER ){
-			sum = move->smalldata;
+		if ( has_number_type( move )){
+			sum = move->number;
 			move = move->next;
 
 			foreach_in_list( move ){
-				if ( move->type == TYPE_NUMBER ){
-					sum /= move->smalldata;
+				if ( has_number_type( move )){
+					sum = number_div( sum, move->number );
 
 				} else {
 					FRAME_ERROR_ARGTYPE( frame, "number", move->type );
@@ -145,8 +149,8 @@ token_t *builtin_divide( stack_frame_t *frame ){
 
 	if ( !error ){
 		ret = alloc_token( );
-		ret->type = TYPE_NUMBER;
-		ret->smalldata = sum;
+		ret->type = sum.type;
+		ret->number = sum;
 	}
 
 	return ret;
@@ -172,15 +176,27 @@ token_t *builtin_equal( stack_frame_t *frame ){
 					              shared_get( op2->data )) == 0;
 					break;
 
+				case TYPE_CHAR:
+					val = op1->character == op2->character;
+					break;
+
+				case TYPE_REAL:
+					val = op1->number.real == op2->number.real;
+					break;
+
+				case TYPE_NUMBER:
+					val = op1->number.s_int == op2->number.s_int;
+					break;
+
 				default:
-					val = ( op1->smalldata == op2->smalldata )
-					   && ( op1->down      == op2->down );
+					val = ( op1->data == op2->data )
+					   && ( op1->down == op2->down );
 					break;
 			}
 
 		} // default value of 'val' is false, so just continue
 
-		ret->smalldata = val;
+		ret->boolean = val;
 
 	} else {
 		FRAME_ERROR_ARGNUM( frame, 2 );
@@ -192,6 +208,7 @@ token_t *builtin_equal( stack_frame_t *frame ){
 token_t *builtin_greaterthan( stack_frame_t *frame ){
 	token_t *ret = NULL;
 	token_t *op1, *op2;
+	bool val = false;
 
 	if ( frame->ntokens == 3 ){
 		op1 = frame->expr->next;
@@ -199,8 +216,32 @@ token_t *builtin_greaterthan( stack_frame_t *frame ){
 
 		ret = alloc_token( );
 		ret->type = TYPE_BOOLEAN;
+		/*
 		ret->smalldata = ( op1->type          == op2->type )
 		              && ((int)op1->smalldata > (int)op2->smalldata );
+
+	     */
+
+		if ( op1->type == op2->type ){
+			switch( op1->type ){
+				case TYPE_CHAR:
+					val = op1->character > op2->character;
+					break;
+
+				case TYPE_REAL:
+					val = op1->number.real > op2->number.real;
+					break;
+
+				case TYPE_NUMBER:
+					val = op1->number.s_int > op2->number.s_int;
+					break;
+
+				default:
+					break;
+			}
+		}
+
+		ret->boolean = val;
 
 	} else {
 		FRAME_ERROR_ARGNUM( frame, 2 );
@@ -313,7 +354,8 @@ token_t *builtin_is_list( stack_frame_t *frame ){
 		ret->type = TYPE_BOOLEAN;
 
 		move = frame->expr->next;
-		ret->smalldata = move->type == TYPE_LIST;
+		//ret->smalldata = move->type == TYPE_LIST;
+		ret->boolean = move->type == TYPE_LIST;
 
 	} else {
 		FRAME_ERROR_ARGNUM( frame, 1 );
@@ -331,7 +373,8 @@ token_t *builtin_is_null( stack_frame_t *frame ){
 
 		ret = alloc_token( );
 		ret->type = TYPE_BOOLEAN;
-		ret->smalldata = tok->type == TYPE_LIST && tok->down == NULL;
+		//ret->smalldata = tok->type == TYPE_LIST && tok->down == NULL;
+		ret->boolean = tok->type == TYPE_LIST && tok->down == NULL;
 
 	} else {
 		FRAME_ERROR_ARGNUM( frame, 1 );
@@ -349,7 +392,8 @@ token_t *builtin_is_symbol( stack_frame_t *frame ){
 
 		ret = alloc_token( );
 		ret->type = TYPE_BOOLEAN;
-		ret->smalldata = tok->type == TYPE_SYMBOL && tok->down == NULL;
+		//ret->smalldata = tok->type == TYPE_SYMBOL && tok->down == NULL;
+		ret->boolean = tok->type == TYPE_SYMBOL && tok->down == NULL;
 
 	} else {
 		FRAME_ERROR_ARGNUM( frame, 1 );
@@ -358,6 +402,7 @@ token_t *builtin_is_symbol( stack_frame_t *frame ){
 	return ret;
 }
 
+/*
 token_t *builtin_lessthan( stack_frame_t *frame ){
 	token_t *ret = NULL;
 	token_t *op1, *op2;
@@ -371,6 +416,52 @@ token_t *builtin_lessthan( stack_frame_t *frame ){
 
 		ret->smalldata = ( op1->type          == op2->type )
 			          && ((int)op1->smalldata < (int)op2->smalldata );
+
+	} else {
+		FRAME_ERROR_ARGNUM( frame, 2 );
+	}
+
+	return ret;
+}
+*/
+
+token_t *builtin_lessthan( stack_frame_t *frame ){
+	token_t *ret = NULL;
+	token_t *op1, *op2;
+	bool val = false;
+
+	if ( frame->ntokens == 3 ){
+		op1 = frame->expr->next;
+		op2 = frame->expr->next->next;
+
+		ret = alloc_token( );
+		ret->type = TYPE_BOOLEAN;
+		/*
+		ret->smalldata = ( op1->type          == op2->type )
+		              && ((int)op1->smalldata > (int)op2->smalldata );
+
+	     */
+
+		if ( op1->type == op2->type ){
+			switch( op1->type ){
+				case TYPE_CHAR:
+					val = op1->character < op2->character;
+					break;
+
+				case TYPE_REAL:
+					val = op1->number.real < op2->number.real;
+					break;
+
+				case TYPE_NUMBER:
+					val = op1->number.s_int < op2->number.s_int;
+					break;
+
+				default:
+					break;
+			}
+		}
+
+		ret->boolean = val;
 
 	} else {
 		FRAME_ERROR_ARGNUM( frame, 2 );
@@ -400,7 +491,9 @@ token_t *builtin_modulo( stack_frame_t *frame ){
 		if ( op1->type == TYPE_NUMBER && op2->type == TYPE_NUMBER ){
 			ret = alloc_token( );
 			ret->type = TYPE_NUMBER;
-			ret->smalldata = op1->smalldata % op2->smalldata;
+			//ret->smalldata = op1->smalldata % op2->smalldata;
+			ret->number.s_int = op1->number.s_int % op2->number.s_int;
+			ret->number.type = TYPE_NUMBER;
 
 		} else {
 			FRAME_ERROR( frame,
@@ -418,15 +511,17 @@ token_t *builtin_modulo( stack_frame_t *frame ){
 token_t *builtin_multiply( stack_frame_t *frame ){
 	token_t *ret = NULL;
 	token_t *move;
-	int sum = 1;
+	//int sum = 1;
+	number_t sum = as_int_number( 1 );
 	bool error = false;
 
 	move = frame->expr->next;
 
 	if ( move ){
 		foreach_in_list( move ){
-			if ( move->type == TYPE_NUMBER ){
-				sum *= move->smalldata;
+			if ( has_number_type( move )){ 
+				//sum *= move->smalldata;
+				sum = number_mul( sum, move->number );
 
 			} else {
 				error = true;
@@ -437,8 +532,8 @@ token_t *builtin_multiply( stack_frame_t *frame ){
 
 		if ( !error ){
 			ret = alloc_token( );
-			ret->type = TYPE_NUMBER;
-			ret->smalldata = sum;
+			ret->type = sum.type;
+			ret->number = sum;
 		}
 
 	} else {
@@ -459,7 +554,8 @@ token_t *builtin_random_int( stack_frame_t *frame ){
 
 	ret = alloc_token( );
 	ret->type = TYPE_NUMBER;
-	ret->smalldata = rand( );
+	//ret->smalldata = rand( );
+	ret->number = as_int_number( rand( ));
 
 	return ret;
 }
@@ -495,28 +591,35 @@ token_t *builtin_sleep( stack_frame_t *frame ){
 token_t *builtin_subtract( stack_frame_t *frame ){
 	token_t *ret = NULL;
 	token_t *move;
-	int sum = 0;
+	//int sum = 0;
+	number_t sum = as_int_number( 0 );
+	bool error = false;
 
 	move = frame->expr->next;
 
 	if ( move ){
-		ret = alloc_token( );
-		ret->type = TYPE_NUMBER;
-
-		sum = move->smalldata;
+		sum = move->number;
 		move = move->next;
 
 		foreach_in_list( move ){
-			if ( move->type == TYPE_NUMBER ){
-				sum -= move->smalldata;
+			//if ( move->type == TYPE_NUMBER ){
+			if ( has_number_type( move )) {
+				//sum -= move->smalldata;
+				sum = number_sub( sum, move->number );
 
 			} else {
 				FRAME_ERROR_ARGTYPE( frame, "number", move->type );
+				error = true;
 				break;
 			}
 		}
+	}
 
-		ret->smalldata = sum;
+	if ( !error ){
+		ret = alloc_token( );
+		//ret->type = TYPE_NUMBER;
+		ret->type = sum.type;
+		ret->number = sum;
 	}
 
 	return ret;
@@ -566,7 +669,8 @@ token_t *builtin_load_global_file( stack_frame_t *frame ){
 
 			ret = alloc_token( );
 			ret->type      = TYPE_BOOLEAN;
-			ret->smalldata = eval_return;
+			//ret->smalldata = eval_return;
+			ret->boolean = eval_return;
 
 		} else {
 			FRAME_ERROR_ARGTYPE( frame, "string", frame->expr->next->type );

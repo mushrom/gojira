@@ -31,7 +31,7 @@ token_t *builtin_tcp_socket( stack_frame_t *frame ){
 
 				if ( host && ( sock = socket( AF_INET, SOCK_STREAM, 0 )) >= 0 ){
 					server_addr.sin_family = AF_INET;
-					server_addr.sin_port = htons( move->next->smalldata );
+					server_addr.sin_port = htons( move->next->number.u_int );
 					server_addr.sin_addr = *((struct in_addr *)host->h_addr);
 
 					if ( connect( sock, (struct sockaddr *)&server_addr,
@@ -39,7 +39,7 @@ token_t *builtin_tcp_socket( stack_frame_t *frame ){
 					{
 						ret = alloc_token( );
 						ret->type = TYPE_SOCKET;
-						ret->smalldata = (unsigned)sock;
+						ret->misc = (unsigned)sock;
 
 					} else {
 						frame->error_call( frame, "[%s] Could not connect to host\n",
@@ -80,17 +80,17 @@ token_t *builtin_tcp_getchar( stack_frame_t *frame ){
 			int recv_ret;
 			unsigned char ch;
 
-			recv_ret = recv( move->smalldata, &ch, 1, 0 );
+			recv_ret = recv( move->misc, &ch, 1, 0 );
 			
 			if ( recv_ret > 0 ){
 				ret = alloc_token( );
 				ret->type = TYPE_CHAR;
-				ret->smalldata = ch;
+				ret->character = ch;
 
 			} else {
 				ret = alloc_token( );
 				ret->type = TYPE_BOOLEAN;
-				ret->smalldata = false;
+				ret->boolean = false;
 			}
 
 		} else {
@@ -116,14 +116,14 @@ token_t *builtin_tcp_putchar( stack_frame_t *frame ){
 		if ( move->type == TYPE_SOCKET ){
 			if ( move->next->type == TYPE_CHAR ){
 				int send_ret;
-				unsigned char ch = move->next->smalldata;
+				unsigned char ch = move->next->character;
 
-				send_ret = send( move->smalldata, &ch, 1, 0 );
+				send_ret = send( move->misc, &ch, 1, 0 );
 				
 				if ( send_ret > 0 ){
 					ret = alloc_token( );
 					ret->type = TYPE_CHAR;
-					ret->smalldata = ch;
+					ret->character = ch;
 				}
 			}
 

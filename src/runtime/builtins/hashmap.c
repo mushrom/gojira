@@ -91,7 +91,7 @@ token_t *builtin_hashmap_get( stack_frame_t *frame ){
 				} else {
 					ret = alloc_token( );
 					ret->type = TYPE_BOOLEAN;
-					ret->smalldata = false;
+					ret->boolean = false;
 				}
 
 			} else {

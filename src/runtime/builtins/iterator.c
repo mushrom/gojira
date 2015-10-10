@@ -53,7 +53,7 @@ token_t *builtin_iterator( stack_frame_t *frame ){
 				iter->counter = 0;
 				iter->next_type = temp->next->type;
 				switch ( iter->next_type ){
-					case TYPE_NUMBER:    iter->limit = temp->next->smalldata; break;
+					case TYPE_NUMBER:    iter->limit = temp->next->number.u_int; break;
 					case TYPE_PROCEDURE: iter->nproc = shared_aquire( temp->next->data ); break;
 					case TYPE_ITERATOR:  iter->iter  = shared_aquire( temp->next->data ); break;
 					default: /* TODO: Error here */ break;
@@ -91,7 +91,8 @@ token_t *builtin_iterator_access( stack_frame_t *frame ){
 
 			num = alloc_token( );
 			num->type = TYPE_NUMBER;
-			num->smalldata = iter->counter;
+			//num->smalldata = iter->counter;
+			num->number = as_int_number( iter->counter );
 
 			proc = alloc_token( );
 			proc->type = TYPE_PROCEDURE;
@@ -174,7 +175,8 @@ token_t *builtin_iterator_next( stack_frame_t *frame ){ token_t *ret = NULL;
 
 						num = alloc_token( );
 						num->type = TYPE_NUMBER;
-						num->smalldata = iter->counter;
+						//num->smalldata = iter->counter;
+						num->number = as_int_number( iter->counter );
 
 						cur_iter = alloc_token( );
 						cur_iter->type = TYPE_ITERATOR;

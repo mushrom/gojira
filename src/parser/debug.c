@@ -4,6 +4,7 @@ char *debug_strings[] = {
 	"unspecified",
 	"boolean",
 	"number",
+	"real",
 	"char",
 	"string",
 	"symbol",

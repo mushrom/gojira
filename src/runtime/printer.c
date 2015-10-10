@@ -37,11 +37,15 @@ void file_print_token( FILE *fp, token_t *token ){
 	if ( token && fp ){
 		switch ( token->type ){
 			case TYPE_NUMBER:
-				fprintf( fp, "%d", token->smalldata );
+				fprintf( fp, "%ld", token->number.s_int );
+				break;
+
+			case TYPE_REAL:
+				fprintf( fp, "%g", token->number.real );
 				break;
 
 			case TYPE_BOOLEAN:
-				fprintf( fp, "#%c", (token->smalldata == true)? 't' : 'f' );
+				fprintf( fp, "#%c", (token->boolean == true)? 't' : 'f' );
 				break;
 
 			case TYPE_STRING:
@@ -53,20 +57,20 @@ void file_print_token( FILE *fp, token_t *token ){
 				break;
 
 			case TYPE_CHAR:
-				if ( token->smalldata == '\n' ){
+				if ( token->character == '\n' ){
 					fprintf( fp, "#\\newline" );
-				} else if ( token->smalldata == '\r' ){
+				} else if ( token->character == '\r' ){
 					fprintf( fp, "#\\return" );
-				} else if ( token->smalldata == ' ' ){
+				} else if ( token->character == ' ' ){
 					fprintf( fp, "#\\space" );
-				} else if ( token->smalldata == '\t' ){
+				} else if ( token->character == '\t' ){
 					fprintf( fp, "#\\tab" );
-				} else if ( token->smalldata == '\x1b' ){
+				} else if ( token->character == '\x1b' ){
 					fprintf( fp, "#\\escape" );
-				} else if ( token->smalldata == '\b' ){
+				} else if ( token->character == '\b' ){
 					fprintf( fp, "#\\backspace" );
 				} else {
-					fprintf( fp, "#\\%c", token->smalldata );
+					fprintf( fp, "#\\%c", token->character );
 				}
 				break;
 

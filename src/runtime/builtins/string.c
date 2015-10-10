@@ -63,11 +63,11 @@ token_t *builtin_string_contains( stack_frame_t *frame ){
 
 			if (( str = strstr( op1_str, op2_str ))){
 				ret->type = TYPE_NUMBER;
-				ret->smalldata = (unsigned)((unsigned long)str - (unsigned long)op1_str );
+				ret->number = as_int_number((unsigned)((unsigned long)str - (unsigned long)op1_str ));
 
 			} else {
 				ret->type = TYPE_BOOLEAN;
-				ret->smalldata = false;
+				ret->boolean = false;
 			}
 
 		} else {
@@ -147,7 +147,7 @@ token_t *builtin_char_to_string( stack_frame_t *frame ){
 			i = 0;
 			foreach_in_list( move ){
 				if ( move->type == TYPE_CHAR ){
-					str[i] = move->smalldata;
+					str[i] = move->character;
 					i++;
 
 				} else {
@@ -186,7 +186,7 @@ token_t *builtin_is_string( stack_frame_t *frame ){
 	if ( frame->ntokens == 2 ){
 		ret = alloc_token( );
 		ret->type = TYPE_BOOLEAN;
-		ret->smalldata = frame->expr->next->type == TYPE_STRING;
+		ret->boolean = frame->expr->next->type == TYPE_STRING;
 
 	} else {
 		frame->error_call( frame, "[%s] Need moar tokenz\n", __func__ );
@@ -202,13 +202,13 @@ token_t *builtin_string_ref( stack_frame_t *frame ){
 		if ( frame->expr->next->type == TYPE_STRING ){
 			if ( frame->expr->next->next->type == TYPE_NUMBER ){
 				char *str = shared_get( frame->expr->next->data );
-				unsigned n = frame->expr->next->next->smalldata;
+				unsigned n = frame->expr->next->next->number.u_int;
 				unsigned len = strlen( str );
 
 				if ( n < len ){
 					ret = alloc_token( );
 					ret->type = TYPE_CHAR;
-					ret->smalldata = str[n];
+					ret->character = str[n];
 
 				} else {
 					frame->error_call( frame,
@@ -245,7 +245,7 @@ token_t *builtin_string_length( stack_frame_t *frame ){
 		if ( move->type == TYPE_STRING ){
 			ret = alloc_token( );
 			ret->type = TYPE_NUMBER;
-			ret->smalldata = strlen( shared_get( move->data ));
+			ret->number = as_int_number( strlen( shared_get( move->data )));
 
 		} else {
 			frame->error_call( frame,

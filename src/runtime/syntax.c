@@ -260,7 +260,9 @@ bool syntax_matches( const token_t *pattern, const token_t *args ){
 				DEBUGP( "[%s] Matching a literal value, %d==%d, %d\n",
 						__func__, pattern->smalldata, args->smalldata, ret );
 				ret =  ( pattern->type      == args->type )
-				    && ( pattern->smalldata == args->smalldata )
+				    //&& ( pattern->smalldata == args->smalldata )
+					// TODO: do this properly
+				    && ( pattern->character == args->character )
 				    && syntax_matches( pattern->next, args->next );
 				break;
 		}

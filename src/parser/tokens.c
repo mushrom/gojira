@@ -16,15 +16,15 @@ void debug_print_token( const token_t *token ){
 	if ( token ){
 		switch ( token->type ){
 			case TYPE_NUMBER:
-				printf( "%d", token->smalldata );
+				printf( "%ld", token->number.s_int );
 				break;
 
 			case TYPE_BOOLEAN:
-				printf( "#%c", (token->smalldata == true)? 't' : 'f' );
+				printf( "#%c", (token->boolean == true)? 't' : 'f' );
 				break;
 
 			case TYPE_CHAR:
-				printf( "%c", token->smalldata );
+				printf( "%c", token->character );
 				break;
 
 			case TYPE_STRING:

@@ -256,7 +256,7 @@ bool eval_frame_expr( stack_frame_t **frame_ret ){
 
 		case TYPE_BOOLEAN:
 			{
-				foo = ext_proc_token( frame->expr->smalldata? builtin_true : builtin_false );
+				foo = ext_proc_token( frame->expr->boolean? builtin_true : builtin_false );
 				frame_register_one_token( frame, foo );
 
 				foo->next = frame->expr->next;

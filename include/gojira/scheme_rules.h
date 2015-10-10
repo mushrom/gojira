@@ -65,6 +65,10 @@ static rule_t *scheme_rules =
 		.ret = TYPE_BASE_TOKEN,
 
 	.next = &(rule_t){
+		.type = TYPE_REAL,
+		.ret = TYPE_BASE_TOKEN,
+
+	.next = &(rule_t){
 		.type = TYPE_CHAR,
 		.ret = TYPE_BASE_TOKEN,
 
@@ -102,6 +106,6 @@ static rule_t *scheme_rules =
 			.ret = TYPE_VECTOR,
 		},
 
-	}}}}}}}}}}}}}}}};
+	}}}}}}}}}}}}}}}}};
 
 #endif

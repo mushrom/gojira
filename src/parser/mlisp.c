@@ -118,15 +118,15 @@ static void expand_mlisp_indent( stack_t *stack, token_t *pos ){
 
 	if ( foo ) {
 		// handle an indent larger than the last
-		if ( foo->indent < pos->next->smalldata ){
-			foo = push_indent( stack, pos->next->smalldata, period == false );
+		if ( foo->indent < pos->next->character ){
+			foo = push_indent( stack, pos->next->character, period == false );
 
 			if ( period == false ){ 
 				insert_token( &pos, TYPE_OPEN_PAREN );
 			}
 
 		// handle a line with the same indentation as the last
-		} else if ( foo->indent == pos->next->smalldata ){
+		} else if ( foo->indent == pos->next->character ){
 			unsigned i;
 
 			for ( i = foo->parens; i; i-- ){
@@ -140,7 +140,7 @@ static void expand_mlisp_indent( stack_t *stack, token_t *pos ){
 		} else {
 			foo = stack_pop( stack );
 
-			while (foo && foo->indent != pos->next->smalldata) {
+			while (foo && foo->indent != pos->next->character) {
 				unsigned i;
 				for ( i = foo->parens; i; i-- ){
 					insert_token( &pos, TYPE_CLOSE_PAREN );

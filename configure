@@ -7,6 +7,7 @@ CONF_ENABLE_SOCKETS=1
 CONF_ENABLE_FILES=1
 CONF_DEBUG=0
 CONF_CFLAGS=""
+CONF_PUBLIC_MODE=0
 
 # Parse the given options
 for arg in $@; do

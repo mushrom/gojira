@@ -106,12 +106,12 @@ token_t *builtin_read_char( stack_frame_t *frame ){
 			if ( !feof( fp )){
 				ret = alloc_token( );
 				ret->type = TYPE_CHAR;
-				ret->smalldata = c;
+				ret->character = c;
 
 			} else {
 				ret = alloc_token( );
 				ret->type = TYPE_BOOLEAN;
-				ret->smalldata = false;
+				ret->boolean = false;
 			}
 
 
@@ -124,7 +124,7 @@ token_t *builtin_read_char( stack_frame_t *frame ){
 		//frame->error_call( frame, "[%s] Need moar tokenz\n", __func__ );
 		ret = alloc_token( );
 		ret->type = TYPE_CHAR;
-		ret->smalldata = getchar( );
+		ret->character = getchar( );
 	}
 
 	return ret;
@@ -141,11 +141,11 @@ token_t *builtin_write_char( stack_frame_t *frame ){
 				shr = frame->expr->next->data;
 				fp = shared_get( shr );
 
-				fputc( frame->expr->next->next->smalldata, fp );
+				fputc( frame->expr->next->next->character, fp );
 
 				ret = alloc_token( );
 				ret->type = TYPE_CHAR;
-				ret->smalldata = frame->expr->next->next->smalldata;
+				ret->character = frame->expr->next->next->character;
 
 			} else {
 				frame->error_call( frame, "[%s] Expected char, but have %s\n",
@@ -174,16 +174,16 @@ token_t *builtin_is_eof( stack_frame_t *frame ){
 			fp = shared_get( frame->expr->next->data );
 			ret = alloc_token( );
 			ret->type = TYPE_BOOLEAN;
-			ret->smalldata = 0;
+			ret->boolean = false;
 
 			c = fgetc( fp );
 			if ( c == EOF || !feof( fp )){
-				ret->smalldata = 1;
+				ret->boolean = true;
 			} else {
 				ungetc( c, fp );
 			}
 
-			ret->smalldata = feof( fp ) != 0;
+			ret->boolean = feof( fp ) != 0;
 
 		} else {
 			frame->error_call( frame, "[%s] Expected file, but have %s\n",
@@ -290,7 +290,7 @@ token_t *builtin_mkdir( stack_frame_t *frame ){
 			if ( result == 0 ){
 				ret = alloc_token( );
 				ret->type = TYPE_BOOLEAN;
-				ret->smalldata = true;
+				ret->boolean = true;
 
 			} else {
 				frame->error_call( frame,
@@ -325,7 +325,7 @@ token_t *builtin_file_exists( stack_frame_t *frame ){
 
 			ret = alloc_token( );
 			ret->type = TYPE_BOOLEAN;
-			ret->smalldata = result == 0;
+			ret->boolean = result == 0;
 
 		} else {
 			frame->error_call( frame,

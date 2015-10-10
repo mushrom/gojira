@@ -5,6 +5,7 @@ extern "C" {
 #endif
 
 #include <stdbool.h>
+#include <stdint.h>
 
 typedef enum {
 	TYPE_NULL,
@@ -12,6 +13,7 @@ typedef enum {
 	// Basic types
 	TYPE_BOOLEAN,
 	TYPE_NUMBER,
+	TYPE_REAL,
 	TYPE_CHAR,
 	TYPE_STRING,
 	TYPE_SYMBOL,
@@ -70,26 +72,32 @@ typedef struct stack_frame stack_frame_t;
 typedef struct token token_t;
 typedef token_t *(*scheme_func)( stack_frame_t * );
 
+#include <gojira/libs/numbers.h>
+
 typedef struct token {
+	struct token *next;
+	struct token *down;
+
+	// Used in frames to keep (seperate) token list of all allocated tokens
+	struct token *gc_link;
+
+	// token data
+	union {
+		void *data;
+		scheme_func func;
+		struct number_buf number;
+		uint8_t byte;
+		uint32_t character;
+		uint32_t misc;
+		bool boolean;
+	};
+
 	type_t type;
 	// Used for rule reduction while parsing, and for garbage status
 	// during runtime.
 	unsigned status;
 	// special flags about the token
 	token_flag_t flags;
-
-	// token data
-	union {
-		void *data;
-		unsigned smalldata;
-		scheme_func func;
-	};
-
-	struct token *next;
-	struct token *down;
-
-	// Used in frames to keep (seperate) token list of all allocated tokens
-	struct token *gc_link;
 } token_t;
 
 token_t *strip_token( token_t *tokens, type_t type );
@@ -111,6 +119,10 @@ token_t *replace_type( token_t *tokens, const token_t *replace, type_t type );
 token_t *parse_scheme_tokens( char *buf );
 
 const token_t *debug_print( const token_t *tokens );
+
+static inline bool has_number_type( token_t *token ){
+	return token->type == TYPE_NUMBER || token->type == TYPE_REAL;
+}
 
 #include <gojira/runtime/allocate.h>
 
