@@ -44,6 +44,10 @@ void file_print_token( FILE *fp, token_t *token ){
 				fprintf( fp, "%g", token->number.real );
 				break;
 
+			case TYPE_RATIONAL:
+				fprintf( fp, "%ld/%lu", token->number.num, token->number.denom );
+				break;
+
 			case TYPE_BOOLEAN:
 				fprintf( fp, "#%c", (token->boolean == true)? 't' : 'f' );
 				break;

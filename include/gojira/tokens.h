@@ -13,6 +13,7 @@ typedef enum {
 	// Basic types
 	TYPE_BOOLEAN,
 	TYPE_NUMBER,
+	TYPE_RATIONAL,
 	TYPE_REAL,
 	TYPE_CHAR,
 	TYPE_STRING,
@@ -121,7 +122,9 @@ token_t *parse_scheme_tokens( char *buf );
 const token_t *debug_print( const token_t *tokens );
 
 static inline bool has_number_type( token_t *token ){
-	return token->type == TYPE_NUMBER || token->type == TYPE_REAL;
+	return token->type == TYPE_NUMBER
+		|| token->type == TYPE_REAL
+		|| token->type == TYPE_RATIONAL;
 }
 
 #include <gojira/runtime/allocate.h>
