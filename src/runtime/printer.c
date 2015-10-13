@@ -30,7 +30,7 @@ static void escaped_print_str( FILE *fp, const char *buf ){
 	fputc( '"', fp );
 }
 
-void file_print_token( FILE *fp, token_t *token ){
+void file_print_token( FILE *fp, token_t *token, print_readable_t readable ){
 	procedure_t *proc;
 	shared_t *shr;
 
@@ -53,34 +53,49 @@ void file_print_token( FILE *fp, token_t *token ){
 				break;
 
 			case TYPE_STRING:
-				escaped_print_str( fp, (char *)shared_get( token->data ));
+				if ( readable ){
+					escaped_print_str( fp, (char *)shared_get( token->data ));
+				} else {
+					fprintf( fp, "%s", (char *)shared_get( token->data ));
+				}
+
 				break;
 
 			case TYPE_SYMBOL:
-				fprintf( fp, "'%s", (char *)shared_get( token->data ));
+				if ( readable ){
+					fprintf( fp, "'%s", (char *)shared_get( token->data ));
+				} else {
+					fprintf( fp, "%s", (char *)shared_get( token->data ));
+				}
 				break;
 
 			case TYPE_CHAR:
-				if ( token->character == '\n' ){
-					fprintf( fp, "#\\newline" );
-				} else if ( token->character == '\r' ){
-					fprintf( fp, "#\\return" );
-				} else if ( token->character == ' ' ){
-					fprintf( fp, "#\\space" );
-				} else if ( token->character == '\t' ){
-					fprintf( fp, "#\\tab" );
-				} else if ( token->character == '\x1b' ){
-					fprintf( fp, "#\\escape" );
-				} else if ( token->character == '\b' ){
-					fprintf( fp, "#\\backspace" );
+				if ( readable ){
+					if ( token->character == '\n' ){
+						fprintf( fp, "#\\newline" );
+					} else if ( token->character == '\r' ){
+						fprintf( fp, "#\\return" );
+					} else if ( token->character == ' ' ){
+						fprintf( fp, "#\\space" );
+					} else if ( token->character == '\t' ){
+						fprintf( fp, "#\\tab" );
+					} else if ( token->character == '\x1b' ){
+						fprintf( fp, "#\\escape" );
+					} else if ( token->character == '\b' ){
+						fprintf( fp, "#\\backspace" );
+					} else {
+						fprintf( fp, "#\\%c", token->character );
+					}
+
 				} else {
-					fprintf( fp, "#\\%c", token->character );
+					fprintf( fp, "%c", token->character );
 				}
+
 				break;
 
 			case TYPE_LIST:
 				fputc( '(', fp );
-				file_dump_tokens( fp, token->down );
+				file_dump_tokens( fp, token->down, readable );
 				fputc( ')', fp );
 				break;
 
@@ -89,7 +104,7 @@ void file_print_token( FILE *fp, token_t *token ){
 				proc = shared_get( shr );
 
 				fprintf( fp, "#<%s (", type_str( token->type ));
-				file_dump_tokens( fp, proc->args );
+				file_dump_tokens( fp, proc->args, readable );
 #if GOJIRA_PUBLIC_MODE
 				fprintf( fp, ")>" );
 #else
@@ -110,7 +125,7 @@ void file_print_token( FILE *fp, token_t *token ){
 						if ( i > 0 )
 							fputc( ' ', fp );
 
-						file_dump_tokens( fp, dlist_get( foo, i ));
+						file_dump_tokens( fp, dlist_get( foo, i ), readable );
 					}
 				}
 
@@ -125,11 +140,11 @@ void file_print_token( FILE *fp, token_t *token ){
 }
 
 // Prints all the tokens in a given tree
-token_t *file_dump_tokens( FILE *fp, token_t *tokens ){
+token_t *file_dump_tokens( FILE *fp, token_t *tokens, print_readable_t readable ){
 	token_t *move;
 
 	for ( move = tokens; move; move = move->next ){
-		file_print_token( fp, move );
+		file_print_token( fp, move, readable );
 		if ( move->next )
 			fputc( ' ', fp );
 	}
@@ -138,9 +153,9 @@ token_t *file_dump_tokens( FILE *fp, token_t *tokens ){
 }
 
 token_t *dump_tokens( token_t *tokens ){
-	return file_dump_tokens( stdout, tokens );
+	return file_dump_tokens( stdout, tokens, true );
 }
 
-void print_token( token_t *token ){
-	file_print_token( stdout, token );
+void print_token( token_t *token, print_readable_t readable ){
+	file_print_token( stdout, token, readable );
 }

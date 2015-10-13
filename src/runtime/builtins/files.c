@@ -209,10 +209,41 @@ token_t *builtin_display( stack_frame_t *frame ){
 
 		if ( file_tok && file_tok->type == TYPE_FILE ){
 			fp = shared_get( file_tok->data );
-			file_print_token( fp, move );
+			file_print_token( fp, move, OUTPUT_REGULAR );
 
 		} else {
-			file_print_token( stdout, move );
+			file_print_token( stdout, move, OUTPUT_REGULAR );
+		}
+
+	} else {
+		frame->error_call(
+			frame,
+			"[%s] Error: expected 1 or 2 arguments, but have %u\n",
+			__func__, frame->ntokens - 1 );
+	}
+
+	return ret;
+}
+
+token_t *builtin_write( stack_frame_t *frame ){
+	token_t *ret = NULL;
+	token_t *move;
+	token_t *file_tok;
+	FILE *fp;
+
+
+	move = frame->expr->next;
+	if ( move ){
+		ret = alloc_token( );
+		ret->type = TYPE_NULL;
+		file_tok = move->next;
+
+		if ( file_tok && file_tok->type == TYPE_FILE ){
+			fp = shared_get( file_tok->data );
+			file_print_token( fp, move, OUTPUT_READABLE );
+
+		} else {
+			file_print_token( stdout, move, OUTPUT_READABLE );
 		}
 
 	} else {

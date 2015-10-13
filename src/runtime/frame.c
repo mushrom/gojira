@@ -91,6 +91,7 @@ struct global_builtin {
 	{ "load!",           builtin_load_global_file },
 	{ "eof?",            builtin_is_eof },
 	{ "display",         builtin_display },
+	{ "write",           builtin_write },
 	{ "newline",         builtin_newline },
 	{ "read",            builtin_read },
 	{ "mkdir",           builtin_mkdir },
@@ -162,7 +163,7 @@ void stack_trace( st_frame_t *frame ){
 		k = m = 0;
 		foreach_in_list( token ){
 			if ( m >= start || m == 0 ){
-				print_token( token );
+				print_token( token, true );
 
 				if ( token->next )
 					printf( " -> " );

@@ -79,7 +79,6 @@ RATIONAL_OP( add,
 	((a.num * b.denom) + (b.num * a.denom)),
 	(a.denom * b.denom))
 
-
 // a/b - c/d == (ad - bc) / bd
 RATIONAL_OP( sub,
 	((a.num * b.denom) - (b.num * a.denom)),
@@ -139,7 +138,7 @@ static inline number_t normalize_rational( number_t foo ){
 	} else if ( foo.num % foo.denom == 0 ) {
 		return (number_t){
 			.type = TYPE_NUMBER,
-			.s_int = foo.num / foo.denom,
+			.s_int = foo.num / (long int)foo.denom,
 		};
 
 	} else {

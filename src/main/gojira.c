@@ -130,7 +130,7 @@ int main( int argc, char *argv[] ){
 						global_frame->end, NO_RECURSE, VAR_IMMUTABLE );
 
 					printf( "..%u = ", n );
-					print_token( global_frame->end );
+					print_token( global_frame->end, OUTPUT_READABLE );
 					putchar( '\n' );
 
 					free_tokens( tree );
