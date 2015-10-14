@@ -41,6 +41,11 @@ struct global_builtin {
 	{ "true",            builtin_true },
 	{ "false",           builtin_false },
 
+	{ "number?",         builtin_is_number },
+	{ "integer?",        builtin_is_integer },
+	{ "rational?",       builtin_is_rational },
+	{ "real?",           builtin_is_real },
+
 	{ "eval",            builtin_eval },
 	{ "apply",           builtin_apply },
 

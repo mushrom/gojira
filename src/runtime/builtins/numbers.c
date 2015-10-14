@@ -181,3 +181,73 @@ token_t *builtin_random_int( stack_frame_t *frame ){
 
 	return ret;
 }
+
+token_t *builtin_is_number( stack_frame_t *frame ){
+	token_t *ret = NULL;
+
+	if ( frame->ntokens == 2 ){
+		ret = alloc_token( );
+		ret->type = TYPE_BOOLEAN;
+		//ret->boolean = frame->expr->next->type == TYPE_NUMBER;
+		ret->boolean = has_number_type( frame->expr->next );
+
+	} else {
+		FRAME_ERROR_ARGNUM( frame, 2 );
+	}
+
+	return ret;
+}
+
+token_t *builtin_is_integer( stack_frame_t *frame ){
+	token_t *ret = NULL;
+
+	if ( frame->ntokens == 2 ){
+		ret = alloc_token( );
+		ret->type = TYPE_BOOLEAN;
+		ret->boolean = frame->expr->next->type == TYPE_NUMBER;
+
+	} else {
+		FRAME_ERROR_ARGNUM( frame, 2 );
+	}
+
+	return ret;
+}
+
+token_t *builtin_is_rational( stack_frame_t *frame ){
+	token_t *ret = NULL;
+
+	if ( frame->ntokens == 2 ){
+		token_t *move = frame->expr->next;
+
+		ret = alloc_token( );
+		ret->type = TYPE_BOOLEAN;
+		ret->boolean =
+			   move->type == TYPE_RATIONAL
+			|| move->type == TYPE_NUMBER;
+
+	} else {
+		FRAME_ERROR_ARGNUM( frame, 2 );
+	}
+
+	return ret;
+}
+
+token_t *builtin_is_real( stack_frame_t *frame ){
+	token_t *ret = NULL;
+
+	if ( frame->ntokens == 2 ){
+		token_t *move = frame->expr->next;
+
+		ret = alloc_token( );
+		ret->type = TYPE_BOOLEAN;
+		ret->boolean =
+			   move->type == TYPE_REAL
+			|| move->type == TYPE_RATIONAL
+			|| move->type == TYPE_NUMBER;
+
+	} else {
+		FRAME_ERROR_ARGNUM( frame, 2 );
+	}
+
+	return ret;
+}
