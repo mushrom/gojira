@@ -267,7 +267,9 @@ static token_return_t get_token_from_str( const char *string ){
 				( *string == '-' && strchr( DIGITS, *(string + 1))) ||
 				( *string == '.' && strchr( DIGITS, *(string + 1)))) {
 
-			i = strspn( string, "-+e."DIGITS );
+			char *bar = NULL;
+
+			i = strspn( string, "-+e./"DIGITS );
 			foo = malloc( sizeof( char[i + 1]));
 			strncpy( foo, string, i );
 			foo[i] = 0;
@@ -278,11 +280,33 @@ static token_return_t get_token_from_str( const char *string ){
 				ret.token->number = as_real_number( atof( foo ));
 				ret.found = true;
 
+			} else if (( bar = strchr( foo, '/' ))) {
+				size_t k = strspn( foo, "-"DIGITS );
+				size_t m = strspn( bar + 1, DIGITS );
+
+				char *baz  = malloc( sizeof( char[k + 1]));
+				char *quix = malloc( sizeof( char[m + 1]));
+
+				strncpy( baz, foo, k );
+				baz[k] = '\0';
+
+				strncpy( quix, bar + 1, m );
+				quix[m] = '\0';
+
+				ret.string = string + i;
+				ret.found = true;
+				ret.token->type = TYPE_RATIONAL;
+				ret.token->number =
+					normalize_rational(
+						as_rational_number_ints( atol( baz ), atol( quix )));
+
+				free( baz );
+				free( quix );
+
 			} else {
 				ret.string = string + i;
 				ret.token->type = TYPE_NUMBER;
 				ret.found = true;
-				//ret.token->smalldata = atoi( foo );
 				ret.token->number = as_int_number( atoi( foo ));
 			}
 

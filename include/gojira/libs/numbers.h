@@ -109,11 +109,19 @@ static inline number_t as_rational_number( number_t val ){
 		return val;
 	} else {
 		return (number_t){
-			.type = TYPE_RATIONAL,
+			.type  = TYPE_RATIONAL,
 			.num   = val.s_int,
 			.denom = 1,
 		};
 	}
+}
+
+static inline number_t as_rational_number_ints( long num, unsigned long denom ){
+	return (number_t){
+		.type  = TYPE_RATIONAL,
+		.num   = num,
+		.denom = denom,
+	};
 }
 
 static inline unsigned long find_gcd( unsigned long num, unsigned long denom ){
