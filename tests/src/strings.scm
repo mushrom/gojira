@@ -1,27 +1,27 @@
-(display "Hello, world")
+(write "Hello, world")
 (newline)
 
-(display (eq? (string->symbol "asdf") 'asdf))
+(write (eq? (string->symbol "asdf") 'asdf))
 (newline)
 
-(display (string-contains "some string" "str"))
+(write (string-contains "some string" "str"))
 (newline)
 
-(display (string-contains "some string" "saywut"))
+(write (string-contains "some string" "saywut"))
 (newline)
 
-(display (string-append "testing " "this"))
+(write (string-append "testing " "this"))
 (newline)
 
-(display (symbol->string 'testing))
+(write (symbol->string 'testing))
 (newline)
 
 ; test string escapes
-(display "testing\"this \\")
+(write "testing\"this \\")
 (newline)
 
-(display "\\\\\"\"\\")
+(write "\\\\\"\"\\")
 (newline)
 
-(display "\a\b\c\\d")
+(write "\a\b\c\\d")
 (newline)

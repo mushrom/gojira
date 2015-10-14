@@ -1,21 +1,21 @@
 ; ints
-(display 0)
+(write 0)
 (newline)
 
-(display 123)
+(write 123)
 (newline)
 
-(display -1)
+(write -1)
 (newline)
 
-(display 268435455)
+(write 268435455)
 (newline)
 
-(display (+ 1 2 3 4))
+(write (+ 1 2 3 4))
 (newline)
 
-(display (* 2 (- 123 321)))
+(write (* 2 (- 123 321)))
 (newline)
 
-(display (/ 100 2))
+(write (/ 100 2))
 (newline)

@@ -3,12 +3,19 @@
 (define infinite-thing
   (iterator (lambda (x) x)))
 
-(print (car infinite-thing))
-(print (caddr infinite-thing))
+(write (car infinite-thing))
+(newline)
 
-(foreach (take infinite-thing 10) print)
+(write (caddr infinite-thing))
+(newline)
 
-(print (map (lambda (n) (* n n))
+(foreach (take infinite-thing 10)
+    (lambda (x)
+      (write x)
+      (newline)))
+
+(write (map (lambda (n) (* n n))
             (iterator
               (lambda (foo) foo)
               10)))
+(newline)

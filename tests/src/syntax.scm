@@ -4,14 +4,14 @@
     ((_ a)   2)
     ((_ a b) (+ a b))))
 
-(display (asdf))
+(write (asdf))
 (newline)
 
-(display (asdf 1))
+(write (asdf 1))
 (newline)
 
-(display (asdf 1 2))
+(write (asdf 1 2))
 (newline)
 
-(display (asdf (asdf 1 2) 3))
+(write (asdf (asdf 1 2) 3))
 (newline)

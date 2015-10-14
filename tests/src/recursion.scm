@@ -1,6 +1,6 @@
 (intern-set 'recurse-func
   (lambda (x)
-    (display x)
+    (write x)
     (newline)
     (if (< x 10)
       (recurse-func (+ x 1))
@@ -12,7 +12,7 @@
 
 (intern-set 'qwerty
   (lambda (num)
-    (display 'qwerty)
+    (write 'qwerty)
     (newline)
 
     (if (> num 0)
@@ -21,7 +21,7 @@
 
 (intern-set 'abc
   (lambda (num)
-    (display 'abc)
+    (write 'abc)
     (newline)
 
     (if (> num 0)

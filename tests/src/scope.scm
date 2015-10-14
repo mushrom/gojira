@@ -2,7 +2,7 @@
 (define blarg
   (lambda (x)
     (define :mut y (* x 2))
-    (display y)
+    (write y)
     (newline)))
 
 (blarg 5)

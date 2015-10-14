@@ -1,24 +1,24 @@
 ; symbols
-(display 'a)
+(write 'a)
 (newline)
 
-(display 'abc)
+(write 'abc)
 (newline)
 
-(display (eq? 'abc 'abc))
+(write (eq? 'abc 'abc))
 (newline)
 
-(display (eq? 'abc 'def))
+(write (eq? 'abc 'def))
 (newline)
 
-(display 'zeblarg)
+(write 'zeblarg)
 (newline)
 
-(display 'fooba&r-_baz?)
+(write 'fooba&r-_baz?)
 (newline)
 
-(display :asdf)
+(write :asdf)
 (newline)
 
-(display (eq? :asdf ':asdf))
+(write (eq? :asdf ':asdf))
 (newline)
