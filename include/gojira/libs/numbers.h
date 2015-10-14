@@ -13,7 +13,7 @@ typedef struct number_buf {
 
 		struct {
 			long int num;
-			unsigned long denom;
+			long int denom;
 		};
 		// TODO: implement a big int type
 	};
@@ -124,8 +124,8 @@ static inline number_t as_rational_number_ints( long num, unsigned long denom ){
 	};
 }
 
-static inline unsigned long find_gcd( unsigned long num, unsigned long denom ){
-	unsigned long temp;
+static inline unsigned long find_gcd( long num, long denom ){
+	long temp;
 
 	while ( denom ){
 		temp = denom;
@@ -155,6 +155,12 @@ static inline number_t normalize_rational( number_t foo ){
 		if ( temp != foo.denom ){
 			foo.num   /= temp;
 			foo.denom /= temp;
+
+			if ( foo.denom < 0 ){
+				foo.num   = -foo.num;
+				foo.denom = -foo.denom;
+			}
+			// TODO: add error handling for foo.denom == 0
 		}
 
 		return foo;

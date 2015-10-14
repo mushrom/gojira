@@ -4,12 +4,12 @@
 #include <gojira/runtime/files.h>
 #include <gojira/libs/numbers.h>
 #include <gojira/parse_debug.h>
+
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
-#include <time.h>
 
 token_t *ext_proc_token( scheme_func handle ){
 	token_t *ret = NULL;
@@ -17,35 +17,6 @@ token_t *ext_proc_token( scheme_func handle ){
 	ret = alloc_token( );
 	ret->func = handle;
 	ret->type = TYPE_EXTERN_PROC;
-
-	return ret;
-}
-
-token_t *builtin_add( stack_frame_t *frame ){
-	token_t *ret = NULL;
-	token_t *move;
-	number_t sum = as_int_number( 0 ); 
-	bool error = false;
-
-	move = frame->expr->next;
-	foreach_in_list( move ){
-		//if ( move->type == TYPE_NUMBER ){
-			//sum += move->smalldata;
-		if ( has_number_type( move )) {
-			sum = number_add( sum, move->number );
-
-		} else {
-			error = true;
-			FRAME_ERROR_ARGTYPE( frame, "number", move->type );
-			break;
-		}
-	}
-
-	if ( !error ){
-		ret = alloc_token( );
-		ret->type = sum.type;
-		ret->number = sum;
-	}
 
 	return ret;
 }
@@ -107,50 +78,6 @@ token_t *builtin_cons( stack_frame_t *frame ){
 
 	} else {
 		FRAME_ERROR_ARGNUM( frame, 2 );
-	}
-
-	return ret;
-}
-
-token_t *builtin_divide( stack_frame_t *frame ){
-	token_t *ret = NULL;
-	token_t *move;
-	//int sum = 1;
-	number_t sum = as_int_number( 1 );
-	bool error = false;
-
-	move = frame->expr->next;
-
-	if ( move ){
-		if ( has_number_type( move )){
-			sum = move->number;
-			move = move->next;
-
-			foreach_in_list( move ){
-				if ( has_number_type( move )){
-					sum = number_div( sum, move->number );
-
-				} else {
-					FRAME_ERROR_ARGTYPE( frame, "number", move->type );
-					error = true;
-					break;
-				}
-			}
-
-		} else {
-			FRAME_ERROR_ARGTYPE( frame, "number", move->type );
-			error = true;
-		}
-
-	} else {
-		FRAME_ERROR_ARGNUM( frame, 2 );
-		error = true;
-	}
-
-	if ( !error ){
-		ret = alloc_token( );
-		ret->type = sum.type;
-		ret->number = sum;
 	}
 
 	return ret;
@@ -480,86 +407,6 @@ token_t *builtin_list( stack_frame_t *frame ){
 	return ret;
 }
 
-token_t *builtin_modulo( stack_frame_t *frame ){
-	token_t *ret = NULL;
-	token_t *op1, *op2;
-
-	if ( frame->ntokens == 3 ){
-		op1 = frame->expr->next;
-		op2 = frame->expr->next->next;
-
-		if ( op1->type == TYPE_NUMBER && op2->type == TYPE_NUMBER ){
-			ret = alloc_token( );
-			ret->type = TYPE_NUMBER;
-			//ret->smalldata = op1->smalldata % op2->smalldata;
-			ret->number.s_int = op1->number.s_int % op2->number.s_int;
-			ret->number.type = TYPE_NUMBER;
-
-		} else {
-			FRAME_ERROR( frame,
-				"expected number, but have %s and %s",
-				type_str( op1->type  ), type_str( op2->type ));
-		}
-
-	} else {
-		FRAME_ERROR_ARGNUM( frame, 2 );
-	}
-
-	return ret;
-}
-
-token_t *builtin_multiply( stack_frame_t *frame ){
-	token_t *ret = NULL;
-	token_t *move;
-	//int sum = 1;
-	number_t sum = as_int_number( 1 );
-	bool error = false;
-
-	move = frame->expr->next;
-
-	if ( move ){
-		foreach_in_list( move ){
-			if ( has_number_type( move )){ 
-				//sum *= move->smalldata;
-				sum = number_mul( sum, move->number );
-
-			} else {
-				error = true;
-				FRAME_ERROR_ARGTYPE( frame, "number", move->type );
-				break;
-			}
-		}
-
-		if ( !error ){
-			ret = alloc_token( );
-			ret->type = sum.type;
-			ret->number = sum;
-		}
-
-	} else {
-		FRAME_ERROR_ARGNUM( frame, 2 );
-	}
-
-	return ret;
-}
-
-token_t *builtin_random_int( stack_frame_t *frame ){
-	static bool seeded = false;
-	token_t *ret = NULL;
-
-	if ( !seeded ){
-		srand( time( NULL ));
-		seeded = true;
-	}
-
-	ret = alloc_token( );
-	ret->type = TYPE_NUMBER;
-	//ret->smalldata = rand( );
-	ret->number = as_int_number( rand( ));
-
-	return ret;
-}
-
 token_t *builtin_return_first( stack_frame_t *frame ){
 	return frame->expr->next;
 }
@@ -584,43 +431,6 @@ token_t *builtin_sleep( stack_frame_t *frame ){
 	ret = alloc_token( );
 	ret->type = TYPE_NULL;
 	sleep( 1 );
-
-	return ret;
-}
-
-token_t *builtin_subtract( stack_frame_t *frame ){
-	token_t *ret = NULL;
-	token_t *move;
-	//int sum = 0;
-	number_t sum = as_int_number( 0 );
-	bool error = false;
-
-	move = frame->expr->next;
-
-	if ( move ){
-		sum = move->number;
-		move = move->next;
-
-		foreach_in_list( move ){
-			//if ( move->type == TYPE_NUMBER ){
-			if ( has_number_type( move )) {
-				//sum -= move->smalldata;
-				sum = number_sub( sum, move->number );
-
-			} else {
-				FRAME_ERROR_ARGTYPE( frame, "number", move->type );
-				error = true;
-				break;
-			}
-		}
-	}
-
-	if ( !error ){
-		ret = alloc_token( );
-		//ret->type = TYPE_NUMBER;
-		ret->type = sum.type;
-		ret->number = sum;
-	}
 
 	return ret;
 }

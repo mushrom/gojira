@@ -45,7 +45,7 @@ void file_print_token( FILE *fp, token_t *token, print_readable_t readable ){
 				break;
 
 			case TYPE_RATIONAL:
-				fprintf( fp, "%ld/%lu", token->number.num, token->number.denom );
+				fprintf( fp, "%ld/%ld", token->number.num, token->number.denom );
 				break;
 
 			case TYPE_BOOLEAN:

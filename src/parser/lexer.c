@@ -282,7 +282,7 @@ static token_return_t get_token_from_str( const char *string ){
 
 			} else if (( bar = strchr( foo, '/' ))) {
 				size_t k = strspn( foo, "-"DIGITS );
-				size_t m = strspn( bar + 1, DIGITS );
+				size_t m = strspn( bar + 1, "-"DIGITS );
 
 				char *baz  = malloc( sizeof( char[k + 1]));
 				char *quix = malloc( sizeof( char[m + 1]));
