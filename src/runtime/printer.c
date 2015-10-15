@@ -143,7 +143,7 @@ void file_print_token( FILE *fp, token_t *token, print_readable_t readable ){
 						if ( readable && i > 0 )
 							fputc( ' ', fp );
 
-						fprintf( fp, readable? "%u" : "%c", bytevec->bytes[i] );
+						fprintf( fp, readable? "#x%02x" : "%c", bytevec->bytes[i] );
 					}
 					readable? fprintf( fp, ")" ) : 0;
 				}

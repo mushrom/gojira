@@ -8,6 +8,7 @@
 #define ALPHABET	"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #define DIGITS		"0123456789"
 #define ALPHANUM	ALPHABET DIGITS
+#define HEXADECIMAL DIGITS "abcdef" "ABCDEF"
 #define DELIMITER	"()[]{} "
 #define IDENTIFIER	ALPHANUM "!@#$%^&*_-=+/?<>.~:"
 #define SEPERATOR	" \t\n\r"
@@ -73,6 +74,35 @@ static inline unsigned spanchars( char_pred predicate, const char *s ){
 	for ( ret = 0; s[ret] && predicate( s[ret] ); ret++ );
 
 	return ret;
+}
+
+static inline long int lexer_atoh( const char *s ){
+	unsigned long sum = 0;
+	const char *pos = s;
+	bool is_signed = false;
+
+	if (*pos == '-'){
+		is_signed = true;
+		pos++;
+	}
+
+	for ( ; *pos && strchr( HEXADECIMAL, *pos ); pos++ ){
+		sum <<= 4;
+
+		if ( *pos >= '0' && *pos <= '9' ){
+			sum += *pos - '0';
+
+		} else if ( *pos >= 'a' && *pos <= 'f' ){
+			sum += *pos - 'a' + 10;
+
+		} else if ( *pos >= 'A' && *pos <= 'F' ){
+			sum += *pos - 'A' + 10;
+		}
+	}
+
+	sum = is_signed? -sum : sum;
+
+	return sum;
 }
 
 /* returns a token_return_t struct giving information about the lexer's state.
@@ -209,6 +239,15 @@ static token_return_t get_token_from_str( const char *string ){
 				ret.token->type = TYPE_BOOLEAN;
 				ret.token->boolean = (string[1] == 't')? true : false;
 				ret.found = true;
+
+			} else if ( string[1] == 'x' ){
+				long int foo;
+				foo = lexer_atoh( string + 2 );
+
+				ret.string = string + 2 + strspn( string + 2, "-"HEXADECIMAL );
+				ret.found = true;
+				ret.token->type = TYPE_NUMBER;
+				ret.token->number = as_int_number( foo );
 
 			// Check for characters
 			} else if ( string[1] == '\\' && string[2] ){

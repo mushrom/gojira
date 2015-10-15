@@ -90,7 +90,7 @@ RATIONAL_OP( mul, (a.num * b.num), (a.denom * b.denom))
 // a/b / c/d == ad / bc
 RATIONAL_OP( div, (a.num * b.denom), (a.denom * b.num))
 
-static inline number_t as_int_number( int val ){
+static inline number_t as_int_number( long int val ){
 	return (number_t){
 		.type = TYPE_NUMBER,
 		.s_int = val,
