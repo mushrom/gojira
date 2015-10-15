@@ -60,6 +60,9 @@ typedef enum {
 	TYPE_SOCKET,
 	TYPE_HASHMAP,
 
+	// "less basic" types
+	TYPE_BYTEVECTOR,
+
 	TYPE_END,
 } type_t;
 

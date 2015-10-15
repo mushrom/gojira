@@ -1,5 +1,5 @@
 #ifndef _GOJIRA_RUNTIME_BUILTIN_H
-#define _GOJIRA_RUNTIME_BUILTIN_H
+#define _GOJIRA_RUNTIME_BUILTIN_H 1
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -8,6 +8,7 @@ extern "C" {
 #include <gojira/tokens.h>
 #include <gojira/debugger/debugger.h>
 
+#include <gojira/runtime/builtins/bytevector.h>
 
 // Convenience macros for displaying various errors builtins may have
 #define FRAME_ERROR( frame, msg, ... ) \

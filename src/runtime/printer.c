@@ -7,6 +7,7 @@
 #include <gojira/runtime/files.h>
 #include <gojira/runtime/runtime.h>
 #include <gojira/runtime/printer.h>
+#include <gojira/runtime/builtins/bytevector.h>
 
 static void escaped_print_str( FILE *fp, const char *buf ){
 	const char *s = buf;
@@ -130,6 +131,23 @@ void file_print_token( FILE *fp, token_t *token, print_readable_t readable ){
 				}
 
 				fprintf( fp, ")" );
+				break;
+
+			case TYPE_BYTEVECTOR:
+				{
+					bytevector_t *bytevec = shared_get( token->data );
+					unsigned i;
+
+					readable? fprintf( fp, "#vu8(" ) : 0;
+					for ( i = 0; i < bytevec->length; i++ ){
+						if ( readable && i > 0 )
+							fputc( ' ', fp );
+
+						fprintf( fp, readable? "%u" : "%c", bytevec->bytes[i] );
+					}
+					readable? fprintf( fp, ")" ) : 0;
+				}
+
 				break;
 
 			default:

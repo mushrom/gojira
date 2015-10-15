@@ -79,6 +79,11 @@ struct global_builtin {
 	// misc
 	{ "random-int",      builtin_random_int },
 
+	{ "make-bytevector", builtin_make_bytevector },
+	{ "bytevector-u8-ref", builtin_bytevector_u8_ref },
+	{ "bytevector-length", builtin_bytevector_length },
+	{ "u8-list->bytevector", builtin_bytevector_from_u8s },
+
 #if ! GOJIRA_PUBLIC_MODE
 	{ "stacktrace",      builtin_stacktrace },
 	{ "intern-sleep",    builtin_sleep },

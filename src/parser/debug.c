@@ -44,6 +44,8 @@ char *debug_strings[] = {
 	"socket",
 	"hashmap",
 
+	"bytevector",
+
 	"If you see this something has gone terribly wrong",
 };
 
