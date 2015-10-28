@@ -73,6 +73,32 @@ token_t *builtin_divide( stack_frame_t *frame ){
 	return ret;
 }
 
+token_t *builtin_floor( stack_frame_t *frame ){
+	token_t *ret = NULL;
+
+	if ( frame->ntokens == 2 ){
+		token_t *move = frame->expr->next;
+
+		if ( has_number_type( move )){
+			number_t temp;
+
+			temp = number_mul( as_real_number(1.0), move->number );
+
+			ret = alloc_token( );
+			ret->type = TYPE_NUMBER;
+			ret->number = as_int_number( temp.real );
+
+		} else {
+			FRAME_ERROR_ARGTYPE( frame, "number", move->type );
+		}
+
+	} else {
+		FRAME_ERROR_ARGNUM( frame, 2 );
+	}
+
+	return ret;
+}
+
 token_t *builtin_multiply( stack_frame_t *frame ){
 	token_t *ret = NULL;
 	token_t *move;
