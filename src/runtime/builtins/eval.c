@@ -16,7 +16,7 @@ token_t *builtin_eval( stack_frame_t *frame ){
 		token_t *move = frame->expr->next;
 
 		if ( move->type == TYPE_LIST ){
-			stack_frame_t *tempframe = frame_create( frame, move->down );
+			stack_frame_t *tempframe = frame_create( frame, move->down, DONT_MAKE_ENV );
 			tempframe->flags |= RUNTIME_FLAG_BREAK;
 
 			eval_loop( tempframe );
@@ -51,7 +51,7 @@ token_t *builtin_apply( stack_frame_t *frame ){
 				stack_frame_t *tempframe;
 
 				code->next = arglist->down;
-				tempframe = frame_create( frame, NULL );
+				tempframe = frame_create( frame, NULL, DONT_MAKE_ENV );
 				tempframe->expr = code;
 				tempframe->flags |= RUNTIME_FLAG_BREAK;
 

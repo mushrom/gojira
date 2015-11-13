@@ -118,17 +118,20 @@ struct global_builtin {
 };
 
 // Adds an "external function" to a frame, and handles registering the tokens for garbage collection
-variable_t *global_add_func( st_frame_t *frame, char *name, scheme_func handle ){
-	return frame_add_var( frame, name,
-		frame_register_one_token( frame, ext_proc_token( handle )),
-			NO_RECURSE, VAR_IMMUTABLE );
+variable_t *global_add_func( env_t *env, char *name, scheme_func handle ){
+	token_t *proc = ext_proc_token( handle );
+	variable_t *ret = env_add_var( env, name, proc, NO_RECURSE, VAR_IMMUTABLE );
+
+	free_token( proc );
+
+	return ret;
 }
 
 st_frame_t *init_global_frame( st_frame_t *frame ){
 	int i;
 
 	for ( i = 0; i < sizeof( global_builtins ) / sizeof( struct global_builtin ); i++ )
-		global_add_func( frame, global_builtins[i].name, global_builtins[i].handle );
+		global_add_func( frame->env, global_builtins[i].name, global_builtins[i].handle );
 
 	return frame;
 }
@@ -193,6 +196,7 @@ void stack_trace( st_frame_t *frame ){
 		}
 
 		printf( "\n" );
+		/*
 		map = move->vars;
 
 		if ( map ){
@@ -213,6 +217,7 @@ void stack_trace( st_frame_t *frame ){
 
 			printf( "\n" );
 		}
+		*/
 	}
 }
 
@@ -229,7 +234,7 @@ void default_error_printer( stack_frame_t *frame, char *fmt, ... ){
 	va_end( args );
 }
 
-st_frame_t *frame_create( st_frame_t *cur_frame, token_t *ptr ){
+st_frame_t *frame_create( st_frame_t *cur_frame, token_t *ptr, bool make_env ){
 	st_frame_t *ret;
 
 	ret = calloc( 1, sizeof( st_frame_t ));
@@ -241,41 +246,24 @@ st_frame_t *frame_create( st_frame_t *cur_frame, token_t *ptr ){
 	ret->status = TYPE_NULL;
 	ret->flags  = RUNTIME_FLAG_NULL;
 
+	// TODO: what happens when the global frame is created with no environment?
+	if ( make_env ){
+		ret->env = env_create( cur_frame? cur_frame->env : NULL );
+	}
+
 	if ( cur_frame ){
 		ret->error_call = cur_frame->error_call;
 		ret->flags |= cur_frame->flags & RUNTIME_FLAG_TRACE;
+
+		if ( !make_env && cur_frame->env ){
+			ret->env = env_aquire( cur_frame->env );
+		}
 
 	} else {
 		ret->error_call = default_error_printer;
 	}
 
 	return ret;
-}
-
-st_frame_t *frame_free_vars( st_frame_t *frame ){
-	list_node_t *move, *temp;
-	hashmap_t *map;
-	unsigned i;
-
-	if ( frame ){
-		if ( frame->vars ){
-			map = frame->vars;
-			for ( i = 0; i < map->nbuckets; i++ ){
-				move = map->buckets[i].base;
-
-				for ( ; move; move = temp ){
-					temp = move->next;
-					shared_release( move->data );
-					free( move );
-				}
-			}
-
-			hashmap_free( frame->vars );
-			frame->vars = NULL;
-		}
-	}
-
-	return NULL;
 }
 
 st_frame_t *frame_free( st_frame_t *frame ){
@@ -286,7 +274,8 @@ st_frame_t *frame_free( st_frame_t *frame ){
 	*/
 
 	if ( frame ){
-		frame_free_vars( frame );
+		//frame_free_vars( frame );
+		env_release( frame->env );
 		free( frame );
 	}
 
@@ -335,139 +324,6 @@ token_t *frame_add_token_noclone( st_frame_t *frame, token_t *token ){
 	frame->ntokens++;
 
 	return ret;
-}
-
-variable_t *frame_find_var_struct_hash( st_frame_t *frame, unsigned hash, bool recurse ){
-	variable_t *ret = NULL;
-	shared_t *shr;
-
-	if ( frame ){
-		if ( frame->vars ){
-			shr = hashmap_get( frame->vars, hash );
-			if ( shr ){
-				ret = shared_get( shr );
-			}
-
-			if ( !ret && recurse ){
-				ret = frame_find_var_struct_hash( frame->last, hash, recurse );
-			}
-
-		} else if ( recurse ){
-			ret = frame_find_var_struct_hash( frame->last, hash, recurse );
-		}
-	}
-
-	return ret;
-}
-
-shared_t *frame_find_shared_struct_hash( st_frame_t *frame, unsigned hash, bool recurse ){
-	shared_t *ret = NULL;
-
-	if ( frame ){
-		if ( frame->vars ){
-			ret = hashmap_get( frame->vars, hash );
-
-			if ( !ret && recurse ){
-				ret = frame_find_shared_struct_hash( frame->last, hash, recurse );
-			}
-
-		} else if ( recurse ){
-			ret = frame_find_shared_struct_hash( frame->last, hash, recurse );
-		}
-	}
-
-	return ret;
-}
-
-token_t *frame_find_var_hash( st_frame_t *frame, unsigned hash, bool recurse ){
-	token_t *ret = NULL;
-	variable_t *var;
-
-	var = frame_find_var_struct_hash( frame, hash, recurse );
-	if ( var ){
-		ret = var->token;
-	}
-
-	return ret;
-}
-
-token_t *frame_find_var( st_frame_t *frame, char *key, bool recurse ){
-	token_t *ret = NULL;
-	unsigned hash;
-
-	hash = hash_string( key );
-	ret = frame_find_var_hash( frame, hash, recurse );
-
-	return ret;
-}
-
-variable_t *frame_find_var_struct( st_frame_t *frame, char *key, bool recurse ){
-	variable_t *ret = NULL;
-	unsigned hash;
-
-	hash = hash_string( key );
-	ret = frame_find_var_struct_hash( frame, hash, recurse );
-
-	return ret;
-}
-
-shared_t *frame_find_shared_struct( st_frame_t *frame, char *key, bool recurse ){
-	shared_t *ret = NULL;
-	unsigned hash;
-
-	hash = hash_string( key );
-	ret = frame_find_shared_struct_hash( frame, hash, recurse );
-
-	return ret;
-}
-
-void free_var( void *ptr ){
-	if ( ptr ){
-		variable_t *var = ptr;
-		//printf( "[%s] Freeing variable with hash 0x%x\n", __func__, var->hash );
-		free_tokens( var->token );
-		free( var->key );
-		free( var );
-	}
-}
-
-variable_t *frame_add_var( st_frame_t *frame, char *key, token_t *token, bool recurse, bool mutable ){
-	variable_t *new_var = NULL;
-	shared_t *new_shared = NULL;
-
-	if ( frame ){
-		if ( !frame->vars )
-			frame->vars = hashmap_create( 8 );
-
-		new_var = frame_find_var_struct( frame, key, recurse );
-
-		if ( !new_var ){
-			new_var = calloc( 1, sizeof( variable_t ));
-			new_var->key = strdup( key );
-			new_var->hash = hash_string( key );
-			new_var->is_mutable = mutable;
-			new_var->token = clone_token_tree( token );
-			new_shared = shared_new( new_var, free_var );
-
-			hashmap_add( frame->vars, new_var->hash, new_shared );
-
-		} else if ( new_var->is_mutable ){
-			new_var->token = clone_token_tree( token );
-
-		} else {
-			/* TODO: existing variable isn't mutable, so error out */
-			printf( "[%s] Error: variable \"%s\" is not mutable\n",
-					__func__, key );
-
-			stack_trace( frame );
-		}
-
-	} else {
-		printf( "[%s] Warning: Got null frame, can't add variable \"%s\"\n",
-				__func__, key );
-	}
-
-	return new_var;
 }
 
 token_t *frame_register_tokens( st_frame_t *frame, token_t *token ){

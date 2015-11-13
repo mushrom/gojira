@@ -81,7 +81,7 @@ bool eval_frame_subexpr( stack_frame_t **frame_ret ){
 				break;
 			}
 
-			frame = *frame_ret = frame_create( frame, move->down );
+			frame = *frame_ret = frame_create( frame, move->down, false );
 			break;
 
 		case TYPE_SYMBOL:
@@ -93,7 +93,7 @@ bool eval_frame_subexpr( stack_frame_t **frame_ret ){
 					frame->ptr = frame->ptr->next;
 
 				} else {
-					move = frame_find_var( frame, varname, RECURSE );
+					move = env_find_var( frame->env, varname, RECURSE );
 
 					if ( move ){
 						if ( move->type != TYPE_SYNTAX || frame->expr ){

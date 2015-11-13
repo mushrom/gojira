@@ -184,7 +184,7 @@ static bool set_variable( stack_frame_t *frame, const token_t *tokens, bool muta
 
 	if ( tokens->type == TYPE_SYMBOL ){
 		char *varname = shared_get( tokens->data );
-		if ( frame_add_var( frame->last, varname, tokens->next, NO_RECURSE, mutable )){
+		if ( env_add_var( frame->env, varname, tokens->next, NO_RECURSE, mutable )){
 			ret = true;
 		}
 
@@ -247,7 +247,7 @@ token_t *builtin_intern_set( stack_frame_t *frame ){
 token_t *builtin_intern_set_global( stack_frame_t *frame ){
 	token_t *ret = NULL;
 	token_t *move;
-	st_frame_t *first;
+	env_t *first;
 
 	move = frame->expr->next;
 
@@ -255,8 +255,8 @@ token_t *builtin_intern_set_global( stack_frame_t *frame ){
 		if ( move->type == TYPE_SYMBOL ){
 			char *varname = shared_get( move->data );
 
-			for ( first = frame; first->last; first = first->last );
-			frame_add_var( first, varname, move->next, NO_RECURSE, VAR_MUTABLE );
+			for ( first = frame->env; first->last; first = first->last );
+			env_add_var( first, varname, move->next, NO_RECURSE, VAR_MUTABLE );
 
 			ret = alloc_token( );
 			ret->type = TYPE_NULL;

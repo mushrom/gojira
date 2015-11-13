@@ -36,9 +36,8 @@ token_t *compile_lambda( stack_frame_t *frame, token_t *args, token_t *tokens ){
 			varname = shared_get( tokens->data );
 			if ( !has_symbol( args, varname ) &&
 			      //shr = frame_find_var( frame, varname, RECURSE )){
-			     ( shr = frame_find_shared_struct( frame, varname, RECURSE )))
+			     ( shr = env_find_shared_struct( frame->env, varname, RECURSE )))
 			{
-
 				ret = alloc_token( );
 				ret->type = TYPE_VARIABLE_REF;
 				ret->flags |= T_FLAG_HAS_SHARED;
@@ -54,7 +53,6 @@ token_t *compile_lambda( stack_frame_t *frame, token_t *args, token_t *tokens ){
 						DEBUGP( "[%s] Possible optimization here\n", __func__ );
 					}
 				}
-
 
 				free_token( tokens );
 			}
@@ -163,6 +161,9 @@ stack_frame_t *expand_procedure( stack_frame_t *frame, token_t *tokens ){
 		move = tokens->next;
 		temp = proc->args;
 
+		env_release( frame->env );
+		frame->env = env_create( frame->env );
+
 		foreach_in_list( temp ){
 			if ( temp->type == TYPE_SYMBOL ){
 				var_name = shared_get( temp->data );
@@ -177,7 +178,8 @@ stack_frame_t *expand_procedure( stack_frame_t *frame, token_t *tokens ){
 						newlist->type = TYPE_LIST;
 						newlist->down = move;
 
-						frame_add_var( frame, var_name, newlist, NO_RECURSE, VAR_IMMUTABLE );
+						//frame_add_var( frame, var_name, newlist, NO_RECURSE, VAR_IMMUTABLE );
+						env_add_var( frame->env, var_name, newlist, NO_RECURSE, VAR_IMMUTABLE );
 
 						free_token( newlist );
 						break;
@@ -194,7 +196,7 @@ stack_frame_t *expand_procedure( stack_frame_t *frame, token_t *tokens ){
 					if ( move ){
 						// TODO: allow specifying mutable parameters
 						//frame_add_var( frame, var_name, move, NO_RECURSE, VAR_IMMUTABLE );
-						frame_add_var( frame, var_name, move, NO_RECURSE, VAR_IMMUTABLE );
+						env_add_var( frame->env, var_name, move, NO_RECURSE, VAR_IMMUTABLE );
 						move = move->next;
 
 					} else {

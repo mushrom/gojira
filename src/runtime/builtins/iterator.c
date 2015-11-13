@@ -100,8 +100,8 @@ token_t *builtin_iterator_access( stack_frame_t *frame ){
 			proc->flags = T_FLAG_HAS_SHARED;
 			proc->next = num;
 
-			foo_frame = frame_create( NULL, NULL );
-			temp_frame = frame_create( foo_frame, proc );
+			foo_frame = frame_create( NULL, NULL, DONT_MAKE_ENV );
+			temp_frame = frame_create( foo_frame, proc, DONT_MAKE_ENV );
 			eval_loop( temp_frame );
 
 			gc_mark( foo_frame->expr );
@@ -190,8 +190,8 @@ token_t *builtin_iterator_next( stack_frame_t *frame ){ token_t *ret = NULL;
 						proc->flags = T_FLAG_HAS_SHARED;
 						proc->next = cur_iter;
 
-						foo_frame = frame_create( NULL, NULL );
-						temp_frame = frame_create( foo_frame, proc );
+						foo_frame = frame_create( NULL, NULL, DONT_MAKE_ENV );
+						temp_frame = frame_create( foo_frame, proc, DONT_MAKE_ENV );
 						eval_loop( temp_frame );
 
 						gc_mark( foo_frame->expr );

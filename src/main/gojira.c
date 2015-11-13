@@ -77,7 +77,7 @@ int main( int argc, char *argv[] ){
 	}
 
 	// Initialize the global interpreter state
-	global_frame = frame_create( NULL, NULL );
+	global_frame = frame_create( NULL, NULL, MAKE_ENV );
 	init_global_frame( global_frame );
 
 	// Load the 'base' library for needed primatives
@@ -126,7 +126,7 @@ int main( int argc, char *argv[] ){
 					eval_loop( global_frame );
 
 					snprintf( varexpr, sizeof(varexpr) - 1, "..%u", n );
-					frame_add_var( global_frame, varexpr,
+					env_add_var( global_frame->env, varexpr,
 						global_frame->end, NO_RECURSE, VAR_IMMUTABLE );
 
 					printf( "..%u = ", n );
@@ -158,7 +158,7 @@ void print_help( ){
 void goj_linenoise_complete( const char *buf, linenoiseCompletions *lc ){
 	const char        *pos, *move;
 	const st_frame_t  *frame = really_global_frame;
-	const hashmap_t   *map = frame->vars;
+	const hashmap_t   *map = frame->env->vars;
 	const list_node_t *node;
 	const variable_t  *var;
 	unsigned i, k, pos_num;

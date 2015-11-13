@@ -71,7 +71,7 @@ unsigned hash_string_old( char *str ){
 }
 
 // djb2 hash function, see http://www.cse.yorku.ca/~oz/hash.html
-unsigned hash_string( char *str ){
+unsigned hash_string( const char *str ){
 	unsigned hash = 5381;
 	int c;
 
@@ -83,7 +83,7 @@ unsigned hash_string( char *str ){
 }
 
 // this is to allow 'concatenating' hashes
-unsigned hash_string_accum( char *str, unsigned hash ){
+unsigned hash_string_accum( const char *str, unsigned hash ){
 	int c;
 
 	while (( c = *str++ )){
