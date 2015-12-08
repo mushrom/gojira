@@ -76,6 +76,11 @@ int main( int argc, char *argv[] ){
 		}
 	}
 
+	// print some info about the interpreter going into a REPL
+	if ( interactive ){
+		printf( "%s\n", GOJIRA_BUILD_NAME );
+	}
+
 	// Initialize the global interpreter state
 	global_frame = frame_create( NULL, NULL, MAKE_ENV );
 	init_global_frame( global_frame );

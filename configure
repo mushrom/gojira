@@ -1,5 +1,8 @@
 #!/bin/sh
 
+CONF_VERSION="`git describe`"
+CONF_BUILD_NAME="gojira $CONF_VERSION"
+CONF_TARGETS="out/gojira lib"
 CONF_PREFIX=/usr/local
 CONF_SYSROOT=
 CONF_GOJIRA_LIBDIR=
@@ -8,6 +11,7 @@ CONF_ENABLE_FILES=1
 CONF_DEBUG=0
 CONF_CFLAGS=""
 CONF_PUBLIC_MODE=0
+CONF_DEV_BUILD=0
 
 # Parse the given options
 for arg in $@; do
@@ -39,9 +43,13 @@ for arg in $@; do
 				  -df, --disable-files    Disable the built-in file functions.
 				  -da, --disable-all      Disable everything extra, and just build the core
 				                          interpreter.
+				  -lo, --lib-only         Output only a shared object (.so)
+				  -lo, --interp-only      Output only the interpreter executable
 				  -s,  --static           Output a static executable.
 				  -p,  --public           Specify that this will have input from untrusted sources,
 				                          and should not perform/output possibly sensitive operations.
+				  -D,  --dev              Specify that this is a development build. This changes the
+				                          build name accordingly.
 			END_OF_HELP
 			exit 0
 			;;
@@ -62,26 +70,47 @@ for arg in $@; do
 			CONF_ENABLE_SOCKETS=0
 			CONF_ENABLE_FILES=0
 			;;
+
+		--lib-only|-lo)
+			CONF_TARGETS="lib"
+			;;
+
+		--interp-only|-io)
+			CONF_TARGETS="out/gojira"
+			;;
+
 		--static|-s)
 			CONF_CFLAGS="$CONF_FLAGS -static"
 			;;
+
 		--public-mode|-p)
 			CONF_PUBLIC_MODE=1
 			;;
+
+		--dev|-D)
+			BRANCHNAME="`git rev-parse --abbrev-ref HEAD`"
+			CONF_BUILD_NAME="gojira dev build $BRANCHNAME@$CONF_VERSION"
+			CONF_DEV_BUILD=1
+			;;
+
 		*)
 			echo "configure: error: Unknown option \"$OPT_KEY\""
 			exit 1
 	esac
 done;
 
-echo "PREFIX  = $CONF_PREFIX"
-echo "SYSROOT = $CONF_SYSROOT"
+echo "BUILD_NAME = $CONF_BUILD_NAME"
+echo "TARGETS    = $CONF_TARGETS"
+echo "PREFIX     = $CONF_PREFIX"
+echo "SYSROOT    = $CONF_SYSROOT"
+echo "DEV_BUILD  = $CONF_DEV_BUILD"
 echo "Full install path: $CONF_SYSROOT$CONF_PREFIX"
 
 # Write the options to the makefile
 echo "Generating makefile..."
 echo "PREFIX=$CONF_PREFIX"   >  Makefile
 echo "SYSROOT=$CONF_SYSROOT" >> Makefile
+echo "CONF_TARGETS=$CONF_TARGETS" >> Makefile
 echo "CONF_CFLAGS=$CONF_CFLAGS" >> Makefile
 cat Makefile.conf >> Makefile
 
@@ -92,6 +121,7 @@ echo "#define GOJIRA_ENABLE_SOCKETS $CONF_ENABLE_SOCKETS" >> include/gojira/conf
 echo "#define GOJIRA_ENABLE_FILES $CONF_ENABLE_FILES" >> include/gojira/config.h
 echo "#define GOJIRA_DEBUG $CONF_DEBUG" >> include/gojira/config.h
 echo "#define GOJIRA_PUBLIC_MODE $CONF_PUBLIC_MODE" >> include/gojira/config.h
+echo "#define GOJIRA_BUILD_NAME \"$CONF_BUILD_NAME\"" >> include/gojira/config.h
 echo "#endif" >> include/gojira/config.h
 
 # And we're finished
