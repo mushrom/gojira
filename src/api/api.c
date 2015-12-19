@@ -14,6 +14,7 @@ goj_call_t *goj_start_call( gojira_t *runtime ){
 	goj_call_t *ret = calloc( 1, sizeof( goj_call_t ));
 
 	ret->frame = frame_create( runtime, NULL, DONT_MAKE_ENV );
+	ret->frame->flags = RUNTIME_FLAG_BREAK;
 
 	return ret;
 }
@@ -36,6 +37,25 @@ goj_val_t *goj_exec_call( goj_call_t *call ){
 	call->frame->ptr = call->ptr;
 	eval_loop( call->frame );
 	return call->frame->value;
+}
+
+goj_call_t *goj_build_call( gojira_t *env, goj_val_t *first, ... ){
+	goj_call_t *ret = goj_start_call( env );
+	va_list args;
+	goj_val_t *temp;
+
+	goj_call_add( ret, first );
+	va_start( args, first );
+
+	temp = va_arg( args, goj_val_t * );
+	while ( temp ){
+		goj_call_add( ret, temp );
+		temp = va_arg( args, goj_val_t * );
+	}
+
+	va_end( args );
+
+	return ret;
 }
 
 goj_val_t *goj_parse( char *str ){
