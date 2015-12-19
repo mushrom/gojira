@@ -7,6 +7,8 @@
 #include <gojira/runtime/printer.h>
 #include <gojira/config.h>
 
+#include <stdarg.h>
+
 typedef stack_frame_t gojira_t;
 typedef token_t goj_val_t;
 
@@ -22,6 +24,7 @@ gojira_t *goj_runtime( error_printer handler );
 goj_call_t *goj_start_call( gojira_t *call );
 goj_call_t *goj_call_add( goj_call_t *call, goj_val_t *val );
 goj_val_t *goj_exec_call( goj_call_t *call );
+goj_call_t *goj_build_call( gojira_t *env, goj_val_t *first, ... );
 
 goj_val_t *goj_parse( char *str );
 goj_val_t *goj_eval( gojira_t *runtime, goj_val_t *tree );
@@ -34,5 +37,7 @@ void goj_println( goj_val_t *value );
 void goj_free_val( goj_val_t *value );
 void goj_free_runtime( gojira_t *runtime );
 void goj_free_call( goj_call_t *call );
+
+#include <gojira/api/token_conversion.h>
 
 #endif

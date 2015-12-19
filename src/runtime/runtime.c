@@ -296,10 +296,11 @@ bool eval_frame_expr( stack_frame_t **frame_ret ){
 
 		if ( frame->flags & RUNTIME_FLAG_BREAK ){
 			ret = true;
-		}
 
-		frame_free( frame );
-		*frame_ret = temp_frame;
+		} else {
+			frame_free( frame );
+			*frame_ret = temp_frame;
+		}
 	}
 
 	return ret;

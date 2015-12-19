@@ -98,25 +98,25 @@
 
 (define-syntax let
   (syntax-rules ()
-    ((_ ((varname mutable expression) e2 ...) body ...)
-     (begin
-       (intern-set mutable 'varname expression)
-       (let (e2 ...) body ...)))
+    ;((_ ((varname mutable expression) e2 ...) body ...)
+    ; (begin
+    ;   (intern-set mutable 'varname expression)
+    ;   (let (e2 ...) body ...)))
 
     ((_ ((varname expression) e2 ...) body ...)
-     (begin
+     ((lambda ()
        (intern-set 'varname expression)
-       (let (e2 ...) body ...)))
+       (let (e2 ...) body ...))))
 
-    ((_ ((varname mutable expression)) body ...)
-     (begin
-       (intern-set mutable 'varname expression)
-        body ...))
+    ;((_ ((varname mutable expression)) body ...)
+    ; (begin
+    ;   (intern-set mutable 'varname expression)
+    ;    body ...))
 
     ((_ ((varname expression)) body ...)
-     (begin
+     ((lambda ()
        (intern-set 'varname expression)
-        body ...))))
+        body ...)))))
 
 (define let* let)
 
