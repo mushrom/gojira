@@ -1,6 +1,10 @@
+(in no particular order)
+
 - Change stack frames to use immutable data structures,
   so that tails calls and continuations would be easy to implement.
 - Add more bytevector functions as specified in r6rs
 - Begin working on a C FFI
   - idea for FFI: have a 'messaging' or 'event' interface,
     which can have multiple scheme functions registered to some key.
+- Add "lightweight" lambdas that don't bind closures, in order to improve
+  performance for if, let, etc

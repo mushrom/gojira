@@ -104,9 +104,10 @@
     ;   (let (e2 ...) body ...)))
 
     ((_ ((varname expression) e2 ...) body ...)
-     ((lambda ()
-       (intern-set 'varname expression)
-       (let (e2 ...) body ...))))
+     ((lambda (varname)
+       ;(intern-set 'varname expression)
+       (let (e2 ...) body ...))
+      expression))
 
     ;((_ ((varname mutable expression)) body ...)
     ; (begin
@@ -114,9 +115,10 @@
     ;    body ...))
 
     ((_ ((varname expression)) body ...)
-     ((lambda ()
-       (intern-set 'varname expression)
-        body ...)))))
+     ((lambda (varname)
+       ;(intern-set 'varname expression)
+        body ...)
+      expression))))
 
 (define let* let)
 
