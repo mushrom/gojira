@@ -204,3 +204,8 @@
 
 (define (use! modlist)
   (map import! modlist))
+
+(define modpath gojira-modpath)
+
+(import! 'lists)
+(import! 'strings)
