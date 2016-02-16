@@ -51,6 +51,19 @@
     else
     (drop (cdr x) (- i 1))))
 
+(define (equal? xs ys)
+    (if (list? xs)
+      (or (and (null? xs) (null? ys))
+          (and
+            (and
+              (and
+                (not (null? xs))
+                (not (null? ys)))
+              (equal? (car xs) (car ys)))
+            (equal? (cdr xs) (cdr ys))))
+     else
+      (eq? xs ys)))
+
 (define (for-each f xs)
   (if (null? xs)
     '()
@@ -140,6 +153,39 @@
      (let ((a1 (safecar xs)))
        body ...))))
 
+(define-syntax for
+  (syntax-rules (in)
+    ((_ (args ...) in somelist body ...)
+     (map
+       (lambda (foobar)
+         (with foobar as (args ...)
+               body ...))
+       somelist))
+
+    ((_ varname in somelist body ...)
+     (map
+       (lambda (varname)
+         body ...)
+       somelist))))
+
+(define-syntax for-var
+  (syntax-rules (in)
+    ((_ (args ...) in somelist body ...)
+     (for-each
+       (lambda (foobar)
+         (with foobar as (args ...)
+               body ...))
+       somelist))
+
+    ((_ varname in somelist body ...)
+     (for-each
+       (lambda (varname)
+         body ...)
+       somelist))))
+
 (define infinity
   (iterator
     (lambda (x) x)))
+
+(define (display-list :rest xs)
+  (map display xs))

@@ -135,6 +135,32 @@
 
 (define let* let)
 
+(define (ident x) x)
+
+(define (intern-quasiquote expr)
+  (cond
+    ((null? expr) '())
+
+    ((null? (car expr))
+     (cons '() (intern-quasiquote (cdr expr))))
+
+    ((and (list? (car expr))
+          (eq? (caar expr) 'unquote))
+     (cons (eval (cons 'ident (cdar expr)))
+           (intern-quasiquote (cdr expr))))
+
+    ((list? (car expr))
+     (cons (intern-quasiquote (car expr))
+           (intern-quasiquote (cdr expr))))
+
+    (true (cons (car expr)
+          (intern-quasiquote (cdr expr))))))
+
+(define-syntax quasiquote
+  (syntax-rules ()
+    ((_ expr)
+     (intern-quasiquote 'expr))))
+
 (define help "To see the gojira scheme tutorial, visit https://example.com. To see the currently defined variables, try (stacktrace).")
 
 (define (not x)
