@@ -5,35 +5,43 @@
   (syntax-rules ()
     ((_ (funcname args ...) body ...)
      (intern-set 'funcname
-        (begin
+        ;(begin
+        ((lambda ()
           (intern-set :mut 'funcname 0)
           (intern-set :mut 'funcname
              (lambda (args ...) body ...))
           funcname)))
+     )
 
     ((_ mutable (funcname args ...) body ...)
      (intern-set mutable 'funcname
-        (begin
+        ;(begin
+        ((lambda ()
           (intern-set :mut 'funcname 0)
           (intern-set :mut 'funcname
                       (lambda (args ...) body ...))
           funcname)))
+     )
 
     ((_ (funcname) body ...)
      (intern-set 'funcname
-        (begin
+        ;(begin
+        ((lambda ()
           (intern-set :mut 'funcname 0)
           (intern-set :mut 'funcname
                       (lambda () body ...))
           funcname)))
+     )
 
     ((_ mutable (funcname) body ...)
      (intern-set mutable 'funcname
-        (begin
+        ;(begin
+        ((lambda ()
           (intern-set :mut 'funcname 0)
           (intern-set :mut 'funcname
                       (lambda () body ...))
           funcname)))
+     )
 
     ((_ mutable sym def)
      (intern-set mutable 'sym def))
@@ -104,10 +112,12 @@
     ;   (let (e2 ...) body ...)))
 
     ((_ ((varname expression) e2 ...) body ...)
-     ((lambda (varname)
-       ;(intern-set 'varname expression)
+     ;((lambda (varname)
+     (begin
+       (intern-set 'varname expression)
        (let (e2 ...) body ...))
-      expression))
+     )
+      ;expression))
 
     ;((_ ((varname mutable expression)) body ...)
     ; (begin
@@ -115,10 +125,13 @@
     ;    body ...))
 
     ((_ ((varname expression)) body ...)
-     ((lambda (varname)
-       ;(intern-set 'varname expression)
+     ;((lambda (varname)
+     (begin
+       (intern-set 'varname expression)
         body ...)
-      expression))))
+     )
+    ))
+      ;expression))))
 
 (define let* let)
 

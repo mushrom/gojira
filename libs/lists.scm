@@ -51,12 +51,12 @@
     else
     (drop (cdr x) (- i 1))))
 
-(define (foreach xs f)
+(define (for-each f xs)
   (if (null? xs)
     '()
     (begin
       (f (car xs))
-      (foreach (cdr xs) f))))
+      (for-each f (cdr xs)))))
 
 (define (list-replace xs old new)
   (if (null? xs)
