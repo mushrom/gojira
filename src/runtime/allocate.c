@@ -19,6 +19,7 @@ token_t *alloc_token( void ){
 		nodeheap = nodeheap->down;
 
 		ret->down = ret->gc_link = NULL;
+		ret->data = NULL;
 		ret->status = 0;
 		ret->flags = T_FLAG_NULL;
 		avail_tokens--;
