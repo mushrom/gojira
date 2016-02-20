@@ -1,13 +1,13 @@
 #!/usr/bin/env gojira
-(import! 'lists)
 
-(define fizzbuzz
-  (lambda (limit)
-    (foreach (iota limit 1)
-      (lambda (x)
-        (if (eq? (modulo x 15) 0) (print "FizzBuzz")
-        (if (eq? (modulo x  3) 0) (print "Fizz")
-        (if (eq? (modulo x  5) 0) (print "Buzz")
-         else                     (print x))))))))
+(define (divides? num div)
+  (eq? (modulo num div) 0))
+
+(define (fizzbuzz limit)
+  (for i in (iota limit 1)
+    (print (cond ((divides? i 15) "FizzBuzz")
+                 ((divides? i 5)  "Fizz")
+                 ((divides? i 3)  "Buzz")
+                  (true           i)))))
 
 (fizzbuzz 100)
