@@ -9,10 +9,10 @@
 (write (caddr infinite-thing))
 (newline)
 
-(foreach (take infinite-thing 10)
-    (lambda (x)
-      (write x)
-      (newline)))
+(for-each (lambda (x)
+            (write x)
+            (newline))
+          (take infinite-thing 10))
 
 (write (map (lambda (n) (* n n))
             (iterator
