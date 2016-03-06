@@ -22,7 +22,7 @@
        (define func-def body ...)))))
 
 (define (add-docpage! doc)
-  (define *docs-list* (cons doc *docs-list*)))
+  (set! *docs-list* (cons doc *docs-list*)))
 
 (define (get-docpage doc)
   (filter (lambda (page)

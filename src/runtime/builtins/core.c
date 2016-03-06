@@ -255,8 +255,7 @@ token_t *builtin_intern_set_global( stack_frame_t *frame ){
 		if ( move->type == TYPE_SYMBOL ){
 			char *varname = shared_get( move->data );
 
-			for ( first = frame->env; first->last; first = first->last );
-			env_add_var( first, varname, move->next, NO_RECURSE, VAR_MUTABLE );
+			env_add_var( frame->env, varname, move->next, RECURSE, VAR_MUTABLE );
 
 			ret = alloc_token( );
 			ret->type = TYPE_NULL;

@@ -54,6 +54,11 @@
 
 (define define-syntax define)
 
+(define-syntax set!
+  (syntax-rules ()
+    ((_ varname value)
+     (intern-set! 'varname value))))
+
 (define-syntax if
   (syntax-rules ()
     ((_ condition a else b)
@@ -219,7 +224,7 @@
   (if (not (member? modname modules))
     (if (load! (as_modpath (symbol->string modname)))
       (begin
-        (intern-set! 'modules (cons modname modules))
+        (set! modules (cons modname modules))
         #t)
       #f)
     #f))
