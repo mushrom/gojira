@@ -158,6 +158,24 @@ int utf8len( char *str ){
 	return ret;
 }
 
+// This gets the variable name corresponding to some global external procedure, if any.
+// Returns NULL if not found.
+static const char *stack_trace_ext_name( token_t *token ){
+	const char *ret = NULL;
+	int i;
+
+	if ( token->type == TYPE_EXTERN_PROC ){
+		for ( i = 0; i < sizeof( global_builtins ) / sizeof( struct global_builtin ); i++ ){
+			if ( global_builtins[i].handle == token->func ){
+				ret = global_builtins[i].name;
+				break;
+			}
+		}
+	}
+
+	return ret;
+}
+
 void stack_trace( st_frame_t *frame ){
 	st_frame_t *move = frame;
 	token_t *token = NULL;
@@ -167,26 +185,34 @@ void stack_trace( st_frame_t *frame ){
 
 	unsigned i, k, limit = 3;
 	int start = 0, m;
+	const char *name;
 
-	printf( "[stack trace]\n" );
-	for ( move = frame, i = 0; move; move = move->last, i++ ){
-		printf( "[%u] ", i );
+	printf( "Stack trace:\n" );
+	for ( move = frame, i = 0; move->last; move = move->last, i++ ){
+		printf( "  %u: (", i );
 		token = move->expr;
 		start = move->ntokens - limit;
 
 		k = m = 0;
 		foreach_in_list( token ){
 			if ( m >= start || m == 0 ){
-				print_token( token, true );
+				//print_token( token, true );
+				if (( name = stack_trace_ext_name( token ))){
+					printf( "%s", name );
+				} else {
+					print_token( token, true );
+				}
 
 				if ( token->next )
-					printf( " -> " );
+					printf( " " );
+					//printf( " -> " );
 
 				k++;
 				m++;
 
 			} else if ( m == 1 ){
-				printf( "(%d truncated) -> ", start - 1);
+				//printf( "(%d truncated) -> ", start - 1);
+				printf( "(%d truncated) ", start - 1);
 				m++;
 
 			} else {
@@ -195,7 +221,11 @@ void stack_trace( st_frame_t *frame ){
 			}
 		}
 
-		printf( "\n" );
+		if ( i != 0 && move->ntokens ){
+			printf(" ...");
+		}
+
+		printf( ")\n" );
 		/*
 		map = move->vars;
 
