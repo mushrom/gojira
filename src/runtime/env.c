@@ -6,7 +6,10 @@
 #include <stdbool.h>
 
 env_t *env_aquire( env_t *env ){
-	env->refs++;
+	if ( env ){
+		env->refs++;
+	}
+
 	return env;
 }
 
@@ -15,6 +18,7 @@ void env_release( env_t *env ){
 		env->refs--;
 		if ( env->refs == 0 ){
 			env_free_vars( env );
+			env_release( env->last );
 			free( env );
 			//printf( "[%s] Got here\n", __func__ );
 		}
@@ -23,7 +27,7 @@ void env_release( env_t *env ){
 
 env_t *env_create( env_t *last ){
 	env_t *ret = calloc( 1, sizeof( env_t ));
-	ret->last = last;
+	ret->last = env_aquire( last );
 	ret->refs = 1;
 	//printf( "[%s] Got here\n", __func__ );
 

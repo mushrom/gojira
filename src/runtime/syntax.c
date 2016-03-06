@@ -26,52 +26,15 @@ bool has_symbol( token_t *tokens, char *sym ){
 	return ret;
 }
 
-token_t *compile_lambda( stack_frame_t *frame, token_t *args, token_t *tokens ){
-	token_t *ret = tokens;
-	shared_t *shr;
-	char *varname;
-
-	if ( tokens ){
-		if ( tokens->type == TYPE_SYMBOL ){
-			varname = shared_get( tokens->data );
-			if ( !has_symbol( args, varname ) &&
-			      //shr = frame_find_var( frame, varname, RECURSE )){
-			     ( shr = env_find_shared_struct( frame->env, varname, RECURSE )))
-			{
-				ret = alloc_token( );
-				ret->type = TYPE_VARIABLE_REF;
-				ret->flags |= T_FLAG_HAS_SHARED;
-				ret->next = tokens->next;
-				ret->down = NULL;
-				ret->data = shared_aquire( shr );
-
-				{
-					variable_t *foo = shared_get( shr );
-					token_t *wut = foo->token;
-
-					if ( !foo->is_mutable && wut->type == TYPE_SYNTAX ){
-						DEBUGP( "[%s] Possible optimization here\n", __func__ );
-					}
-				}
-
-				free_token( tokens );
-			}
-
-		} else if ( tokens->type != TYPE_QUOTED_TOKEN && tokens->type != TYPE_VECTOR ){
-			ret->down = compile_lambda( frame, args, tokens->down );
-		}
-
-		ret->next = compile_lambda( frame, args, ret->next );
-	}
-
-	return ret;
-}
-
 void free_procedure( void *ptr ){
 	if ( ptr ){
 		procedure_t *proc = ptr;
 
 		//printf( "[%s] Freeing procedure at %p\n", __func__, ptr );
+		if ( proc->env ){
+			env_release( proc->env );
+		}
+
 		free_tokens( proc->body );
 		free_tokens( proc->args );
 		free( proc );
@@ -108,14 +71,14 @@ token_t *expand_lambda( stack_frame_t *frame, token_t *tokens ){
 
 	temp = clone_tokens( tokens->next->next );
 
+	proc->env = frame->env? env_aquire( frame->env ) : NULL;
 	proc->args = clone_tokens( tokens->next->down );
-	proc->body = compile_lambda( frame, proc->args, temp );
+	proc->body = temp;
 	shr = shared_new( proc, free_procedure );
 
 	ret->type = TYPE_PROCEDURE;
 	ret->data = shr;
 	ret->flags |= T_FLAG_HAS_SHARED;
-	//ret->data = proc;
 
 	return ret;
 }
@@ -162,7 +125,7 @@ stack_frame_t *expand_procedure( stack_frame_t *frame, token_t *tokens ){
 		temp = proc->args;
 
 		env_release( frame->env );
-		frame->env = env_create( frame->env );
+		frame->env = env_create( proc->env );
 
 		foreach_in_list( temp ){
 			if ( temp->type == TYPE_SYMBOL ){
