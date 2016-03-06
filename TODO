@@ -1,7 +1,5 @@
 (in no particular order)
 
-- Add '..last' variable to REPL, which is set to the return value of the last
-  expression evaluated
 - Change stack frames to use immutable data structures,
   so that tails calls and continuations would be easy to implement.
 - Add more bytevector functions as specified in r6rs

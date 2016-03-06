@@ -134,6 +134,9 @@ int main( int argc, char *argv[] ){
 					env_add_var( global_frame->env, varexpr,
 						global_frame->end, NO_RECURSE, VAR_IMMUTABLE );
 
+					env_add_var( global_frame->env, "..last",
+						global_frame->end, NO_RECURSE, VAR_MUTABLE );
+
 					printf( "..%u = ", n );
 					print_token( global_frame->end, OUTPUT_READABLE );
 					putchar( '\n' );
