@@ -273,6 +273,43 @@ token_t *builtin_newline( stack_frame_t *frame ){
 	return ret;
 }
 
+static char *read_s_expr( FILE *fp ){
+	unsigned pos, alloced, open, spaces;
+	char *ret = malloc(1);
+	char c = 0;
+
+	open = pos = spaces = 0;
+	alloced = 1;
+
+	while ( !feof( fp )){
+		c = fgetc( fp );
+
+		if (!( c == ' ' || c == '\t' || c == '\n' || c == '\v' )) {
+			ungetc( c, fp );
+			break;
+		}
+	}
+
+	for ( ; (spaces == 0 || open > 0) && !feof( fp ); pos++ ){
+		if ( pos + 1 >= alloced ){
+			alloced += 16;
+			ret = realloc( ret, sizeof( char[ alloced + 1]));
+		}
+
+		c = fgetc( fp );
+
+		if      ( c == '(' ) open++;
+		else if ( c == ')' ) open--;
+		else if ( c == ' ' ) spaces++;
+
+		ret[pos] = c;
+	}
+
+	ret[pos] = 0;
+
+	return ret;
+}
+
 token_t *builtin_read( stack_frame_t *frame ){
 	token_t *ret = NULL;
 	token_t *move;
@@ -283,7 +320,8 @@ token_t *builtin_read( stack_frame_t *frame ){
 	if ( frame->ntokens == 2 ){
 		if ( move->type == TYPE_FILE ){
 			fp = shared_get( move->data );
-			buf = read_input_file( fp );
+			//buf = read_input_file( fp );
+			buf = read_s_expr( fp );
 
 			ret = alloc_token( );
 			ret->type = TYPE_LIST;
