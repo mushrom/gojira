@@ -229,8 +229,10 @@
       #f)
     #f))
 
-(define (use! modlist)
-  (map import! modlist))
+(define-syntax use
+  (syntax-rules ()
+    ((_ mod)
+     (import! 'mod))))
 
 (define modpath gojira-modpath)
 
