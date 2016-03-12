@@ -5,7 +5,6 @@
   (lambda ()
     (if (not already-run?)
       (begin
-        ;(print "Ran procedure")
         (set! result (proc))
         (set! already-run? #t)
         result)
@@ -24,6 +23,8 @@
   (syntax-rules ()
     ((_ a b)
      (list a (delay b)))))
+
+(define stream-cons cons-stream)
 
 (define stream-car car)
 (define (stream-cdr str)
@@ -69,8 +70,23 @@
     (cons-stream (proc (stream-car args))
                  (stream-map proc (stream-cdr args)))))
 
+(define (stream-for-each proc str)
+  (if (stream-null? str)
+    '()
+    (begin
+      (proc (stream-car str))
+      (stream-for-each proc (stream-cdr str)))))
+
 (define empty-stream? null?)
 (define stream-null? null?)
 
-(define (nums n)
-  (cons-stream n (nums (+ n 1))))
+(define (integers n)
+  (cons-stream n (integers (+ n 1))))
+
+(define (string->stream-at str k)
+  (if (< k (string-length str))
+    (cons-stream (string-ref str k) (string->stream-at str (+ k 1)))
+    '()))
+
+(define (string->stream str)
+  (string->stream-at str 0))
