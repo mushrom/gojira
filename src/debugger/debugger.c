@@ -12,6 +12,7 @@ static unsigned p_heap( token_t *heap ){
 	unsigned marked = 0;
 	unsigned freed = 0;
 
+	/*
 	for ( ; move; move = move->gc_link ){
 		switch ( move->status ){
 			case GC_UNMARKED: unmarked++; break;
@@ -25,6 +26,7 @@ static unsigned p_heap( token_t *heap ){
 
 	printf( "%3u tokens, %3u unmarked, %3u marked, %3u freed",
 			i, unmarked, marked, freed );
+	*/
 
 	return i;
 }

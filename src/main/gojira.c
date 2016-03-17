@@ -120,7 +120,7 @@ int main( int argc, char *argv[] ){
 				// generate a parse tree, and make sure all tokens are "clean" for the GC
 				//tree = remove_punc_tokens( parse_tokens( remove_meta_tokens( lexerize( buf ))));
 				tree = parse_scheme_tokens( buf );
-				gc_unmark( tree );
+				//gc_unmark( tree );
 
 				// Only interpret the tree if there is a tree
 				if ( tree ){
@@ -151,7 +151,7 @@ int main( int argc, char *argv[] ){
 	}
 
 	// Clean up the global frame, and free all tokens left in the token cache
-	gc_sweep( global_frame->heap );
+	//gc_sweep( global_frame->heap );
 	frame_free( global_frame );
 	destroy_token_cache( );
 

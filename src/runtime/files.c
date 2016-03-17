@@ -46,12 +46,14 @@ bool evaluate_file( stack_frame_t *frame, char *filename ){
 
 			//foo = remove_punc_tokens( parse_tokens( remove_meta_tokens( foo )));
             foo = token_parser( buf );
-            gc_unmark( foo );
+            //gc_unmark( foo );
 
             if ( foo ){
                 frame->ptr = foo;
+				//gc_register_tokens( &frame->gc, foo );
                 eval_loop( frame );
-                free_tokens( foo );
+				//gc_collect( &frame->gc, NULL, 0 );
+                //free_tokens( foo );
             }
 
             ret = true;

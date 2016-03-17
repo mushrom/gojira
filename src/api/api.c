@@ -1,3 +1,4 @@
+// TODO: Update this to work with new GC
 #include <gojira/api/api.h>
 
 gojira_t *goj_default_runtime( ){
@@ -62,7 +63,7 @@ goj_val_t *goj_parse( char *str ){
 	goj_val_t *ret;
 
 	ret = parse_scheme_tokens( str );
-	gc_unmark( ret );
+	//gc_unmark( ret );
 
 	return ret;
 }
@@ -109,7 +110,7 @@ void goj_free_val( goj_val_t *value ){
 }
 
 void goj_free_runtime( gojira_t *runtime ){
-	gc_sweep( runtime->heap );
+	//gc_sweep( runtime->heap );
 	frame_free( runtime );
 }
 

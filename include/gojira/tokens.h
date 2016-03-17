@@ -83,7 +83,10 @@ typedef struct token {
 	struct token *down;
 
 	// Used in frames to keep (seperate) token list of all allocated tokens
-	struct token *gc_link;
+	//struct token *gc_link;
+	struct token *gc_prev;
+	struct token *gc_next;
+	void *gc_data;
 
 	// token data
 	union {
@@ -97,11 +100,10 @@ typedef struct token {
 	};
 
 	type_t type;
-	// Used for rule reduction while parsing, and for garbage status
-	// during runtime.
-	unsigned status;
-	// special flags about the token
-	token_flag_t flags;
+	unsigned gc_id;
+	unsigned status;    // Used for rule reduction while parsing, and for
+	                    // garbage status during runtime.
+	token_flag_t flags; // special flags about the token
 } token_t;
 
 token_t *strip_token( token_t *tokens, type_t type );

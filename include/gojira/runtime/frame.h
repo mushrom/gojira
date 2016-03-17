@@ -5,6 +5,7 @@ extern "C" {
 #endif
 
 #include <gojira/tokens.h>
+#include <gojira/runtime/garbage.h>
 #include <gojira/libs/list.h>
 #include <gojira/libs/hashmap.h>
 #include <gojira/libs/shared.h>
@@ -65,6 +66,8 @@ typedef struct stack_frame {
 	token_t *value;       // value to return to last continuation
 	token_t *heap;        // List of all tokens allocated in the frame
 
+	gbg_collector_t gc;
+
 	error_printer error_call;
 } stack_frame_t;
 typedef stack_frame_t st_frame_t;
@@ -78,12 +81,16 @@ void env_release( env_t *env );
 env_t *env_aquire( env_t *env );
 env_t *env_create( env_t *last );
 
+#define DEPRECATED __attribute__((deprecated))
+
 token_t *frame_add_token( st_frame_t *frame, token_t *token );
 token_t *frame_add_token_noclone( st_frame_t *frame, token_t *token );
-token_t *frame_register_token_tree( st_frame_t *frame, token_t *token );
-token_t *frame_register_one_token( st_frame_t *frame, token_t *token );
-token_t *frame_register_tokens( st_frame_t *frame, token_t *token );
-token_t *frame_alloc_token( st_frame_t *frame );
+token_t *frame_register_token_tree( st_frame_t *frame, token_t *token ) DEPRECATED;
+token_t *frame_register_one_token( st_frame_t *frame, token_t *token ) DEPRECATED;
+token_t *frame_register_tokens( st_frame_t *frame, token_t *token ) DEPRECATED;
+token_t *frame_alloc_token( st_frame_t *frame ) DEPRECATED;
+
+#undef DEPRECATED
 
 //variable_t *frame_add_var( st_frame_t *frame, char *key, token_t *token, bool recurse );
      env_t *env_free_vars( env_t *env );

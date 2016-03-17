@@ -27,6 +27,10 @@ eval_ret_t eval_step( stack_frame_t **frame ){
 		} else {
 			ret = EVAL_STATUS_NONE;
 		}
+
+		if ( gc_should_collect( &(*frame)->gc )){
+			gc_collect( &(*frame)->gc, (*frame)->expr, 0 );
+		}
 	}
 
 	return ret;
@@ -101,8 +105,9 @@ bool eval_frame_subexpr( stack_frame_t **frame_ret ){
 							frame->ptr = frame->ptr->next;
 
 						} else {
-							frame->expr = clone_token( move );
-							frame_register_one_token( frame, frame->expr );
+							//frame->expr = clone_token( move );
+							//frame_register_one_token( frame, frame->expr );
+							frame->expr = gc_clone_token( &frame->gc, move );
 							frame->expr->next = frame->ptr->next;
 							frame->ptr = NULL;
 						}
@@ -128,8 +133,9 @@ bool eval_frame_subexpr( stack_frame_t **frame_ret ){
 					frame->ptr = frame->ptr->next;
 
 				} else {
-					frame->expr = clone_token( var->token );
-					frame_register_one_token( frame, frame->expr );
+					//frame->expr = clone_token( var->token );
+					//frame_register_one_token( frame, frame->expr );
+					frame->expr = gc_clone_token( &frame->gc, var->token );
 					frame->expr->next = frame->ptr->next;
 					frame->ptr = NULL;
 				}
@@ -148,8 +154,11 @@ bool eval_frame_subexpr( stack_frame_t **frame_ret ){
 			move->type = TYPE_SYNTAX;
 			move->down = frame->ptr;
 
-			frame_add_token_noclone( frame, ext_proc_token( builtin_return_first ));
-			frame_add_token( frame, move );
+			//frame_add_token_noclone( frame, ext_proc_token( builtin_return_first ));
+			//frame_add_token( frame, move );
+			frame_add_token_noclone( frame,
+				gc_register_token( &frame->gc, ext_proc_token( builtin_return_last )));
+			frame_add_token_noclone( frame, move );
 
 			frame->ptr = NULL;
 			break;
@@ -163,7 +172,8 @@ bool eval_frame_subexpr( stack_frame_t **frame_ret ){
 			move = expand_vector( frame, frame->ptr );
 
 			if ( move )
-				frame_add_token_noclone( frame, move );
+				//frame_add_token_noclone( frame, move );
+				frame_add_token_noclone( frame, gc_register_token( &frame->gc, move ));
 			else
 				ret = true;
 
@@ -257,7 +267,8 @@ bool eval_frame_expr( stack_frame_t **frame_ret ){
 		case TYPE_BOOLEAN:
 			{
 				foo = ext_proc_token( frame->expr->boolean? builtin_true : builtin_false );
-				frame_register_one_token( frame, foo );
+				//frame_register_one_token( frame, foo );
+				gc_register_token( &frame->gc, foo );
 
 				foo->next = frame->expr->next;
 				frame->expr = foo;
@@ -269,7 +280,8 @@ bool eval_frame_expr( stack_frame_t **frame_ret ){
 		case TYPE_HASHMAP:
 			{
 				foo = ext_proc_token( builtin_hashmap_get );
-				frame_register_one_token( frame, foo );
+				//frame_register_one_token( frame, foo );
+				gc_register_token( &frame->gc, foo );
 
 				foo->next = frame->expr;
 				frame->expr = foo;
@@ -288,11 +300,21 @@ bool eval_frame_expr( stack_frame_t **frame_ret ){
 	if ( apply && !ret ){
 		temp_frame = frame->last;
 
+		/*
 		gc_mark_tree( frame->value );
 		frame->heap = gc_sweep( frame->heap );
 		frame->value->next = NULL;
+		*/
+		//gc_register_token( &frame->gc, frame->value );
+		/*
+		if ( gc_should_collect( &frame->gc )){
+			gc_collect( &frame->gc, frame->value, 0 );
+		}
+		*/
 
+		//gc_move_token( &temp_frame->gc, &frame->gc, frame->value );
 		frame_add_token_noclone( temp_frame, frame->value );
+		gc_merge( &temp_frame->gc, &frame->gc );
 
 		if ( frame->flags & RUNTIME_FLAG_BREAK ){
 			ret = true;

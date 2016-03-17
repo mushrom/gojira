@@ -127,6 +127,11 @@ stack_frame_t *expand_procedure( stack_frame_t *frame, token_t *tokens ){
 		env_release( frame->env );
 		frame->env = env_create( proc->env );
 
+		if ( frame->env->vars && frame->env->vars->nbuckets == 0 ){
+			printf( "[%s} have no buckets at %p based on %p...\n",
+				__func__, frame->env, proc->env );
+		}
+
 		foreach_in_list( temp ){
 			if ( temp->type == TYPE_SYMBOL ){
 				var_name = shared_get( temp->data );
@@ -390,8 +395,11 @@ token_t *expand_syntax_rules( stack_frame_t *frame, token_t *tokens ){
 				}
 				hashmap_free( map );
 
+				/*
 				gc_unmark( ret );
 				frame_register_token_tree( frame, ret );
+				*/
+				//gc_register_token_tree( &frame->gc, ret );
 				break;
 
 			} else {

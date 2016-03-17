@@ -42,6 +42,7 @@ void debug_print_token( const token_t *token ){
 const token_t *debug_print_iter( const token_t *tokens, unsigned level ){
 	if ( tokens ){
 		unsigned i;
+		/*
 		if ( tokens->status == GC_MARKED ){
 			printf( "[marked]       " );
 		} else if ( tokens->status == GC_UNMARKED ){
@@ -51,6 +52,7 @@ const token_t *debug_print_iter( const token_t *tokens, unsigned level ){
 		} else {
 			printf( "[unknown (%d)] ", tokens->status );
 		}
+		*/
 
 		for ( i = 0; i < level; i++ )
 			printf( "    " );

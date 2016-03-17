@@ -3,6 +3,7 @@
 #include <gojira/tokens.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 enum alloc_config {
 	MAX_TOKEN_CACHE = 0xffff,
@@ -18,10 +19,16 @@ token_t *alloc_token( void ){
 		ret = nodeheap;
 		nodeheap = nodeheap->down;
 
-		ret->down = ret->gc_link = NULL;
+		memset( ret, 0, sizeof( token_t ));
+		//ret->down = ret->gc_link = NULL;
+		/*
+		ret->down = ret->gc_prev = ret->gc_next = NULL;
 		ret->data = NULL;
 		ret->status = 0;
+		ret->gc_id = 0;
+		ret->gc_data = NULL;
 		ret->flags = T_FLAG_NULL;
+		*/
 		avail_tokens--;
 
 	} else {

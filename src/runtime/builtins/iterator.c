@@ -1,3 +1,6 @@
+// XXX: This file (and so iterators) are going to be removed
+//      once the new GC is fully implemented, things here will only be
+//      updated so they compile without errors.
 #include <gojira/runtime/runtime.h>
 #include <gojira/runtime/builtin.h>
 #include <gojira/runtime/garbage.h>
@@ -104,9 +107,11 @@ token_t *builtin_iterator_access( stack_frame_t *frame ){
 			temp_frame = frame_create( foo_frame, proc, DONT_MAKE_ENV );
 			eval_loop( temp_frame );
 
+			/*
 			gc_mark( foo_frame->expr );
 			foo_frame->heap = gc_sweep( foo_frame->heap );
-			frame_free( foo_frame );
+			*/
+			gc_collect( &foo_frame->gc, foo_frame->value, 0 );
 
 			free_token( proc );
 			free_token( num );
@@ -114,6 +119,8 @@ token_t *builtin_iterator_access( stack_frame_t *frame ){
 			frame_free( frame );
 
 			ret = foo_frame->expr;
+
+			frame_free( foo_frame );
 		}
 	}
 
@@ -194,8 +201,8 @@ token_t *builtin_iterator_next( stack_frame_t *frame ){ token_t *ret = NULL;
 						temp_frame = frame_create( foo_frame, proc, DONT_MAKE_ENV );
 						eval_loop( temp_frame );
 
-						gc_mark( foo_frame->expr );
-						gc_sweep( foo_frame->heap );
+						//gc_mark( foo_frame->expr );
+						//gc_sweep( foo_frame->heap );
 						frame_free( foo_frame );
 
 						ret = foo_frame->expr;

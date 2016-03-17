@@ -284,12 +284,14 @@ st_frame_t *frame_create( st_frame_t *cur_frame, token_t *ptr, bool make_env ){
 	if ( cur_frame ){
 		ret->error_call = cur_frame->error_call;
 		ret->flags |= cur_frame->flags & RUNTIME_FLAG_TRACE;
+		gc_init( &cur_frame->gc, &ret->gc );
 
 		if ( !make_env && cur_frame->env ){
 			ret->env = env_aquire( cur_frame->env );
 		}
 
 	} else {
+		gc_init( NULL, &ret->gc );
 		ret->error_call = default_error_printer;
 	}
 
@@ -319,14 +321,15 @@ token_t *frame_add_token( st_frame_t *frame, token_t *token ){
 	if ( !frame->expr ){
 		//frame->expr = frame->end = meh = clone_token_tree( token );
 		//frame_register_token_tree( frame, meh );
-		frame->expr = frame->end = meh = clone_token( token );
-		frame_register_one_token( frame, meh );
-		meh->status = GC_UNMARKED;
+		frame->expr = frame->end = gc_clone_token( &frame->gc, token );
+		//frame_register_one_token( frame, meh );
+		//meh->status = GC_UNMARKED;
 
 	} else {
-		frame->end->next = clone_token_tree( token );
-		frame->end->next = frame_register_token_tree( frame, frame->end->next );
-		frame->end->next->status = GC_UNMARKED;
+		//frame->end->next = clone_token_tree( token );
+		//frame->end->next = frame_register_token_tree( frame, frame->end->next );
+		frame->end->next = gc_clone_token( &frame->gc, token );
+		//frame->end->next->status = GC_UNMARKED;
 		frame->end = frame->end->next;
 	}
 
@@ -341,13 +344,13 @@ token_t *frame_add_token_noclone( st_frame_t *frame, token_t *token ){
 	if ( !frame->expr ){
 		frame->expr = frame->end = token;
 		//frame_register_token_tree( frame, token );
-		frame_register_one_token( frame, token );
-		token->status = GC_UNMARKED;
+		//frame_register_one_token( frame, token );
+		//token->status = GC_UNMARKED;
 
 	} else {
 		frame->end->next = token;
-		frame->end->next = frame_register_token_tree( frame, frame->end->next );
-		frame->end->next->status = GC_UNMARKED;
+		//frame->end->next = frame_register_token_tree( frame, frame->end->next );
+		//frame->end->next->status = GC_UNMARKED;
 		frame->end = frame->end->next;
 	}
 
@@ -356,6 +359,7 @@ token_t *frame_add_token_noclone( st_frame_t *frame, token_t *token ){
 	return ret;
 }
 
+/*
 token_t *frame_register_tokens( st_frame_t *frame, token_t *token ){
 	if ( token ){
 		frame_register_tokens( frame, token->down );
@@ -388,7 +392,7 @@ token_t *frame_register_one_token( st_frame_t *frame, token_t *token ){
 	return token;
 }
 
-
 token_t *frame_alloc_token( st_frame_t *frame ){
 	return frame_register_one_token( frame, alloc_token( ));
 }
+*/
