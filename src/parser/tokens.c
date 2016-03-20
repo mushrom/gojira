@@ -90,11 +90,13 @@ token_t *strip_token( token_t *tokens, type_t type ){
 					ret->next = strip_token( tokens->next, type );
 				}
 
-				free( tokens );
+				//free( tokens );
+				free_token( tokens );
 
 			} else {
 				ret = strip_token( tokens->next, type );
-				free( tokens );
+				//free( tokens );
+				free_token( tokens );
 			}
 
 		} else {
@@ -154,6 +156,7 @@ token_t *clone_token( const token_t *token ){
 
 	ret = alloc_token( );
 	*ret = *token;
+	ret->gc_id = 0;
 
 	//if ( has_shared_data( token->type )){
 	if ( token->flags & T_FLAG_HAS_SHARED ){ 

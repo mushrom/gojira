@@ -30,6 +30,7 @@ token_t *gc_alloc_token( gbg_collector_t *gc );
 token_t *gc_clone_token( gbg_collector_t *gc, token_t *token );
 token_t *gc_register_token( gbg_collector_t *gc, token_t *token );
 token_t *gc_register_token_tree( gbg_collector_t *gc, token_t *tokens );
+token_t *gc_register_tokens( gbg_collector_t *gc, token_t *token );
 token_t *gc_move_token( gbg_collector_t *to, gbg_collector_t *from, token_t *token );
 void gc_free_token( gbg_collector_t *gc );
 void gc_collect( gbg_collector_t *gc, token_t *root_nodes, unsigned iters );

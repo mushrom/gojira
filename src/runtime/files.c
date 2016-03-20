@@ -50,7 +50,7 @@ bool evaluate_file( stack_frame_t *frame, char *filename ){
 
             if ( foo ){
                 frame->ptr = foo;
-				//gc_register_tokens( &frame->gc, foo );
+				gc_register_tokens( &frame->gc, foo );
                 eval_loop( frame );
 				//gc_collect( &frame->gc, NULL, 0 );
                 //free_tokens( foo );

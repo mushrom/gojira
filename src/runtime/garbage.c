@@ -7,9 +7,8 @@
 static token_t *gc_list_add( gbg_collector_t *gc, unsigned color, token_t *token ){
 	gbg_list_t *list = &gc->colors[color];
 
-	if ( list->start ){
-		list->start->gc_prev = token;
-		//gc->white->gc_prev = token;
+	if ( list->start && !list->end ){
+		printf( "[%s] Have a list with a start but no end\n", __func__ );
 	}
 
 	token->gc_id = gc->id;
@@ -21,8 +20,27 @@ static token_t *gc_list_add( gbg_collector_t *gc, unsigned color, token_t *token
 	list->start = token;
 	list->length++;
 
+	if ( token->gc_next ){
+		token->gc_next->gc_prev = token;
+	}
+	/*
+	if ( list->start ){
+		list->start->gc_prev = token;
+		//gc->white->gc_prev = token;
+	}
+	*/
+
 	if ( !list->end ){
-		list->end = list->start;
+		list->end = token;
+	}
+
+	if ( list->start->gc_prev != NULL ){
+		printf( "[%s] Have a start with tokens after it...\n", __func__ );
+	}
+
+	if ( list->end->gc_next != NULL ){
+		printf( "[%s] Have an end with tokens after it...\n", __func__ );
+		//for ( ; list->end->gc_next; list->end = list->end->gc_next );
 	}
 
 	if ( token->gc_next == token ){
@@ -39,7 +57,9 @@ static token_t *gc_list_add( gbg_collector_t *gc, unsigned color, token_t *token
 static token_t *gc_list_remove( gbg_collector_t *gc, token_t *token ){
 	gbg_list_t *list = &gc->colors[token->status];
 
-	if ((!list->start && !list->end) || token->status >= 3 ){
+	//printf( "[%s] removing %p, %u, start = %p, end = %p\n", __func__, token, gc->id, list->start, list->end );
+
+	if ((!list->start && !list->end) || token->status >= 3 || list->length == 0 ){
 		printf( "[%s] Got bad list remove request, token: %p, color: %u\n",
 			__func__, token, token->status );
 
@@ -63,9 +83,20 @@ static token_t *gc_list_remove( gbg_collector_t *gc, token_t *token ){
 	}
 
 	if ( token == list->end ){
-		list->end = token->gc_prev;
+		if ( token->gc_prev ){
+			list->end = token->gc_prev;
+		} else {
+			list->end = list->start;
+		}
+
 		//printf( "[%s] Set new list end, %p\n", __func__, list->start );
 	}
+
+	/*
+	if ( list->end && list->end->gc_next != NULL ){
+		printf( "[%s] end is not the real end...?, %p\n", __func__, list->end->gc_next );
+	}
+	*/
 
 	if ( token->gc_prev ){
 		if ( token->status != token->gc_prev->status ){
@@ -79,6 +110,8 @@ static token_t *gc_list_remove( gbg_collector_t *gc, token_t *token ){
 						token->gc_prev, token, token->gc_prev->gc_next );
 			}
 		}
+
+		//printf( "[%s] Set new %p->next to %p\n", __func__, token->gc_prev, token->gc_next );
 
 		token->gc_prev->gc_next = token->gc_next;
 	}
@@ -95,6 +128,8 @@ static token_t *gc_list_remove( gbg_collector_t *gc, token_t *token ){
 			printf( "\tNext token %p in color list does not point to %p, actually points to %p... %d\n",
 				token->gc_next, token, token->gc_next->gc_prev, token != token->gc_next->gc_prev );
 		}
+
+		//printf( "[%s] Set new %p->prev to %p\n", __func__, token->gc_next, token->gc_prev );
 
 		token->gc_next->gc_prev = token->gc_prev;
 	}
@@ -133,15 +168,30 @@ token_t *gc_alloc_token( gbg_collector_t *gc ){
 
 token_t *gc_clone_token( gbg_collector_t *gc, token_t *token ){
 	//token_t *ret = gc_list_add( gc, GC_COLOR_WHITE, clone_token( token ));
-	token_t *ret = gc_register_token( gc, clone_token( token ));
+	token_t *temp = clone_token( token );
+	//temp->gc_id = gc->id;
+	//token_t *ret = gc_register_token( gc, clone_token( token ));
+	//printf( "[%s] Cloned %s token at %p\n", __func__, type_str( temp->type ), temp );
+	token_t *ret = gc_register_token( gc, temp );
 
-	//printf( "[%s] Cloned %s token at %p\n", __func__, type_str( ret->type ), ret );
 
 	return ret;
 }
+#include <signal.h>
 
 token_t *gc_register_token( gbg_collector_t *gc, token_t *token ){
-	token_t *ret = gc_list_add( gc, GC_COLOR_WHITE, token );
+	token_t *ret = NULL;
+
+	if ( token->gc_id && token->gc_id < gc->id ){
+		printf( "[%s] Warning: asking for token registered at %u to be registered into %u\n", __func__, token->gc_id, gc->id );
+		raise( SIGINT );
+		ret = token;
+
+	} else {
+		ret = gc_list_add( gc, GC_COLOR_WHITE, token );
+		//token_t *ret = gc_list_add( gc, GC_COLOR_WHITE, token );
+	}
+
 
 	//printf( "[%s] Registered a %s token at %p\n", __func__, type_str( token->type ), token );
 
@@ -206,18 +256,17 @@ void gc_collect( gbg_collector_t *gc, token_t *root_nodes, unsigned iters ){
 	unsigned max_iters = (iters > 0)? iters : UINT_MAX;
 	unsigned i;
 
-	printf( "[%s] doing garbage collection...\n", __func__ );
+	//printf( "[%s] doing garbage collection...\n", __func__ );
 
 	for ( i = 0; i < max_iters; i++ ){
 		token_t *foo = gc->colors[GC_COLOR_GREY].start;
 
 		if ( foo ){
+			//printf( "[%s] %u: blackened a %s token at %p\n", __func__, gc->id, type_str( foo->type ), foo );
 			gc_list_move( gc, GC_COLOR_BLACK, foo );
 
-			if ( foo->type == TYPE_LIST || foo->type == TYPE_SYNTAX_RULES ){
 				//gc_grey_tokens( gc, foo->down );
-				gc_color_tokens( gc, GC_COLOR_GREY, foo->down );
-			}
+			gc_color_tokens( gc, GC_COLOR_GREY, foo->down );
 
 		} else {
 			break;
@@ -249,13 +298,14 @@ void gc_collect( gbg_collector_t *gc, token_t *root_nodes, unsigned iters ){
 		*/
 	}
 
-	printf( "[%s] done\n", __func__ );
+	//printf( "[%s] done\n", __func__ );
 }
 
 bool gc_should_collect( gbg_collector_t *gc ){
 	gc->interval++;
 
-	if ( gc->colors[GC_COLOR_WHITE].length > 500 && gc->interval > 5000 ){
+	if ( gc->colors[GC_COLOR_WHITE].length > 200 && gc->interval > 1000 ){
+	//if ( gc->id == 1 ){
 		gc->interval = 0;
 		return true;
 
@@ -303,13 +353,20 @@ gbg_collector_t *gc_merge( gbg_collector_t *first, gbg_collector_t *second ){
 			if ( b->start ){
 				b->start->gc_prev = a->end;
 				a->end->gc_next = b->start;
-				a->end = b->start;
+				a->end = b->end;
 			}
 
 			if ( a->end ){
 				if ( a->end->gc_next == a->end ){
 					printf( "[%s] token %p->end->gc_next is itself???\n", __func__, a->end );
 				}
+
+				if ( a->end->gc_next != NULL ){
+					printf( "[%s] end is not the real end? %p\n", __func__, a->end );
+				}
+
+			} else {
+				printf( "[%s] Have start, but no end? first id: %u, second id: %u\n", __func__, first->id, second->id );
 			}
 
 			a->length += b->length;

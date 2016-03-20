@@ -152,6 +152,7 @@ int main( int argc, char *argv[] ){
 
 	// Clean up the global frame, and free all tokens left in the token cache
 	//gc_sweep( global_frame->heap );
+	gc_collect( &global_frame->gc, NULL, 0 );
 	frame_free( global_frame );
 	destroy_token_cache( );
 

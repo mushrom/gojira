@@ -28,9 +28,11 @@ eval_ret_t eval_step( stack_frame_t **frame ){
 			ret = EVAL_STATUS_NONE;
 		}
 
+		/*
 		if ( gc_should_collect( &(*frame)->gc )){
 			gc_collect( &(*frame)->gc, (*frame)->expr, 0 );
 		}
+		*/
 	}
 
 	return ret;
@@ -150,7 +152,7 @@ bool eval_frame_subexpr( stack_frame_t **frame_ret ){
 			break;
 
 		case TYPE_SYNTAX_RULES:
-			move = alloc_token( );
+			move = gc_alloc_token( &frame->gc );
 			move->type = TYPE_SYNTAX;
 			move->down = frame->ptr;
 
@@ -306,11 +308,10 @@ bool eval_frame_expr( stack_frame_t **frame_ret ){
 		frame->value->next = NULL;
 		*/
 		//gc_register_token( &frame->gc, frame->value );
-		/*
 		if ( gc_should_collect( &frame->gc )){
 			gc_collect( &frame->gc, frame->value, 0 );
 		}
-		*/
+		//gc_collect( &frame->gc, frame->value, 0 );
 
 		//gc_move_token( &temp_frame->gc, &frame->gc, frame->value );
 		frame_add_token_noclone( temp_frame, frame->value );

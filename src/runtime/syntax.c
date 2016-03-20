@@ -5,6 +5,7 @@
 #include <gojira/parse_debug.h>
 #include <gojira/libs/shared.h>
 #include <gojira/libs/dlist.h>
+#include <gojira/runtime/garbage.h>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -56,7 +57,7 @@ void free_vector( void *ptr ){
 }
 
 token_t *expand_lambda( stack_frame_t *frame, token_t *tokens ){
-	token_t *ret = alloc_token( );
+	token_t *ret = gc_alloc_token( &frame->gc );
 	token_t *temp;
 	shared_t *shr;
 
@@ -186,6 +187,7 @@ stack_frame_t *expand_procedure( stack_frame_t *frame, token_t *tokens ){
 		ret->expr = ret->end = NULL;
 
 		temp = ext_proc_token( builtin_return_last );
+		gc_register_token( &ret->gc, temp );
 		frame_add_token_noclone( ret, temp );
 
 		ret->ptr = proc->body;
@@ -387,7 +389,7 @@ token_t *expand_syntax_rules( stack_frame_t *frame, token_t *tokens ){
 
 				matched = true;
 				map = syntax_get_names( pattern, tokens, NULL );
-				ret = syntax_expand( template, map );
+				ret = gc_register_tokens( &frame->gc, syntax_expand( template, map ));
 
 				// free the map's resources
 				for ( i = 0; i < map->nbuckets; i++ ){

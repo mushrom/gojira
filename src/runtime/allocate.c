@@ -6,7 +6,8 @@
 #include <string.h>
 
 enum alloc_config {
-	MAX_TOKEN_CACHE = 0xffff,
+	//MAX_TOKEN_CACHE = 0xffff,
+	MAX_TOKEN_CACHE = 0,
 };
 
 token_t *nodeheap = NULL;
