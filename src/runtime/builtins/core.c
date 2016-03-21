@@ -483,7 +483,7 @@ token_t *builtin_load_global_file( stack_frame_t *frame ){
 			for ( ; env->last; env = env->last );
 
 			tempframe = frame_create( NULL, NULL, DONT_MAKE_ENV );
-			tempframe->gc.id = frame->gc.id + 1;
+			//tempframe->gc.id = frame->gc.id + 1;
 			tempframe->env = env_aquire( env );
 			eval_return = evaluate_file( tempframe, fname );
 			//gc_collect( &tempframe->gc, NULL, 0 );
