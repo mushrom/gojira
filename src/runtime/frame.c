@@ -122,7 +122,7 @@ variable_t *global_add_func( env_t *env, char *name, scheme_func handle ){
 	token_t *proc = ext_proc_token( handle );
 	variable_t *ret = env_add_var( env, name, proc, NO_RECURSE, VAR_IMMUTABLE );
 
-	free_token( proc );
+	//free_token( proc );
 
 	return ret;
 }

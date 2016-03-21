@@ -235,17 +235,43 @@ token_t *gc_move_token( gbg_collector_t *to, gbg_collector_t *from, token_t *tok
 	return ret;
 }
 
+#include <gojira/runtime/frame.h>
+#include <gojira/runtime/runtime.h>
+
+static void gc_color_env( gbg_collector_t *gc, env_t *env );
+
 static void gc_color_tokens( gbg_collector_t *gc, unsigned color, token_t *tokens ){
 	token_t *move = tokens;
 
 	for ( ; move; move = move->next ){
 		if ( move->gc_id >= gc->id ){
 			gc_list_move( gc, color, move );
+
+			if ( move->type == TYPE_PROCEDURE ){
+				printf( "[%s] Got here\n", __func__ );
+				procedure_t *proc = shared_get( move->data );
+				gc_color_env( gc, proc->env );
+			}
+
 		} /*else {
 			printf( "[%s] Somehow got a token from a lower stack frame, %d at gc %d\n",
 				__func__, move->gc_id, gc->id );
 		}
 		*/
+	}
+}
+
+static void gc_color_env( gbg_collector_t *gc, env_t *env ){
+	hashmap_t *map = env->vars;
+	unsigned i;
+
+	for ( i = 0; i < map->nbuckets; i++ ){
+		list_node_t *node = map->buckets[i].base;
+
+		foreach_in_list( node ){
+			variable_t *var = shared_get( node->data );
+			gc_color_tokens( gc, GC_COLOR_GREY, var->token );
+		}
 	}
 }
 
@@ -304,7 +330,7 @@ void gc_collect( gbg_collector_t *gc, token_t *root_nodes, unsigned iters ){
 bool gc_should_collect( gbg_collector_t *gc ){
 	gc->interval++;
 
-	if ( gc->colors[GC_COLOR_WHITE].length > 200 && gc->interval > 1000 ){
+	if ( gc->colors[GC_COLOR_WHITE].length > 500 && gc->interval > 5000 ){
 	//if ( gc->id == 1 ){
 		gc->interval = 0;
 		return true;

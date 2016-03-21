@@ -103,14 +103,14 @@ bool eval_frame_subexpr( stack_frame_t **frame_ret ){
 
 					if ( move ){
 						if ( move->type != TYPE_SYNTAX || frame->expr ){
-							//frame_add_token( frame, move );
+							frame_add_token( frame, move );
 							// TODO: find some way to keep track of tokens that are bound to environments,
 							//       so that token copying doesn't have to happen for each variable expansion
 							//
 							//       maybe put GC in environment frames instead of the call frames, and mark
 							//       variables in the environment
-							token_t *temp = gc_register_token_tree( &frame->gc, clone_token_tree( move ));
-							frame_add_token_noclone( frame, temp );
+							//token_t *temp = gc_register_token_tree( &frame->gc, clone_token_tree( move ));
+							//frame_add_token_noclone( frame, temp );
 							frame->ptr = frame->ptr->next;
 
 						} else {

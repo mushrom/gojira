@@ -143,7 +143,7 @@ stack_frame_t *expand_procedure( stack_frame_t *frame, token_t *tokens ){
 						token_t *newlist;
 
 						var_name = shared_get( temp->next->data );
-						newlist  = alloc_token( );
+						newlist  = gc_alloc_token( &frame->gc );
 						newlist->type = TYPE_LIST;
 						newlist->down = move;
 
@@ -165,7 +165,9 @@ stack_frame_t *expand_procedure( stack_frame_t *frame, token_t *tokens ){
 					if ( move ){
 						// TODO: allow specifying mutable parameters
 						//frame_add_var( frame, var_name, move, NO_RECURSE, VAR_IMMUTABLE );
-						env_add_var( frame->env, var_name, move, NO_RECURSE, VAR_IMMUTABLE );
+						token_t *newtoken = gc_clone_token( &frame->gc, move );
+						newtoken->next = NULL;
+						env_add_var( frame->env, var_name, newtoken, NO_RECURSE, VAR_IMMUTABLE );
 						move = move->next;
 
 					} else {

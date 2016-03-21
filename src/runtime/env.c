@@ -155,7 +155,7 @@ void free_var( void *ptr ){
 	if ( ptr ){
 		variable_t *var = ptr;
 		//printf( "[%s] Freeing variable with hash 0x%x\n", __func__, var->hash );
-		free_tokens( var->token );
+		//free_tokens( var->token );
 		free( var->key );
 		free( var );
 	}
@@ -176,7 +176,8 @@ variable_t *env_add_var( env_t *env, const char *key, token_t *token, bool recur
 			new_var->key = strdup( key );
 			new_var->hash = hash_string( key );
 			new_var->is_mutable = mutable;
-			new_var->token = clone_token_tree( token );
+			//new_var->token = clone_token_tree( token );
+			new_var->token = token;
 			new_shared = shared_new( new_var, free_var );
 
 			hashmap_add( env->vars, new_var->hash, new_shared );

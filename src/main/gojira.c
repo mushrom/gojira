@@ -131,6 +131,8 @@ int main( int argc, char *argv[] ){
 					eval_loop( global_frame );
 
 					snprintf( varexpr, sizeof(varexpr) - 1, "..%u", n );
+
+					// do clone here
 					env_add_var( global_frame->env, varexpr,
 						global_frame->end, NO_RECURSE, VAR_IMMUTABLE );
 
@@ -141,7 +143,7 @@ int main( int argc, char *argv[] ){
 					print_token( global_frame->end, OUTPUT_READABLE );
 					putchar( '\n' );
 
-					free_tokens( tree );
+					//free_tokens( tree );
 				}
 			}
 
