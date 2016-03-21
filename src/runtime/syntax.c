@@ -36,8 +36,8 @@ void free_procedure( void *ptr ){
 			env_release( proc->env );
 		}
 
-		free_tokens( proc->body );
-		free_tokens( proc->args );
+		//free_tokens( proc->body );
+		//free_tokens( proc->args );
 		free( proc );
 	}
 }
@@ -70,10 +70,12 @@ token_t *expand_lambda( stack_frame_t *frame, token_t *tokens ){
 		return NULL;
 	}
 
-	temp = clone_tokens( tokens->next->next );
+	//temp = clone_tokens( tokens->next->next );
+	temp = gc_clone_token( &frame->gc, tokens->next->next );
 
 	proc->env = frame->env? env_aquire( frame->env ) : NULL;
-	proc->args = clone_tokens( tokens->next->down );
+	proc->args = gc_clone_token( &frame->gc, tokens->next->down );
+		//clone_tokens( tokens->next->down );
 	proc->body = temp;
 	shr = shared_new( proc, free_procedure );
 

@@ -167,13 +167,15 @@ token_t *gc_alloc_token( gbg_collector_t *gc ){
 }
 
 token_t *gc_clone_token( gbg_collector_t *gc, token_t *token ){
-	//token_t *ret = gc_list_add( gc, GC_COLOR_WHITE, clone_token( token ));
-	token_t *temp = clone_token( token );
-	//temp->gc_id = gc->id;
-	//token_t *ret = gc_register_token( gc, clone_token( token ));
-	//printf( "[%s] Cloned %s token at %p\n", __func__, type_str( temp->type ), temp );
-	token_t *ret = gc_register_token( gc, temp );
+	token_t *ret = NULL;
 
+	if ( token ){
+		token_t *temp = clone_token( token );
+		//temp->gc_id = gc->id;
+		//token_t *ret = gc_register_token( gc, clone_token( token ));
+		//printf( "[%s] Cloned %s token at %p\n", __func__, type_str( temp->type ), temp );
+		ret = gc_register_token( gc, temp );
+	}
 
 	return ret;
 }
@@ -250,7 +252,11 @@ static void gc_color_tokens( gbg_collector_t *gc, unsigned color, token_t *token
 			if ( move->type == TYPE_PROCEDURE ){
 				printf( "[%s] Got here\n", __func__ );
 				procedure_t *proc = shared_get( move->data );
+
 				gc_color_env( gc, proc->env );
+				gc_color_tokens( gc, GC_COLOR_GREY, proc->body );
+				gc_color_tokens( gc, GC_COLOR_GREY, proc->args );
+
 			}
 
 		} /*else {
