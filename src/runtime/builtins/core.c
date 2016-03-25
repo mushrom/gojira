@@ -468,6 +468,7 @@ token_t *builtin_false( stack_frame_t *frame ){
 token_t *builtin_load_global_file( stack_frame_t *frame ){
 	token_t *ret = NULL;
 	stack_frame_t *tempframe;
+	stack_frame_t *global;
 	env_t *env;
 	token_t *oldptr;
 	bool eval_return;
@@ -484,12 +485,16 @@ token_t *builtin_load_global_file( stack_frame_t *frame ){
 			env = frame->env;
 			for ( ; env->last; env = env->last );
 
+			global = frame;
+			for ( ; global->last; global = global->last );
+
 			tempframe = frame_create( NULL, NULL, DONT_MAKE_ENV );
 			//tempframe->gc.id = frame->gc.id + 1;
 			tempframe->env = env_aquire( env );
 			eval_return = evaluate_file( tempframe, fname );
 			//gc_collect( &tempframe->gc, NULL, 0 );
-			gc_merge( &frame->gc, &tempframe->gc );
+			//gc_merge( &frame->gc, &tempframe->gc );
+			gc_merge( &global->gc, &tempframe->gc );
 			frame_free( tempframe );
 
 			ret = gc_alloc_token( &frame->gc );

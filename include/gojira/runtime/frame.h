@@ -65,6 +65,7 @@ typedef struct stack_frame {
 
 	token_t *value;       // value to return to last continuation
 	token_t *heap;        // List of all tokens allocated in the frame
+	token_t *cur_func;
 
 	gbg_collector_t gc;
 

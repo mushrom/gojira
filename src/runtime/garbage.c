@@ -4,43 +4,43 @@
 #include <stdbool.h>
 #include <limits.h>
 
-static token_t *gc_list_add( gbg_collector_t *gc, unsigned color, token_t *token ){
-	gbg_list_t *list = &gc->colors[color];
+static token_t *gc_list_add( gbg_collector_t *gc, token_t *token ){
+	//gbg_list_t *list = &gc->colors[color];
 
-	if ( list->start && !list->end ){
+	if ( gc->start && !gc->end ){
 		printf( "[%s] Have a list with a start but no end\n", __func__ );
 	}
 
 	token->gc_id = gc->id;
-	token->gc_next = list->start;
+	token->gc_next = gc->start;
 	token->gc_prev = NULL;
 	//token->gc_data = gc;
-	token->status = color;
+	//token->status = color;
 
-	list->start = token;
-	list->length++;
+	//list->start = token;
+	gc->start = token;
+	gc->length++;
 
 	if ( token->gc_next ){
 		token->gc_next->gc_prev = token;
 	}
-	/*
-	if ( list->start ){
-		list->start->gc_prev = token;
-		//gc->white->gc_prev = token;
-	}
-	*/
 
-	if ( !list->end ){
-		list->end = token;
+	//if ( list->start ){
+	//	list->start->gc_prev = token;
+	//	gc->white->gc_prev = token;
+	//}
+
+	if ( !gc->end ){
+		gc->end = token;
 	}
 
-	if ( list->start->gc_prev != NULL ){
+	if ( gc->start->gc_prev != NULL ){
 		printf( "[%s] Have a start with tokens after it...\n", __func__ );
 	}
 
-	if ( list->end->gc_next != NULL ){
+	if ( gc->end->gc_next != NULL ){
 		printf( "[%s] Have an end with tokens after it...\n", __func__ );
-		//for ( ; list->end->gc_next; list->end = list->end->gc_next );
+		//for ( ; gc->end->gc_next; gc->end = gc->end->gc_next );
 	}
 
 	if ( token->gc_next == token ){
@@ -55,11 +55,11 @@ static token_t *gc_list_add( gbg_collector_t *gc, unsigned color, token_t *token
 }
 
 static token_t *gc_list_remove( gbg_collector_t *gc, token_t *token ){
-	gbg_list_t *list = &gc->colors[token->status];
+	//gbg_list_t *list = &gc->colors[token->status];
 
 	//printf( "[%s] removing %p, %u, start = %p, end = %p\n", __func__, token, gc->id, list->start, list->end );
 
-	if ((!list->start && !list->end) || token->status >= 3 || list->length == 0 ){
+	if ((!gc->start && !gc->end) || token->status >= 2 || gc->length == 0 ){
 		printf( "[%s] Got bad list remove request, token: %p, color: %u\n",
 			__func__, token, token->status );
 
@@ -77,38 +77,35 @@ static token_t *gc_list_remove( gbg_collector_t *gc, token_t *token ){
 		printf( "[%s] token %p->gc_prev is itself???\n", __func__, token );
 	}
 
-	if ( token == list->start ){
-		list->start = token->gc_next;
+	if ( token == gc->start ){
+		gc->start = token->gc_next;
 		//printf( "[%s] Set new list start, %p\n", __func__, list->start );
 	}
 
-	if ( token == list->end ){
+	if ( token == gc->end ){
 		if ( token->gc_prev ){
-			list->end = token->gc_prev;
+			gc->end = token->gc_prev;
 		} else {
-			list->end = list->start;
+			gc->end = gc->start;
 		}
 
 		//printf( "[%s] Set new list end, %p\n", __func__, list->start );
 	}
 
-	/*
-	if ( list->end && list->end->gc_next != NULL ){
-		printf( "[%s] end is not the real end...?, %p\n", __func__, list->end->gc_next );
-	}
-	*/
-
 	if ( token->gc_prev ){
 		if ( token->status != token->gc_prev->status ){
+			/*
 			printf( "[%s] Warning! token is lying about which list it's in, according to previous!\n", __func__ );
 			printf( "\tToken color: %u, real: %u, token: %p, prev: %p, token gc: %u, gc id: %u\n",
 				__func__, token->status, token->gc_next->status, token, token->gc_prev,
 				token->gc_id, gc->id );
+				*/
 
-			if ( token->gc_prev->gc_next != token ){
-				printf( "\tPrevious token %p in color list does not point to %p, actually points to %p...\n",
-						token->gc_prev, token, token->gc_prev->gc_next );
-			}
+		}
+
+		if ( token->gc_prev->gc_next != token ){
+			printf( "\tPrevious token %p in color list does not point to %p, actually points to %p...\n",
+					token->gc_prev, token, token->gc_prev->gc_next );
 		}
 
 		//printf( "[%s] Set new %p->next to %p\n", __func__, token->gc_prev, token->gc_next );
@@ -117,12 +114,14 @@ static token_t *gc_list_remove( gbg_collector_t *gc, token_t *token ){
 	}
 
 	if ( token->gc_next ){
+		/*
 		if ( token->status != token->gc_next->status ){
 			printf( "[%s] Warning! token is lying about which list it's in, according to next!\n", __func__ );
 			printf( "\tToken color: %u, real: %u, token: %p, next: %p, token gc: %u, gc id: %u\n",
 				__func__, token->status, token->gc_next->status, token, token->gc_next,
 				token->gc_id, gc->id );
 		}
+		*/
 
 		if ( token->gc_next->gc_prev != token ){
 			printf( "\tNext token %p in color list does not point to %p, actually points to %p... %d\n",
@@ -136,11 +135,12 @@ static token_t *gc_list_remove( gbg_collector_t *gc, token_t *token ){
 
 	token->gc_prev = token->gc_next = NULL;
 
-	list->length--;
+	gc->length--;
 
 	return token;
 }
 
+/*
 static token_t *gc_list_move( gbg_collector_t *gc, unsigned color, token_t *token ){
 	token_t *ret = token;
 
@@ -156,6 +156,7 @@ static token_t *gc_list_move( gbg_collector_t *gc, unsigned color, token_t *toke
 
 	return ret;
 }
+*/
 
 token_t *gc_alloc_token( gbg_collector_t *gc ){
 	//token_t *ret = gc_list_add( gc, GC_COLOR_WHITE, alloc_token( ));
@@ -184,13 +185,17 @@ token_t *gc_clone_token( gbg_collector_t *gc, token_t *token ){
 token_t *gc_register_token( gbg_collector_t *gc, token_t *token ){
 	token_t *ret = NULL;
 
-	if ( token->gc_id && token->gc_id < gc->id ){
-		printf( "[%s] Warning: asking for token registered at %u to be registered into %u\n", __func__, token->gc_id, gc->id );
-		raise( SIGINT );
-		ret = token;
+	//if ( token->gc_id && token->gc_id < gc->id ){
+	if ( !token->gc_id ){
+		//raise( SIGINT );
+		//ret = token;
+		ret = gc_list_add( gc, token );
 
 	} else {
-		ret = gc_list_add( gc, GC_COLOR_WHITE, token );
+		printf( "[%s] Warning: asking for token already registered %u to be registered into %u\n",
+			__func__, token->gc_id, gc->id );
+
+		ret = token;
 		//token_t *ret = gc_list_add( gc, GC_COLOR_WHITE, token );
 	}
 
@@ -228,6 +233,7 @@ void gc_free_token( gbg_collector_t *gc ){
 	// TODO
 }
 
+/*
 token_t *gc_move_token( gbg_collector_t *to, gbg_collector_t *from, token_t *token ){
 	token_t *ret = NULL;
 
@@ -236,30 +242,37 @@ token_t *gc_move_token( gbg_collector_t *to, gbg_collector_t *from, token_t *tok
 
 	return ret;
 }
+*/
 
 #include <gojira/runtime/frame.h>
 #include <gojira/runtime/runtime.h>
 
-static void gc_color_env( gbg_collector_t *gc, env_t *env );
+void gc_mark_env( gbg_collector_t *gc, env_t *env );
 
-static void gc_color_tokens( gbg_collector_t *gc, unsigned color, token_t *tokens ){
+void gc_mark_tokens( gbg_collector_t *gc, token_t *tokens ){
 	token_t *move = tokens;
 
 	for ( ; move; move = move->next ){
-		if ( move->gc_id >= gc->id ){
-			gc_list_move( gc, color, move );
+		//if ( move->gc_id >= gc->id ){
+			//gc_list_move( gc, move );
+			bool already_marked = move->status == GC_MARKED;
+			move->status = GC_MARKED;
 
 			if ( move->type == TYPE_PROCEDURE ){
-				printf( "[%s] Got here\n", __func__ );
+				//printf( "[%s] Got here\n", __func__ );
 				procedure_t *proc = shared_get( move->data );
 
-				gc_color_env( gc, proc->env );
-				gc_color_tokens( gc, GC_COLOR_GREY, proc->body );
-				gc_color_tokens( gc, GC_COLOR_GREY, proc->args );
-
+				if ( !already_marked ){
+					gc_mark_env( gc, proc->env );
+					gc_mark_tokens( gc, proc->body );
+					gc_mark_tokens( gc, proc->args );
+				}
 			}
 
-		} /*else {
+			gc_mark_tokens( gc, move->down );
+
+		//}
+	/*else {
 			printf( "[%s] Somehow got a token from a lower stack frame, %d at gc %d\n",
 				__func__, move->gc_id, gc->id );
 		}
@@ -267,77 +280,68 @@ static void gc_color_tokens( gbg_collector_t *gc, unsigned color, token_t *token
 	}
 }
 
-static void gc_color_env( gbg_collector_t *gc, env_t *env ){
-	hashmap_t *map = env->vars;
-	unsigned i;
+void gc_mark_env( gbg_collector_t *gc, env_t *env ){
+	if ( env && env->vars ){
+		unsigned i;
+		hashmap_t *map = env->vars;
 
-	for ( i = 0; i < map->nbuckets; i++ ){
-		list_node_t *node = map->buckets[i].base;
+		for ( i = 0; i < map->nbuckets; i++ ){
+			list_node_t *node = map->buckets[i].base;
 
-		foreach_in_list( node ){
-			variable_t *var = shared_get( node->data );
-			gc_color_tokens( gc, GC_COLOR_GREY, var->token );
+			foreach_in_list( node ){
+				variable_t *var = shared_get( node->data );
+				//gc_color_tokens( gc, GC_COLOR_GREY, var->token );
+				gc_mark_tokens( gc, var->token );
+			}
 		}
 	}
 }
 
-void gc_collect( gbg_collector_t *gc, token_t *root_nodes, unsigned iters ){
-	//gc_grey_tokens( gc, root_nodes );
-	gc_color_tokens( gc, GC_COLOR_GREY, root_nodes );
+void gc_collect( gbg_collector_t *gc, token_t *root_nodes ){
+	token_t *temp;
+	token_t *foo;
 
-	unsigned max_iters = (iters > 0)? iters : UINT_MAX;
-	unsigned i;
+	//gc_grey_tokens( gc, root_nodes );
+	//gc_color_tokens( gc, GC_COLOR_GREY, root_nodes );
+	gc_mark_tokens( gc, root_nodes );
+
+	temp = gc->start;
+
+	while ( temp ){
+		switch ( temp->status ){
+			case GC_UNMARKED:
+				foo = temp->gc_next;
+				gc_list_remove( gc, temp );
+				free_token( temp );
+				temp = foo;
+
+				break;
+
+			case GC_MARKED:
+				temp->status = GC_UNMARKED;
+				temp = temp->gc_next;
+				break;
+
+			default:
+				temp = temp->gc_next;
+				break;
+		}
+	}
+
+
+	//unsigned max_iters = (iters > 0)? iters : UINT_MAX;
+	//unsigned i;
 
 	//printf( "[%s] doing garbage collection...\n", __func__ );
-
-	for ( i = 0; i < max_iters; i++ ){
-		token_t *foo = gc->colors[GC_COLOR_GREY].start;
-
-		if ( foo ){
-			//printf( "[%s] %u: blackened a %s token at %p\n", __func__, gc->id, type_str( foo->type ), foo );
-			gc_list_move( gc, GC_COLOR_BLACK, foo );
-
-				//gc_grey_tokens( gc, foo->down );
-			gc_color_tokens( gc, GC_COLOR_GREY, foo->down );
-
-		} else {
-			break;
-		}
-	}
-
-	if ( gc->colors[GC_COLOR_GREY].start == NULL ){
-		token_t *move = gc->colors[GC_COLOR_WHITE].start;
-
-		for ( ; move; move = gc->colors[GC_COLOR_WHITE].start ){
-			if ( move->gc_id < gc->id ){
-				printf( "[%s] Somehow got a token from a lower stack frame, %d at gc %d\n",
-						__func__, move->gc_id, gc->id );
-			}
-
-			gc_list_remove( gc, move );
-			//printf( "[%s] %u: Freed a %s token at %p\n", __func__, gc->id, type_str( move->type ), move );
-			free_token( move );
-		}
-
-		gc_color_tokens( gc, GC_COLOR_WHITE, gc->colors[GC_COLOR_BLACK].start );
-
-		/*
-		move = gc->colors[GC_COLOR_BLACK].start;
-		for ( ; move; move = gc->colors[GC_COLOR_BLACK].start ){
-			gc_list_move( gc, GC_COLOR_WHITE, move );
-			printf( "[%s] %u: Moving used %s token at %p back to white list\n", __func__, gc->id, type_str( move->type ), move );
-		}
-		*/
-	}
-
 	//printf( "[%s] done\n", __func__ );
 }
 
 bool gc_should_collect( gbg_collector_t *gc ){
 	gc->interval++;
 
-	if ( gc->colors[GC_COLOR_WHITE].length > 500 && gc->interval > 5000 ){
+	if ( gc->length > 10000 && gc->interval > 15000 ){
 	//if ( gc->id == 1 ){
+	//if ( true ){
 		gc->interval = 0;
 		return true;
 
@@ -357,13 +361,18 @@ gbg_collector_t *gc_init( gbg_collector_t *old_gc, gbg_collector_t *new_gc ){
 	}
 
 	unsigned i;
+	/*
 	for ( i = 0; i < 3; i++ ){
 		new_gc->colors[i].start  = NULL;
 		new_gc->colors[i].end    = NULL;
 		new_gc->colors[i].length = 0;
 	}
+	*/
+
+	new_gc->start = new_gc->end = NULL;
 
 	new_gc->interval = 0;
+	new_gc->length = 0;
 
 	/*
 	new_gc->white = new_gc->black = new_gc->grey = NULL;
@@ -377,6 +386,7 @@ gbg_collector_t *gc_init( gbg_collector_t *old_gc, gbg_collector_t *new_gc ){
 gbg_collector_t *gc_merge( gbg_collector_t *first, gbg_collector_t *second ){
 	unsigned i;
 
+	/*
 	for ( i = 0; i < 3; i++ ){
 		gbg_list_t *a = &first->colors[i];
 		gbg_list_t *b = &second->colors[i];
@@ -411,6 +421,22 @@ gbg_collector_t *gc_merge( gbg_collector_t *first, gbg_collector_t *second ){
 
 		b->start = b->end = NULL;
 		b->length = 0;
+	}
+	*/
+
+	if ( first->start ){
+		if ( second->start ){
+			second->start->gc_prev = first->end;
+			first->end->gc_next = second->start;
+			first->end = second->end;
+		}
+
+		first->length += second->length;
+
+	} else {
+		first->start  = second->start;
+		first->end    = second->end;
+		first->length = second->length;
 	}
 
 	first->interval += second->interval;

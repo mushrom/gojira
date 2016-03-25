@@ -284,6 +284,8 @@ st_frame_t *frame_create( st_frame_t *cur_frame, token_t *ptr, bool make_env ){
 	if ( cur_frame ){
 		ret->error_call = cur_frame->error_call;
 		ret->flags |= cur_frame->flags & RUNTIME_FLAG_TRACE;
+		ret->cur_func = cur_frame->cur_func;
+
 		gc_init( &cur_frame->gc, &ret->gc );
 
 		if ( !make_env && cur_frame->env ){

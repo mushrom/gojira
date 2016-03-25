@@ -127,8 +127,10 @@ stack_frame_t *expand_procedure( stack_frame_t *frame, token_t *tokens ){
 		move = tokens->next;
 		temp = proc->args;
 
+		//gc_mark_env( &frame->gc, frame->env );
 		env_release( frame->env );
 		frame->env = env_create( proc->env );
+		frame->cur_func = tokens;
 
 		if ( frame->env->vars && frame->env->vars->nbuckets == 0 ){
 			printf( "[%s} have no buckets at %p based on %p...\n",

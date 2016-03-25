@@ -316,7 +316,18 @@ bool eval_frame_expr( stack_frame_t **frame_ret ){
 		*/
 		//gc_register_token( &frame->gc, frame->value );
 		if ( gc_should_collect( &frame->gc )){
-			gc_collect( &frame->gc, frame->value, 0 );
+			if ( frame->env && frame->env->vars ){
+				gc_mark_env( &frame->gc, frame->env );
+			}
+
+			gc_mark_tokens( &frame->gc, frame->expr );
+			gc_mark_tokens( &frame->gc, frame->ptr );
+
+			if ( frame->cur_func ){
+				gc_mark_tokens( &frame->gc, frame->cur_func );
+			}
+
+			gc_collect( &frame->gc, frame->value );
 		}
 		//gc_collect( &frame->gc, frame->value, 0 );
 
