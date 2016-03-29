@@ -17,10 +17,12 @@ enum recurse_vals {
 };
 
 enum runtime_flags {
-	RUNTIME_FLAG_NULL  = 0,
-	RUNTIME_FLAG_TRACE = 1, // flag for function input/output tracing
-	RUNTIME_FLAG_BREAK = 2, // signals that execution should stop
-	                        // after this frame
+	RUNTIME_FLAG_NULL     = 0,
+	RUNTIME_FLAG_TRACE    = 1, // flag for function input/output tracing
+	RUNTIME_FLAG_BREAK    = 2, // signals that execution should stop
+	                           // after this frame
+	RUNTIME_FLAG_CAPTURED = 4, // indicates that the current frame has been captured
+	                           // as part of a continuation and shouldn't be changed
 };
 
 enum variable_mutability {
@@ -50,31 +52,34 @@ typedef struct environment {
 
 	hashmap_t *vars;
 	unsigned refs;
-	gbg_collector_t garbage;
 } env_t;
 
 typedef struct stack_frame {
 	struct stack_frame *last; // Pointer to previous frame
-	token_t *ret;         // pointer to original place in code (return position)
+	//token_t *ret;         // pointer to original place in code (return position)
 	token_t *ptr;         // pointer to next token to evaluate
 
 	env_t *env;
-	token_t *expr;        // Token list built during evaluation
-	token_t *end;         // Last token in the expression
-	unsigned ntokens;     // Number of tokens in expr
-	unsigned status;
-	unsigned flags;       // various runtime flags
+	token_t *expr;        // reverse token list built during evaluation
+	token_t *end;       // Last token in the expression
 
 	token_t *value;       // value to return to last continuation
 	token_t *heap;        // List of all tokens allocated in the frame
 	token_t *cur_func;
 
 	error_printer error_call;
+
+	gbg_collector_t *garbage;
+
+	unsigned ntokens;     // Number of tokens in expr
+	unsigned status;
+	unsigned flags;       // various runtime flags
+	//unsigned references;
 } stack_frame_t;
 typedef stack_frame_t st_frame_t;
 
 //variable_t *global_add_func( st_frame_t *frame, char *name, scheme_func handle );
-variable_t *global_add_func( env_t *env, char *name, scheme_func handle );
+variable_t *global_add_func( stack_frame_t *frame, char *name, scheme_func handle );
 st_frame_t *init_global_frame( st_frame_t *frame );
 st_frame_t *frame_create( st_frame_t *cur_frame, token_t *ptr, bool make_env );
 st_frame_t *frame_free( st_frame_t *frame );

@@ -316,7 +316,8 @@ bool eval_frame_expr( stack_frame_t **frame_ret ){
 		*/
 		//gc_register_token( &frame->gc, frame->value );
 		//gc_collect( &frame->gc, frame->value, 0 );
-		gc_try_to_collect_frame( frame );
+
+
 		/*
 		dump_runtime_to_dot( "/tmp/scraps/dots/runtime.dot", frame );
 		sleep( 1 );
@@ -324,6 +325,7 @@ bool eval_frame_expr( stack_frame_t **frame_ret ){
 		//usleep( 250000 );
 
 		//gc_move_token( &temp_frame->gc, &frame->gc, frame->value );
+		gc_try_to_collect_frame( frame );
 		frame_add_token_noclone( temp_frame, frame->value );
 		//gc_merge( &temp_frame->gc, &frame->gc );
 

@@ -118,9 +118,9 @@ struct global_builtin {
 };
 
 // Adds an "external function" to a frame, and handles registering the tokens for garbage collection
-variable_t *global_add_func( env_t *env, char *name, scheme_func handle ){
-	token_t *proc = ext_proc_token( handle );
-	variable_t *ret = env_add_var( env, name, proc, NO_RECURSE, VAR_IMMUTABLE );
+variable_t *global_add_func( stack_frame_t *frame, char *name, scheme_func handle ){
+	token_t *proc = gc_register_token( get_current_gc( frame ), ext_proc_token( handle ));
+	variable_t *ret = env_add_var( frame->env, name, proc, NO_RECURSE, VAR_IMMUTABLE );
 
 	//free_token( proc );
 
@@ -130,8 +130,11 @@ variable_t *global_add_func( env_t *env, char *name, scheme_func handle ){
 st_frame_t *init_global_frame( st_frame_t *frame ){
 	int i;
 
+	frame->garbage = calloc( 1, sizeof( gbg_collector_t ));
+	gc_init( NULL, frame->garbage );
+
 	for ( i = 0; i < sizeof( global_builtins ) / sizeof( struct global_builtin ); i++ )
-		global_add_func( frame->env, global_builtins[i].name, global_builtins[i].handle );
+		global_add_func( frame, global_builtins[i].name, global_builtins[i].handle );
 
 	return frame;
 }
@@ -256,7 +259,8 @@ void dump_env_to_dot( FILE *fp, env_t *env ){
 
 	for ( move = env; env; env = env->last ){
 		fprintf( fp, "\tenvironment_%p [label=\"{environment|{%p|refs = %u|{gc id = %u|length = %u}}}\", color=green]\n",
-			move, move, move->refs, move->garbage.id, move->garbage.length );
+			//move, move, move->refs, move->garbage.id, move->garbage.length );
+			move, move, move->refs, 0, 0 );
 
 		if ( env->last ){
 			fprintf( fp, "\tenvironment_%p -> environment_%p [color=green]\n", env, env->last );
@@ -374,6 +378,7 @@ st_frame_t *frame_create( st_frame_t *cur_frame, token_t *ptr, bool make_env ){
 		ret->error_call = cur_frame->error_call;
 		ret->flags |= cur_frame->flags & RUNTIME_FLAG_TRACE;
 		ret->cur_func = cur_frame->cur_func;
+		ret->garbage = cur_frame->garbage;
 
 		//gc_init( &cur_frame->gc, &ret->gc );
 

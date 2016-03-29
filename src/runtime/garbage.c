@@ -7,6 +7,10 @@
 static token_t *gc_list_add( gbg_collector_t *gc, token_t *token ){
 	//gbg_list_t *list = &gc->colors[color];
 
+	if ( !gc ){
+		printf( "[%s] Given a null GC, things will break\n", __func__ );
+	}
+
 	if ( gc->start && !gc->end ){
 		printf( "[%s] Have a list with a start but no end\n", __func__ );
 	}
@@ -248,6 +252,7 @@ token_t *gc_move_token( gbg_collector_t *to, gbg_collector_t *from, token_t *tok
 #include <gojira/runtime/runtime.h>
 
 void gc_mark_env( gbg_collector_t *gc, env_t *env );
+void gc_mark_envs( gbg_collector_t *gc, env_t *env );
 
 void gc_mark_tokens( gbg_collector_t *gc, token_t *tokens ){
 	token_t *move = tokens;
@@ -263,7 +268,7 @@ void gc_mark_tokens( gbg_collector_t *gc, token_t *tokens ){
 				procedure_t *proc = shared_get( move->data );
 
 				if ( !already_marked ){
-					gc_mark_env( gc, proc->env );
+					gc_mark_envs( gc, proc->env );
 					gc_mark_tokens( gc, proc->body );
 					gc_mark_tokens( gc, proc->args );
 				}
@@ -451,32 +456,49 @@ gbg_collector_t *gc_merge( gbg_collector_t *first, gbg_collector_t *second ){
 	return first;
 }
 
+void gc_mark_envs( gbg_collector_t *garbage, env_t *top_env ){
+	env_t *temp = top_env;
+
+	for ( ; temp; temp = temp->last ){
+		gc_mark_env( garbage, temp );
+	}
+}
+
+void gc_mark_frames( gbg_collector_t *garbage, stack_frame_t *top_frame ){
+	stack_frame_t *temp = top_frame;
+
+	for ( ; temp; temp = temp->last ){
+		if ( temp->env && temp->env->vars ){
+			//gc_mark_env( garbage, temp->env );
+			gc_mark_envs( garbage, temp->env );
+		}
+
+		gc_mark_tokens( garbage, temp->expr );
+		gc_mark_tokens( garbage, temp->ptr );
+
+		if ( temp->value ){
+			gc_mark_tokens( garbage, temp->value );
+		}
+
+		if ( temp->cur_func ){
+			gc_mark_tokens( garbage, temp->cur_func );
+		}
+	}
+}
+
 void gc_try_to_collect_frame( stack_frame_t *frame ){
 	gbg_collector_t *garbage = get_current_gc( frame );
-	bool different_gc = false;
 
-	if ( frame->last && frame->last->env != frame->env ){
-		different_gc = true;
-	}
-
-	if ( different_gc && gc_should_collect( garbage )){
-		if ( frame->env && frame->env->vars ){
-			gc_mark_env( garbage, frame->env );
-		}
-
-		gc_mark_tokens( garbage, frame->expr );
-		gc_mark_tokens( garbage, frame->ptr );
-
-		if ( frame->cur_func ){
-			gc_mark_tokens( garbage, frame->cur_func );
-		}
-
-		gc_collect( garbage, frame->value );
+	if ( gc_should_collect( garbage )){
+		gc_mark_frames( garbage, frame );
+		//gc_collect( garbage, frame->value );
+		gc_collect( garbage, NULL );
 	}
 }
 
 gbg_collector_t *get_current_gc( stack_frame_t *frame ){
-	return &frame->env->garbage;
+	//return &frame->env->garbage;
+	return frame->garbage;
 }
 
 /*

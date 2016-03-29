@@ -489,6 +489,8 @@ token_t *builtin_load_global_file( stack_frame_t *frame ){
 			for ( ; global->last; global = global->last );
 
 			tempframe = frame_create( NULL, NULL, DONT_MAKE_ENV );
+			tempframe->garbage = calloc( 1, sizeof( gbg_collector_t ));
+			gc_init( frame->garbage, tempframe->garbage );
 			//tempframe->gc.id = frame->gc.id + 1;
 			tempframe->env = env_aquire( env );
 			eval_return = evaluate_file( tempframe, fname );

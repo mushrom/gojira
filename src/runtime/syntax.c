@@ -71,10 +71,12 @@ token_t *expand_lambda( stack_frame_t *frame, token_t *tokens ){
 	}
 
 	//temp = clone_tokens( tokens->next->next );
-	temp = gc_clone_token( get_current_gc( frame ), tokens->next->next );
+	//temp = gc_clone_token( get_current_gc( frame ), tokens->next->next );
+	temp = tokens->next->next;
 
 	proc->env = frame->env? env_aquire( frame->env ) : NULL;
-	proc->args = gc_clone_token( get_current_gc( frame ), tokens->next->down );
+	//proc->args = gc_clone_token( get_current_gc( frame ), tokens->next->down );
+	proc->args = tokens->next->down;
 		//clone_tokens( tokens->next->down );
 	proc->body = temp;
 	shr = shared_new( proc, free_procedure );
@@ -82,6 +84,9 @@ token_t *expand_lambda( stack_frame_t *frame, token_t *tokens ){
 	ret->type = TYPE_PROCEDURE;
 	ret->data = shr;
 	ret->flags |= T_FLAG_HAS_SHARED;
+
+	//ret->status = GC_MARKED;
+	//gc_mark_tokens( get_current_gc( frame ), ret );
 
 	return ret;
 }
