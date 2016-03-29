@@ -23,6 +23,16 @@ void env_release( env_t *env ){
 
 		if ( env->refs == 0 ){
 			env_free_vars( env );
+
+			if ( env->last ){
+				/*
+				printf( "Merging gc %u to gc %u with length %u...\n",
+					env->garbage.id, env->last->garbage.id, env->garbage.length );
+					*/
+
+				gc_merge( &env->last->garbage, &env->garbage );
+			}
+
 			env_release( env->last );
 			free( env );
 			//printf( "[%s] Got here, %p\n", __func__, env );
@@ -34,6 +44,13 @@ env_t *env_create( env_t *last ){
 	env_t *ret = calloc( 1, sizeof( env_t ));
 	ret->last = env_aquire( last );
 	ret->refs = 1;
+
+	if ( last ){
+		gc_init( &last->garbage, &ret->garbage );
+
+	} else {
+		gc_init( NULL, &ret->garbage );
+	}
 	//printf( "[%s] Got here, %p -> %p\n", __func__, ret, ret->last );
 	//printf( "[%s] Got here\n", __func__ );
 

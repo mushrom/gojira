@@ -47,8 +47,10 @@ typedef void (*error_printer)( struct stack_frame *, char *fmt, ... );
 
 typedef struct environment {
 	struct environment *last;
+
 	hashmap_t *vars;
 	unsigned refs;
+	gbg_collector_t garbage;
 } env_t;
 
 typedef struct stack_frame {
@@ -66,8 +68,6 @@ typedef struct stack_frame {
 	token_t *value;       // value to return to last continuation
 	token_t *heap;        // List of all tokens allocated in the frame
 	token_t *cur_func;
-
-	gbg_collector_t gc;
 
 	error_printer error_call;
 } stack_frame_t;

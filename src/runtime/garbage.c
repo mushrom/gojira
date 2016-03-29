@@ -339,9 +339,11 @@ void gc_collect( gbg_collector_t *gc, token_t *root_nodes ){
 bool gc_should_collect( gbg_collector_t *gc ){
 	gc->interval++;
 
-	if ( gc->length > 10000 && gc->interval > 15000 ){
+	//if ( gc->length > 10000 && gc->interval > 15000 ){
+	//if ( gc->length > 100 && gc->interval > 500 ){
+	if ( true ){
+		//printf( "[%s] Got here\n", __func__ );
 	//if ( gc->id == 1 ){
-	//if ( true ){
 		gc->interval = 0;
 		return true;
 
@@ -423,6 +425,11 @@ gbg_collector_t *gc_merge( gbg_collector_t *first, gbg_collector_t *second ){
 		b->length = 0;
 	}
 	*/
+		//printf( "[%s] Got here\n", __func__ );
+
+	if ( first == second ){
+		return first;
+	}
 
 	if ( first->start ){
 		if ( second->start ){
@@ -442,6 +449,34 @@ gbg_collector_t *gc_merge( gbg_collector_t *first, gbg_collector_t *second ){
 	first->interval += second->interval;
 
 	return first;
+}
+
+void gc_try_to_collect_frame( stack_frame_t *frame ){
+	gbg_collector_t *garbage = get_current_gc( frame );
+	bool different_gc = false;
+
+	if ( frame->last && frame->last->env != frame->env ){
+		different_gc = true;
+	}
+
+	if ( different_gc && gc_should_collect( garbage )){
+		if ( frame->env && frame->env->vars ){
+			gc_mark_env( garbage, frame->env );
+		}
+
+		gc_mark_tokens( garbage, frame->expr );
+		gc_mark_tokens( garbage, frame->ptr );
+
+		if ( frame->cur_func ){
+			gc_mark_tokens( garbage, frame->cur_func );
+		}
+
+		gc_collect( garbage, frame->value );
+	}
+}
+
+gbg_collector_t *get_current_gc( stack_frame_t *frame ){
+	return &frame->env->garbage;
 }
 
 /*

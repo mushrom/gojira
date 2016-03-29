@@ -116,7 +116,7 @@ bool eval_frame_subexpr( stack_frame_t **frame_ret ){
 						} else {
 							//frame->expr = clone_token( move );
 							//frame_register_one_token( frame, frame->expr );
-							frame->expr = gc_clone_token( &frame->gc, move );
+							frame->expr = gc_clone_token( get_current_gc( frame ), move );
 							frame->expr->next = frame->ptr->next;
 							frame->ptr = NULL;
 						}
@@ -144,7 +144,7 @@ bool eval_frame_subexpr( stack_frame_t **frame_ret ){
 				} else {
 					//frame->expr = clone_token( var->token );
 					//frame_register_one_token( frame, frame->expr );
-					frame->expr = gc_clone_token( &frame->gc, var->token );
+					frame->expr = gc_clone_token( get_current_gc( frame ), var->token );
 					frame->expr->next = frame->ptr->next;
 					frame->ptr = NULL;
 				}
@@ -159,14 +159,14 @@ bool eval_frame_subexpr( stack_frame_t **frame_ret ){
 			break;
 
 		case TYPE_SYNTAX_RULES:
-			move = gc_alloc_token( &frame->gc );
+			move = gc_alloc_token( get_current_gc( frame ));
 			move->type = TYPE_SYNTAX;
 			move->down = frame->ptr;
 
 			//frame_add_token_noclone( frame, ext_proc_token( builtin_return_first ));
 			//frame_add_token( frame, move );
 			frame_add_token_noclone( frame,
-				gc_register_token( &frame->gc, ext_proc_token( builtin_return_last )));
+				gc_register_token( get_current_gc( frame ), ext_proc_token( builtin_return_last )));
 			frame_add_token_noclone( frame, move );
 
 			frame->ptr = NULL;
@@ -182,7 +182,7 @@ bool eval_frame_subexpr( stack_frame_t **frame_ret ){
 
 			if ( move )
 				//frame_add_token_noclone( frame, move );
-				frame_add_token_noclone( frame, gc_register_token( &frame->gc, move ));
+				frame_add_token_noclone( frame, gc_register_token( get_current_gc( frame ), move ));
 			else
 				ret = true;
 
@@ -277,7 +277,7 @@ bool eval_frame_expr( stack_frame_t **frame_ret ){
 			{
 				foo = ext_proc_token( frame->expr->boolean? builtin_true : builtin_false );
 				//frame_register_one_token( frame, foo );
-				gc_register_token( &frame->gc, foo );
+				gc_register_token( get_current_gc( frame ), foo );
 
 				foo->next = frame->expr->next;
 				frame->expr = foo;
@@ -290,7 +290,7 @@ bool eval_frame_expr( stack_frame_t **frame_ret ){
 			{
 				foo = ext_proc_token( builtin_hashmap_get );
 				//frame_register_one_token( frame, foo );
-				gc_register_token( &frame->gc, foo );
+				gc_register_token( get_current_gc( frame ), foo );
 
 				foo->next = frame->expr;
 				frame->expr = foo;
@@ -315,25 +315,17 @@ bool eval_frame_expr( stack_frame_t **frame_ret ){
 		frame->value->next = NULL;
 		*/
 		//gc_register_token( &frame->gc, frame->value );
-		if ( gc_should_collect( &frame->gc )){
-			if ( frame->env && frame->env->vars ){
-				gc_mark_env( &frame->gc, frame->env );
-			}
-
-			gc_mark_tokens( &frame->gc, frame->expr );
-			gc_mark_tokens( &frame->gc, frame->ptr );
-
-			if ( frame->cur_func ){
-				gc_mark_tokens( &frame->gc, frame->cur_func );
-			}
-
-			gc_collect( &frame->gc, frame->value );
-		}
 		//gc_collect( &frame->gc, frame->value, 0 );
+		gc_try_to_collect_frame( frame );
+		/*
+		dump_runtime_to_dot( "/tmp/scraps/dots/runtime.dot", frame );
+		sleep( 1 );
+		*/
+		//usleep( 250000 );
 
 		//gc_move_token( &temp_frame->gc, &frame->gc, frame->value );
 		frame_add_token_noclone( temp_frame, frame->value );
-		gc_merge( &temp_frame->gc, &frame->gc );
+		//gc_merge( &temp_frame->gc, &frame->gc );
 
 		if ( frame->flags & RUNTIME_FLAG_BREAK ){
 			ret = true;

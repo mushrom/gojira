@@ -18,6 +18,12 @@ enum {
 	GC_FREED,
 };
 
+enum {
+	GC_TYPE_TOKEN,
+	GC_TYPE_ENVIRONMENT,
+	GC_TYPE_CONTINUATION,
+};
+
 typedef struct gbg_list {
 	token_t *start;
 	token_t *end;
@@ -33,6 +39,13 @@ typedef struct gbg_collector {
 	unsigned interval;
 } gbg_collector_t;
 
+typedef struct gbg_node {
+	token_t *next;
+	token_t *prev;
+	unsigned type;
+	unsigned status;
+} gbg_node_t;
+
 token_t *gc_alloc_token( gbg_collector_t *gc );
 token_t *gc_clone_token( gbg_collector_t *gc, token_t *token );
 token_t *gc_register_token( gbg_collector_t *gc, token_t *token );
@@ -44,6 +57,10 @@ void gc_collect( gbg_collector_t *gc, token_t *root_nodes );
 bool gc_should_collect( gbg_collector_t *gc );
 gbg_collector_t *gc_init( gbg_collector_t *old_gc, gbg_collector_t *new_gc );
 gbg_collector_t *gc_merge( gbg_collector_t *first, gbg_collector_t *second );
+
+typedef struct stack_frame stack_frame_t;
+void gc_try_to_collect_frame( stack_frame_t *frame );
+gbg_collector_t *get_current_gc( stack_frame_t *frame );
 
 #define DEPRECATED __attribute__((deprecated))
 

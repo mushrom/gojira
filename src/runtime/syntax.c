@@ -57,7 +57,7 @@ void free_vector( void *ptr ){
 }
 
 token_t *expand_lambda( stack_frame_t *frame, token_t *tokens ){
-	token_t *ret = gc_alloc_token( &frame->gc );
+	token_t *ret = gc_alloc_token( get_current_gc( frame ));
 	token_t *temp;
 	shared_t *shr;
 
@@ -71,10 +71,10 @@ token_t *expand_lambda( stack_frame_t *frame, token_t *tokens ){
 	}
 
 	//temp = clone_tokens( tokens->next->next );
-	temp = gc_clone_token( &frame->gc, tokens->next->next );
+	temp = gc_clone_token( get_current_gc( frame ), tokens->next->next );
 
 	proc->env = frame->env? env_aquire( frame->env ) : NULL;
-	proc->args = gc_clone_token( &frame->gc, tokens->next->down );
+	proc->args = gc_clone_token( get_current_gc( frame ), tokens->next->down );
 		//clone_tokens( tokens->next->down );
 	proc->body = temp;
 	shr = shared_new( proc, free_procedure );
@@ -130,7 +130,8 @@ stack_frame_t *expand_procedure( stack_frame_t *frame, token_t *tokens ){
 		//gc_mark_env( &frame->gc, frame->env );
 		env_release( frame->env );
 		frame->env = env_create( proc->env );
-		frame->cur_func = tokens;
+		frame->cur_func = gc_clone_token( get_current_gc( frame ), tokens );
+		frame->cur_func->next = NULL;
 
 		if ( frame->env->vars && frame->env->vars->nbuckets == 0 ){
 			printf( "[%s} have no buckets at %p based on %p...\n",
@@ -147,7 +148,7 @@ stack_frame_t *expand_procedure( stack_frame_t *frame, token_t *tokens ){
 						token_t *newlist;
 
 						var_name = shared_get( temp->next->data );
-						newlist  = gc_alloc_token( &frame->gc );
+						newlist  = gc_alloc_token( get_current_gc( frame ));
 						newlist->type = TYPE_LIST;
 						newlist->down = move;
 
@@ -169,7 +170,7 @@ stack_frame_t *expand_procedure( stack_frame_t *frame, token_t *tokens ){
 					if ( move ){
 						// TODO: allow specifying mutable parameters
 						//frame_add_var( frame, var_name, move, NO_RECURSE, VAR_IMMUTABLE );
-						token_t *newtoken = gc_clone_token( &frame->gc, move );
+						token_t *newtoken = gc_clone_token( get_current_gc( frame ), move );
 						newtoken->next = NULL;
 						env_add_var( frame->env, var_name, newtoken, NO_RECURSE, VAR_IMMUTABLE );
 						move = move->next;
@@ -193,7 +194,7 @@ stack_frame_t *expand_procedure( stack_frame_t *frame, token_t *tokens ){
 		ret->expr = ret->end = NULL;
 
 		temp = ext_proc_token( builtin_return_last );
-		gc_register_token( &ret->gc, temp );
+		gc_register_token( get_current_gc( ret ), temp );
 		frame_add_token_noclone( ret, temp );
 
 		ret->ptr = proc->body;
@@ -395,7 +396,7 @@ token_t *expand_syntax_rules( stack_frame_t *frame, token_t *tokens ){
 
 				matched = true;
 				map = syntax_get_names( pattern, tokens, NULL );
-				ret = gc_register_tokens( &frame->gc, syntax_expand( template, map ));
+				ret = gc_register_tokens( get_current_gc( frame ), syntax_expand( template, map ));
 
 				// free the map's resources
 				for ( i = 0; i < map->nbuckets; i++ ){
