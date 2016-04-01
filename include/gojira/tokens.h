@@ -74,19 +74,25 @@ typedef enum {
 // stack_frame_t defined in include/gojira/runtime/frame.h
 typedef struct stack_frame stack_frame_t;
 typedef struct token token_t;
+typedef struct gbg_node gbg_node_t;
 typedef token_t *(*scheme_func)( stack_frame_t * );
 
 #include <gojira/libs/numbers.h>
+#include <gojira/runtime/garbage.h>
 
 typedef struct token {
+	gbg_node_t gc_link;
+
 	struct token *next;
 	struct token *down;
 
 	// Used in frames to keep (seperate) token list of all allocated tokens
 	//struct token *gc_link;
+	/*
 	struct token *gc_prev;
 	struct token *gc_next;
-	void *gc_data;
+	*/
+	//void *gc_data;
 
 	// token data
 	union {

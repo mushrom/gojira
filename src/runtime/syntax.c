@@ -32,9 +32,11 @@ void free_procedure( void *ptr ){
 		procedure_t *proc = ptr;
 
 		//printf( "[%s] Freeing procedure at %p\n", __func__, ptr );
+		/*
 		if ( proc->env ){
 			env_release( proc->env );
 		}
+		*/
 
 		//free_tokens( proc->body );
 		//free_tokens( proc->args );
@@ -74,7 +76,10 @@ token_t *expand_lambda( stack_frame_t *frame, token_t *tokens ){
 	//temp = gc_clone_token( get_current_gc( frame ), tokens->next->next );
 	temp = tokens->next->next;
 
-	proc->env = frame->env? env_aquire( frame->env ) : NULL;
+	//proc->env = frame->env? env_aquire( frame->env ) : NULL;
+	proc->env = frame->env;
+
+	//printf( "[%s] Storing environment at %p\n", __func__, proc->env );
 	//proc->args = gc_clone_token( get_current_gc( frame ), tokens->next->down );
 	proc->args = tokens->next->down;
 		//clone_tokens( tokens->next->down );
@@ -133,8 +138,14 @@ stack_frame_t *expand_procedure( stack_frame_t *frame, token_t *tokens ){
 		temp = proc->args;
 
 		//gc_mark_env( &frame->gc, frame->env );
-		env_release( frame->env );
-		frame->env = env_create( proc->env );
+		//env_release( frame->env );
+		//printf( "[%s] Old env was %p\n", __func__, frame->env );
+		if ( frame->last ){
+			//printf( "[%s] Previous frame env is %p\n", __func__, frame->last->env );
+		}
+
+		frame->env = env_create( get_current_gc( frame ), proc->env );
+		//printf( "[%s] New env is %p\n", __func__, frame->env );
 		frame->cur_func = gc_clone_token( get_current_gc( frame ), tokens );
 		frame->cur_func->next = NULL;
 
@@ -160,7 +171,7 @@ stack_frame_t *expand_procedure( stack_frame_t *frame, token_t *tokens ){
 						//frame_add_var( frame, var_name, newlist, NO_RECURSE, VAR_IMMUTABLE );
 						env_add_var( frame->env, var_name, newlist, NO_RECURSE, VAR_IMMUTABLE );
 
-						free_token( newlist );
+						//free_token( newlist );
 						break;
 
 					} else {
@@ -199,7 +210,7 @@ stack_frame_t *expand_procedure( stack_frame_t *frame, token_t *tokens ){
 		ret->expr = ret->end = NULL;
 
 		temp = ext_proc_token( builtin_return_last );
-		gc_register_token( get_current_gc( ret ), temp );
+		gc_register( get_current_gc( ret ), temp );
 		frame_add_token_noclone( ret, temp );
 
 		ret->ptr = proc->body;

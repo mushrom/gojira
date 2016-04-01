@@ -23,6 +23,8 @@ enum runtime_flags {
 	                           // after this frame
 	RUNTIME_FLAG_CAPTURED = 4, // indicates that the current frame has been captured
 	                           // as part of a continuation and shouldn't be changed
+	RUNTIME_FLAG_NO_EVAL  = 8, // don't evaluate the expression in this frame
+	                           // used when loading files
 };
 
 enum variable_mutability {
@@ -48,13 +50,15 @@ struct stack_frame;
 typedef void (*error_printer)( struct stack_frame *, char *fmt, ... );
 
 typedef struct environment {
+	gbg_node_t gc_link;
 	struct environment *last;
 
 	hashmap_t *vars;
-	unsigned refs;
+	//unsigned refs;
 } env_t;
 
 typedef struct stack_frame {
+	gbg_node_t gc_link;
 	struct stack_frame *last; // Pointer to previous frame
 	//token_t *ret;         // pointer to original place in code (return position)
 	token_t *ptr;         // pointer to next token to evaluate
@@ -83,9 +87,11 @@ variable_t *global_add_func( stack_frame_t *frame, char *name, scheme_func handl
 st_frame_t *init_global_frame( st_frame_t *frame );
 st_frame_t *frame_create( st_frame_t *cur_frame, token_t *ptr, bool make_env );
 st_frame_t *frame_free( st_frame_t *frame );
-void env_release( env_t *env );
-env_t *env_aquire( env_t *env );
-env_t *env_create( env_t *last );
+//void env_release( env_t *env );
+//env_t *env_aquire( env_t *env );
+//env_t *env_create( env_t *last );
+env_t *env_create( gbg_collector_t *gc, env_t *last );
+void env_free( env_t *env );
 
 #define DEPRECATED __attribute__((deprecated))
 

@@ -119,7 +119,7 @@ struct global_builtin {
 
 // Adds an "external function" to a frame, and handles registering the tokens for garbage collection
 variable_t *global_add_func( stack_frame_t *frame, char *name, scheme_func handle ){
-	token_t *proc = gc_register_token( get_current_gc( frame ), ext_proc_token( handle ));
+	token_t *proc = gc_register( get_current_gc( frame ), ext_proc_token( handle ));
 	variable_t *ret = env_add_var( frame->env, name, proc, NO_RECURSE, VAR_IMMUTABLE );
 
 	//free_token( proc );
@@ -129,9 +129,6 @@ variable_t *global_add_func( stack_frame_t *frame, char *name, scheme_func handl
 
 st_frame_t *init_global_frame( st_frame_t *frame ){
 	int i;
-
-	frame->garbage = calloc( 1, sizeof( gbg_collector_t ));
-	gc_init( NULL, frame->garbage );
 
 	for ( i = 0; i < sizeof( global_builtins ) / sizeof( struct global_builtin ); i++ )
 		global_add_func( frame, global_builtins[i].name, global_builtins[i].handle );
@@ -260,7 +257,7 @@ void dump_env_to_dot( FILE *fp, env_t *env ){
 	for ( move = env; env; env = env->last ){
 		fprintf( fp, "\tenvironment_%p [label=\"{environment|{%p|refs = %u|{gc id = %u|length = %u}}}\", color=green]\n",
 			//move, move, move->refs, move->garbage.id, move->garbage.length );
-			move, move, move->refs, 0, 0 );
+			move, move, 0, 0, 0 );
 
 		if ( env->last ){
 			fprintf( fp, "\tenvironment_%p -> environment_%p [color=green]\n", env, env->last );
@@ -369,11 +366,6 @@ st_frame_t *frame_create( st_frame_t *cur_frame, token_t *ptr, bool make_env ){
 	ret->status = TYPE_NULL;
 	ret->flags  = RUNTIME_FLAG_NULL;
 
-	// TODO: what happens when the global frame is created with no environment?
-	if ( make_env ){
-		ret->env = env_create( cur_frame? cur_frame->env : NULL );
-	}
-
 	if ( cur_frame ){
 		ret->error_call = cur_frame->error_call;
 		ret->flags |= cur_frame->flags & RUNTIME_FLAG_TRACE;
@@ -383,13 +375,23 @@ st_frame_t *frame_create( st_frame_t *cur_frame, token_t *ptr, bool make_env ){
 		//gc_init( &cur_frame->gc, &ret->gc );
 
 		if ( !make_env && cur_frame->env ){
-			ret->env = env_aquire( cur_frame->env );
+			//ret->env = env_aquire( cur_frame->env );
+			ret->env = cur_frame->env;
 		}
 
 	} else {
 		//gc_init( NULL, &ret->gc );
 		ret->error_call = default_error_printer;
+		ret->garbage = calloc( 1, sizeof( gbg_collector_t ));
+		gc_init( NULL, ret->garbage );
 	}
+
+	// TODO: what happens when the global frame is created with no environment?
+	if ( make_env ){
+		ret->env = env_create( get_current_gc( ret ), cur_frame? cur_frame->env : NULL );
+	}
+
+	//printf( "[%s] Current frame is %p\n", __func__, ret->env );
 
 	return ret;
 }
@@ -403,7 +405,7 @@ st_frame_t *frame_free( st_frame_t *frame ){
 
 	if ( frame ){
 		//frame_free_vars( frame );
-		env_release( frame->env );
+		//env_release( frame->env );
 		free( frame );
 	}
 

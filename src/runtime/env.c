@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+/*
 env_t *env_aquire( env_t *env ){
 	if ( env ){
 		env->refs++;
@@ -12,7 +13,9 @@ env_t *env_aquire( env_t *env ){
 
 	return env;
 }
+*/
 
+/*
 void env_release( env_t *env ){
 	if ( env ){
 		if ( env->refs == 0 ){
@@ -24,26 +27,28 @@ void env_release( env_t *env ){
 		if ( env->refs == 0 ){
 			env_free_vars( env );
 
-			/*
-			if ( env->last ){
-				printf( "Merging gc %u to gc %u with length %u...\n",
-					env->garbage.id, env->last->garbage.id, env->garbage.length );
-
-				gc_merge( &env->last->garbage, &env->garbage );
-			}
-			*/
-
 			env_release( env->last );
 			free( env );
 			//printf( "[%s] Got here, %p\n", __func__, env );
 		}
 	}
 }
+*/
 
-env_t *env_create( env_t *last ){
-	env_t *ret = calloc( 1, sizeof( env_t ));
-	ret->last = env_aquire( last );
-	ret->refs = 1;
+void env_free( env_t *env ){
+	env_free_vars( env );
+
+	free( env );
+	//printf( "[%s] Got here, %p\n", __func__, env );
+}
+
+env_t *env_create( gbg_collector_t *gc, env_t *last ){
+	//env_t *ret = calloc( 1, sizeof( env_t ));
+	env_t *ret = gc_register( gc, calloc( 1, sizeof( env_t )));
+	//ret->last = env_aquire( last );
+	ret->last = last;
+	ret->gc_link.type = GC_TYPE_ENVIRONMENT;
+	//ret->refs = 1;
 
 	/*
 	if ( last ){

@@ -112,7 +112,8 @@ token_t *builtin_iterator_access( stack_frame_t *frame ){
 			foo_frame->heap = gc_sweep( foo_frame->heap );
 			*/
 			//gc_collect( &foo_frame->gc, foo_frame->value, 0 );
-			gc_collect( get_current_gc( foo_frame ), foo_frame->value );
+			//gc_collect( get_current_gc( foo_frame ), foo_frame->value );
+			gc_collect( get_current_gc( foo_frame ));
 
 			free_token( proc );
 			free_token( num );

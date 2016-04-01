@@ -26,7 +26,9 @@ token_t *builtin_car( stack_frame_t *frame ){
 	token_t *ret = NULL;
 
 	if ( move && move->type == TYPE_LIST && move->down ){
-		ret = move->down;
+		//ret = move->down;
+		ret = gc_clone_token( get_current_gc( frame ), move->down );
+		ret->next = NULL;
 
     } else if ( move && move->type == TYPE_ITERATOR ){
         ret = builtin_iterator_access( frame );
@@ -64,7 +66,8 @@ token_t *builtin_cons( stack_frame_t *frame ){
 
 	if ( move && move->next ){
 		if ( move->next->type == TYPE_LIST ){
-			temp = clone_token_tree( move );
+			//temp = clone_token_tree( move );
+			temp = gc_clone_token( get_current_gc( frame ), move );
 			temp->next = move->next->down;
 
 			ret = gc_alloc_token( get_current_gc( frame ));
@@ -488,15 +491,17 @@ token_t *builtin_load_global_file( stack_frame_t *frame ){
 			global = frame;
 			for ( ; global->last; global = global->last );
 
-			tempframe = frame_create( NULL, NULL, DONT_MAKE_ENV );
-			tempframe->garbage = calloc( 1, sizeof( gbg_collector_t ));
-			gc_init( frame->garbage, tempframe->garbage );
+			tempframe = frame_create( frame, NULL, DONT_MAKE_ENV );
+			tempframe->flags |= RUNTIME_FLAG_NO_EVAL;
+			//tempframe->garbage = calloc( 1, sizeof( gbg_collector_t ));
+			//gc_init( frame->garbage, tempframe->garbage );
 			//tempframe->gc.id = frame->gc.id + 1;
-			tempframe->env = env_aquire( env );
+			tempframe->env = env;
 			eval_return = evaluate_file( tempframe, fname );
 			//gc_collect( &tempframe->gc, NULL, 0 );
 			//gc_merge( get_current_gc( frame ), &tempframe->gc );
 			//gc_merge( &global->gc, &tempframe->gc );
+			//gc_collect( get_current_gc( tempframe ));
 			gc_merge( get_current_gc( global ), get_current_gc( tempframe ));
 			frame_free( tempframe );
 

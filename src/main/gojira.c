@@ -31,6 +31,7 @@ int main( int argc, char *argv[] ){
 	int i = 0;
 	int lastopt = 0;
 	bool interactive = false;
+	bool load_libs = true;
 
 	char *fname = NULL;
 
@@ -45,7 +46,7 @@ int main( int argc, char *argv[] ){
 		// otherwise parse options
 		lastopt = 1;
 
-		while (( option = getopt( argc, argv, "hi" )) != -1 && i++ < argc ){
+		while (( option = getopt( argc, argv, "hiL" )) != -1 && i++ < argc ){
 			switch ( option ){
 				case 'f':
 					fname = argv[++i];
@@ -59,6 +60,10 @@ int main( int argc, char *argv[] ){
 				case 'h':
 					print_help( );
 					exit( 0 );
+					break;
+
+				case 'L':
+					load_libs = false;
 					break;
 
 				case 'v':
@@ -86,7 +91,9 @@ int main( int argc, char *argv[] ){
 	init_global_frame( global_frame );
 
 	// Load the 'base' library for needed primatives
-	evaluate_file( global_frame, BASE_LIB );
+	if ( load_libs ){
+		evaluate_file( global_frame, BASE_LIB );
+	}
 
 	// If there were files passed, interpet them
 	if ( lastopt ){
@@ -155,7 +162,8 @@ int main( int argc, char *argv[] ){
 	// Clean up the global frame, and free all tokens left in the token cache
 	//gc_sweep( global_frame->heap );
 	//gc_collect( &global_frame->env->gc, NULL );
-	gc_collect( get_current_gc( global_frame ), NULL );
+	//gc_collect( get_current_gc( global_frame ), NULL );
+	gc_collect( get_current_gc( global_frame ));
 	frame_free( global_frame );
 	destroy_token_cache( );
 
@@ -164,7 +172,7 @@ int main( int argc, char *argv[] ){
 
 // Displays the handy help message dialog
 void print_help( ){
-	printf( "Usage: gojira [-hi] [files]\n" );
+	printf( "Usage: gojira [-hiL] [files]\n" );
 }
 
 void goj_linenoise_complete( const char *buf, linenoiseCompletions *lc ){

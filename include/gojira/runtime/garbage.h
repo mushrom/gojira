@@ -1,6 +1,5 @@
 #ifndef _GOJIRA_RUNTIME_GARBAGE_H
 #define _GOJIRA_RUNTIME_GARBAGE_H
-#include <gojira/tokens.h>
 #include <stdbool.h>
 
 // Debugging stuff, remove me eventually
@@ -24,36 +23,47 @@ enum {
 	GC_TYPE_CONTINUATION,
 };
 
+/*
 typedef struct gbg_list {
 	token_t *start;
 	token_t *end;
 	unsigned length;
 } gbg_list_t;
+*/
+
+typedef struct gbg_node {
+	struct gbg_node *next;
+	struct gbg_node *prev;
+	unsigned type;
+	unsigned status;
+	unsigned id;
+} gbg_node_t;
 
 typedef struct gbg_collector {
 	//gbg_list_t colors[3];
+	/*
 	token_t *start;
 	token_t *end;
+	*/
+	gbg_node_t *start;
+	gbg_node_t *end;
 	unsigned length;
 	unsigned id;
 	unsigned interval;
 } gbg_collector_t;
 
-typedef struct gbg_node {
-	token_t *next;
-	token_t *prev;
-	unsigned type;
-	unsigned status;
-} gbg_node_t;
+#include <gojira/tokens.h>
+typedef struct token token_t;
 
 token_t *gc_alloc_token( gbg_collector_t *gc );
 token_t *gc_clone_token( gbg_collector_t *gc, token_t *token );
-token_t *gc_register_token( gbg_collector_t *gc, token_t *token );
+void *gc_register( gbg_collector_t *gc, void *thing );
+//token_t *gc_register_token( gbg_collector_t *gc, token_t *token );
 token_t *gc_register_token_tree( gbg_collector_t *gc, token_t *tokens );
 token_t *gc_register_tokens( gbg_collector_t *gc, token_t *token );
 token_t *gc_move_token( gbg_collector_t *to, gbg_collector_t *from, token_t *token );
 void gc_free_token( gbg_collector_t *gc );
-void gc_collect( gbg_collector_t *gc, token_t *root_nodes );
+void gc_collect( gbg_collector_t *gc );
 bool gc_should_collect( gbg_collector_t *gc );
 gbg_collector_t *gc_init( gbg_collector_t *old_gc, gbg_collector_t *new_gc );
 gbg_collector_t *gc_merge( gbg_collector_t *first, gbg_collector_t *second );

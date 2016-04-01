@@ -20,7 +20,7 @@ eval_ret_t eval_step( stack_frame_t **frame ){
 
 	// Evaluation finished, apply function
 	} else {
-		if ( (*frame)->last ){
+		if ( (*frame)->last && !((*frame)->flags & RUNTIME_FLAG_NO_EVAL) ){
 			if ( eval_frame_expr( frame ) == true )
 				ret = EVAL_STATUS_ERROR;
 
@@ -166,7 +166,7 @@ bool eval_frame_subexpr( stack_frame_t **frame_ret ){
 			//frame_add_token_noclone( frame, ext_proc_token( builtin_return_first ));
 			//frame_add_token( frame, move );
 			frame_add_token_noclone( frame,
-				gc_register_token( get_current_gc( frame ), ext_proc_token( builtin_return_last )));
+				gc_register( get_current_gc( frame ), ext_proc_token( builtin_return_last )));
 			frame_add_token_noclone( frame, move );
 
 			frame->ptr = NULL;
@@ -182,7 +182,7 @@ bool eval_frame_subexpr( stack_frame_t **frame_ret ){
 
 			if ( move )
 				//frame_add_token_noclone( frame, move );
-				frame_add_token_noclone( frame, gc_register_token( get_current_gc( frame ), move ));
+				frame_add_token_noclone( frame, gc_register( get_current_gc( frame ), move ));
 			else
 				ret = true;
 
@@ -277,7 +277,7 @@ bool eval_frame_expr( stack_frame_t **frame_ret ){
 			{
 				foo = ext_proc_token( frame->expr->boolean? builtin_true : builtin_false );
 				//frame_register_one_token( frame, foo );
-				gc_register_token( get_current_gc( frame ), foo );
+				gc_register( get_current_gc( frame ), foo );
 
 				foo->next = frame->expr->next;
 				frame->expr = foo;
@@ -290,7 +290,7 @@ bool eval_frame_expr( stack_frame_t **frame_ret ){
 			{
 				foo = ext_proc_token( builtin_hashmap_get );
 				//frame_register_one_token( frame, foo );
-				gc_register_token( get_current_gc( frame ), foo );
+				gc_register( get_current_gc( frame ), foo );
 
 				foo->next = frame->expr;
 				frame->expr = foo;
