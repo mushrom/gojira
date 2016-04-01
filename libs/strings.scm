@@ -1,9 +1,3 @@
-(define (str-iter str)
-  (iterator
-    (lambda (n)
-      (string-ref str n))
-    (string-length str)))
-
 (define (string-concat xs)
   (if (null? xs)
     ""
@@ -14,3 +8,8 @@
   (string-concat strs))
 
 (define string+ concat)
+
+(define (string->list str)
+  (map (lambda (n)
+         (string-ref str n))
+       (iota (string-length str))))

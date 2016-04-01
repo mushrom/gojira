@@ -30,8 +30,10 @@ token_t *builtin_car( stack_frame_t *frame ){
 		ret = gc_clone_token( get_current_gc( frame ), move->down );
 		ret->next = NULL;
 
+		/*
     } else if ( move && move->type == TYPE_ITERATOR ){
         ret = builtin_iterator_access( frame );
+		*/
 
 	} else {
 		FRAME_ERROR_ARGTYPE( frame, "list", move->type );
@@ -49,8 +51,10 @@ token_t *builtin_cdr( stack_frame_t *frame ){
 		ret->type = TYPE_LIST;
 		ret->down = move->down->next;
 
+		/*
     } else if ( move && move->type == TYPE_ITERATOR ){
         ret = builtin_iterator_next( frame );
+		*/
 
 	} else {
 		FRAME_ERROR_ARGTYPE( frame, "list", move->type );

@@ -50,11 +50,6 @@ struct global_builtin {
 	{ "eval",            builtin_eval },
 	{ "apply",           builtin_apply },
 
-	// iterator functions
-	{ "iterator",        builtin_iterator },
-	{ "iter-car",        builtin_iterator_access },
-	{ "iter-cdr",        builtin_iterator_next },
-
 	// string functions
 	{ "string-append",   builtin_string_append },
 	{ "string-contains", builtin_string_contains },

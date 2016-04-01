@@ -9,16 +9,13 @@
     ((_ count start step)
      (gen_range count start step))))
 
-(define gen_range
-  (lambda (count start step)
-    (if (and (not (eq? start 0)) (not (eq? step 1)))
-      (iterator (lambda (n) (+ (* n step) start)) count)
-    (if (not (eq? start 0))
-      (iterator (lambda (n) (+ n start)) count)
-    (if (not (eq? step 1))
-      (iterator (lambda (n) (* n step)) count)
-     else
-      (iterator (lambda (n) n) count))))))
+(define (gen_range count start step)
+  (define (gen_iter i sum)
+    (if (< i count)
+      (cons sum (gen_iter (+ i 1) (+ sum step)))
+      '()))
+
+  (gen_iter 0 start))
 
 (define (any fn xs)
   (member? #t (map fn xs)))
@@ -182,10 +179,6 @@
        (lambda (varname)
          body ...)
        somelist))))
-
-(define infinity
-  (iterator
-    (lambda (x) x)))
 
 (define (display-list :rest xs)
   (map display xs))
