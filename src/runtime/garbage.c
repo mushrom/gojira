@@ -271,8 +271,8 @@ void gc_mark_envs( gbg_collector_t *gc, env_t *env );
 void gc_mark_tokens( gbg_collector_t *gc, token_t *tokens ){
 	token_t *move = tokens;
 
-	for ( ; move && move->gc_link.status == GC_UNMARKED; move = move->next ){
-	//for ( ; move; move = move->next ){
+	//for ( ; move && move->gc_link.status == GC_UNMARKED; move = move->next ){
+	for ( ; move; move = move->next ){
 		//if ( move->gc_id >= gc->id ){
 			//gc_list_move( gc, move );
 			bool already_marked = move->gc_link.status == GC_MARKED;
