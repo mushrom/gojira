@@ -3,18 +3,32 @@
 echo "Running tests for ../out/gojira in $PWD"
 mkdir -p output
 
-failed=0
-for thing in `ls src | grep -e ".scm$"`; do
-	../out/gojira src/$thing > output/$thing.out;
-	if [ ! "`diff src/$thing.out output/$thing.out`" ]; then
-		echo "    [ ] Test passed: $thing"
-	else
-		echo "    [x] Test failed: $thing"
-		((failed++))
-        echo "        + diff:"
-        diff src/$thing.out output/$thing.out | \
-            sed 's/.*/        | &/g'
-	fi
+tests="`ls src`"
+
+function get_expected_out() {
+	cat $1 | grep '^;; => ' | sed 's/;; => //'
+}
+
+for module in $tests; do
+	failed=0
+	echo "  ====> $module"
+
+	for thing in `ls src/$module | grep -e ".scm$"`; do
+		prog=src/$module/$thing
+
+		../out/gojira $prog > output/$thing.out;
+		if [ ! "`get_expected_out $prog | diff - output/$thing.out`" ]; then
+			echo "    [ ] Test passed: $thing"
+		else
+			echo "    [x] Test failed: $thing"
+			((failed++))
+		echo "        + diff:"
+
+		#diff src/$module/$thing.out output/$thing.out | \
+		get_expected_out $prog | diff - output/$thing.out |
+		    sed 's/.*/        | &/g'
+		fi
+	done
 done
 
 if [ $failed -gt 1 ]; then

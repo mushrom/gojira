@@ -6,6 +6,7 @@
       (recurse-func (+ x 1))
       '())))
 
+
 (intern-set 'recurse
   (lambda ()
     (recurse-func 0))) 
@@ -28,5 +29,28 @@
       (qwerty (- num 1))
       '())))
 
+;; => 0
+;; => 1
+;; => 2
+;; => 3
+;; => 4
+;; => 5
+;; => 6
+;; => 7
+;; => 8
+;; => 9
+;; => 10
 (recurse)
+
+;; => 'abc
+;; => 'qwerty
+;; => 'abc
+;; => 'qwerty
+;; => 'abc
+;; => 'qwerty
+;; => 'abc
+;; => 'qwerty
+;; => 'abc
+;; => 'qwerty
+;; => 'abc
 (abc 10)

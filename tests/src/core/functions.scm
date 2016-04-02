@@ -1,6 +1,8 @@
+;; => 'test
 (write ((lambda () 'test)))
 (newline)
 
+;; => 'foo'thing
 (((lambda (x)
     (lambda (y)
       (x y)))
@@ -10,6 +12,7 @@
     (newline)))
  'thing)
 
+;; => 15129
 (write ((lambda (foo)
             (* foo foo)) 123))
 (newline)
