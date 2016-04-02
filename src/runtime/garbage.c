@@ -281,30 +281,27 @@ void gc_mark_hashmap( gbg_collector_t *gc, hashmap_t *map );
 void gc_mark_tokens( gbg_collector_t *gc, token_t *tokens ){
 	token_t *move = tokens;
 
-	for ( ; move && move->gc_link.status == GC_UNMARKED; move = move->next ){
-	//for ( ; move; move = move->next ){
+	for ( ; move; move = move->next ){
 		bool already_marked = move->gc_link.status == GC_MARKED;
 
-		if ( !already_marked ){
-			move->gc_link.status = GC_MARKED;
+		move->gc_link.status = GC_MARKED;
 
-			if ( move->type == TYPE_PROCEDURE ){
-				//printf( "[%s] Got here\n", __func__ );
-				procedure_t *proc = shared_get( move->data );
+		if ( move->type == TYPE_PROCEDURE ){
+			//printf( "[%s] Got here\n", __func__ );
+			procedure_t *proc = shared_get( move->data );
 
-				gc_mark_envs( gc, proc->env );
-				gc_mark_tokens( gc, proc->body );
-				gc_mark_tokens( gc, proc->args );
-			}
-
-			if ( move->type == TYPE_HASHMAP ){
-				hashmap_t *map = shared_get( move->data );
-
-				gc_mark_hashmap( gc, map );
-			}
-
-			gc_mark_tokens( gc, move->down );
+			gc_mark_envs( gc, proc->env );
+			gc_mark_tokens( gc, proc->body );
+			gc_mark_tokens( gc, proc->args );
 		}
+
+		if ( move->type == TYPE_HASHMAP ){
+			hashmap_t *map = shared_get( move->data );
+
+			gc_mark_hashmap( gc, map );
+		}
+
+		gc_mark_tokens( gc, move->down );
 	}
 }
 
