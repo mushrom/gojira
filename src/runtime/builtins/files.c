@@ -35,7 +35,8 @@ token_t *builtin_open( stack_frame_t *frame ){
 				mode = shared_get( frame->expr->next->next->data );
 
 				if (( fp = fopen( fname, mode ))){
-					ret = alloc_token( );
+					//ret = alloc_token( );
+					ret = gc_alloc_token( get_current_gc( frame ));
 					ret->type  = TYPE_FILE;
 					ret->flags = T_FLAG_HAS_SHARED;
 					ret->data  = shared_new( fp, free_file );
@@ -74,7 +75,8 @@ token_t *builtin_readall( stack_frame_t *frame ){
 			fp = shared_get( shr );
 			dat = read_input_file( fp );
 
-			ret = alloc_token( );
+			//ret = alloc_token( );
+			ret = gc_alloc_token( get_current_gc( frame ));
 			ret->type = TYPE_STRING;
 			ret->data = shared_new( dat, free_string );
 
@@ -104,12 +106,14 @@ token_t *builtin_read_char( stack_frame_t *frame ){
 			c = fgetc( fp );
 
 			if ( !feof( fp )){
-				ret = alloc_token( );
+				//ret = alloc_token( );
+				ret = gc_alloc_token( get_current_gc( frame ));
 				ret->type = TYPE_CHAR;
 				ret->character = c;
 
 			} else {
-				ret = alloc_token( );
+				//ret = alloc_token( );
+				ret = gc_alloc_token( get_current_gc( frame ));
 				ret->type = TYPE_BOOLEAN;
 				ret->boolean = false;
 			}
@@ -122,7 +126,8 @@ token_t *builtin_read_char( stack_frame_t *frame ){
 
 	} else {
 		//frame->error_call( frame, "[%s] Need moar tokenz\n", __func__ );
-		ret = alloc_token( );
+		//ret = alloc_token( );
+		ret = gc_alloc_token( get_current_gc( frame ));
 		ret->type = TYPE_CHAR;
 		ret->character = getchar( );
 	}
@@ -143,7 +148,8 @@ token_t *builtin_write_char( stack_frame_t *frame ){
 
 				fputc( frame->expr->next->next->character, fp );
 
-				ret = alloc_token( );
+				//ret = alloc_token( );
+				ret = gc_alloc_token( get_current_gc( frame ));
 				ret->type = TYPE_CHAR;
 				ret->character = frame->expr->next->next->character;
 
@@ -172,7 +178,8 @@ token_t *builtin_is_eof( stack_frame_t *frame ){
 	if ( frame->ntokens == 2 ){
 		if ( frame->expr->next->type == TYPE_FILE ){
 			fp = shared_get( frame->expr->next->data );
-			ret = alloc_token( );
+			//ret = alloc_token( );
+			ret = gc_alloc_token( get_current_gc( frame ));
 			ret->type = TYPE_BOOLEAN;
 			ret->boolean = false;
 
@@ -203,7 +210,8 @@ token_t *builtin_display( stack_frame_t *frame ){
 
 	move = frame->expr->next;
 	if ( move ){
-		ret = alloc_token( );
+		//ret = alloc_token( );
+		ret = gc_alloc_token( get_current_gc( frame ));
 		ret->type = TYPE_NULL;
 		file_tok = move->next;
 
@@ -234,7 +242,8 @@ token_t *builtin_write( stack_frame_t *frame ){
 
 	move = frame->expr->next;
 	if ( move ){
-		ret = alloc_token( );
+		//ret = alloc_token( );
+		ret = gc_alloc_token( get_current_gc( frame ));
 		ret->type = TYPE_NULL;
 		file_tok = move->next;
 
@@ -259,7 +268,8 @@ token_t *builtin_write( stack_frame_t *frame ){
 token_t *builtin_newline( stack_frame_t *frame ){
 	token_t *ret;
 
-	ret = alloc_token( );
+	//ret = alloc_token( );
+	ret = gc_alloc_token( get_current_gc( frame ));
 	ret->type = TYPE_NULL;
 
 	if ( frame->expr->next ){
@@ -323,7 +333,8 @@ token_t *builtin_read( stack_frame_t *frame ){
 			//buf = read_input_file( fp );
 			buf = read_s_expr( fp );
 
-			ret = alloc_token( );
+			//ret = alloc_token( );
+			ret = gc_alloc_token( get_current_gc( frame ));
 			ret->type = TYPE_LIST;
 			ret->down = parse_scheme_tokens( buf );
 
@@ -357,7 +368,8 @@ token_t *builtin_mkdir( stack_frame_t *frame ){
 			result = mkdir( shared_get( temp->data ), 0755 );
 
 			if ( result == 0 ){
-				ret = alloc_token( );
+				//ret = alloc_token( );
+				ret = gc_alloc_token( get_current_gc( frame ));
 				ret->type = TYPE_BOOLEAN;
 				ret->boolean = true;
 
@@ -392,7 +404,8 @@ token_t *builtin_file_exists( stack_frame_t *frame ){
 		if ( temp->type == TYPE_STRING ){
 			result = access( shared_get( temp->data ), F_OK );
 
-			ret = alloc_token( );
+			//ret = alloc_token( );
+			ret = gc_alloc_token( get_current_gc( frame ));
 			ret->type = TYPE_BOOLEAN;
 			ret->boolean = result == 0;
 

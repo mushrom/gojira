@@ -273,10 +273,12 @@ token_t *gc_move_token( gbg_collector_t *to, gbg_collector_t *from, token_t *tok
 
 #include <gojira/runtime/frame.h>
 #include <gojira/runtime/runtime.h>
+#include <gojira/libs/dlist.h>
 
 void gc_mark_env( gbg_collector_t *gc, env_t *env );
 void gc_mark_envs( gbg_collector_t *gc, env_t *env );
 void gc_mark_hashmap( gbg_collector_t *gc, hashmap_t *map );
+void gc_mark_vector( gbg_collector_t *gc, dlist_t *dlst );
 
 void gc_mark_tokens( gbg_collector_t *gc, token_t *tokens ){
 	token_t *move = tokens;
@@ -301,6 +303,12 @@ void gc_mark_tokens( gbg_collector_t *gc, token_t *tokens ){
 			gc_mark_hashmap( gc, map );
 		}
 
+		if ( move->type == TYPE_VECTOR ){
+			dlist_t *dlst = shared_get( move->data );
+
+			gc_mark_vector( gc, dlst );
+		}
+
 		gc_mark_tokens( gc, move->down );
 	}
 }
@@ -317,6 +325,15 @@ void gc_mark_hashmap( gbg_collector_t *gc, hashmap_t *map ){
 			temp = node->next;
 			gc_mark_tokens( gc, node->data );
 		}
+	}
+}
+
+void gc_mark_vector( gbg_collector_t *gc, dlist_t *dlst ){
+	unsigned i;
+
+	foreach_in_dlist( i, dlst ){
+		//printf( "[%s] Freeing vector element at %p\n", __func__, dlist_get( dlst, i ));
+		gc_mark_tokens( gc, dlist_get( dlst, i ));
 	}
 }
 

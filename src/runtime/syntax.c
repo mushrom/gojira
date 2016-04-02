@@ -51,10 +51,13 @@ void free_vector( void *ptr ){
 
 		//printf( "[%s] Freeing vector at %p\n", __func__, ptr );
 
+		/*
 		foreach_in_dlist( i, dlst ){
 			//printf( "[%s] Freeing vector element at %p\n", __func__, dlist_get( dlst, i ));
-			free_tokens( dlist_get( dlst, i ));
+			//free_tokens( dlist_get( dlst, i ));
 		}
+		*/
+		dlist_free( ptr );
 	}
 }
 

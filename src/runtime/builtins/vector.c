@@ -15,7 +15,8 @@ token_t *builtin_is_vector( stack_frame_t *frame ){
 	token_t *ret = NULL;
 
 	if ( frame->ntokens == 2 ){
-		ret = alloc_token( );
+		//ret = alloc_token( );
+		ret = gc_alloc_token( get_current_gc( frame ));
 		ret->type = TYPE_BOOLEAN;
 		ret->boolean = frame->expr->next->type == TYPE_VECTOR;
 
@@ -40,7 +41,8 @@ token_t *builtin_vector_ref( stack_frame_t *frame ){
 				dlst = shared_get( shr );
 
 				if ( foo->number.u_int < dlist_used( dlst )){
-					ret = clone_tokens( dlist_get( dlst, foo->number.u_int ));
+					//ret = clone_tokens( dlist_get( dlst, foo->number.u_int ));
+					ret = gc_clone_token( get_current_gc( frame ), dlist_get( dlst, foo->number.u_int ));
 
 				} else {
 					frame->error_call( frame, "[%s] Error: Index is out of range\n", __func__ );
@@ -76,7 +78,8 @@ token_t *builtin_vector_set( stack_frame_t *frame ){
 				dlst = shared_get( shr );
 
 				if ( foo->number.u_int < dlist_used( dlst )){
-					elem = clone_token_tree( frame->expr->next->next->next );
+					//elem = clone_token_tree( frame->expr->next->next->next );
+					elem = frame->expr->next->next->next;
 					dlist_set( dlst, foo->number.u_int, elem );
 
 					ret = frame->expr->next;
@@ -111,7 +114,8 @@ token_t *builtin_vector_length( stack_frame_t *frame ){
 		if ( move->type == TYPE_VECTOR ){
 			dlst = shared_get( move->data );
 
-			ret = alloc_token( );
+			//ret = alloc_token( );
+			ret = gc_alloc_token( get_current_gc( frame ));
 			ret->type = TYPE_NUMBER;
 			ret->number = as_int_number( dlist_used( dlst ));
 
@@ -144,11 +148,15 @@ token_t *builtin_make_vector( stack_frame_t *frame ){
 				unsigned i;
 
 				for ( i = 0; i < move->number.u_int; i++ ){
+					/*
 					token_t *temp = clone_token_tree( move->next );
 					dlist_add( nlist, temp );
+					*/
+					dlist_add( nlist, move->next );
 				}
 
-				ret = alloc_token( );
+				//ret = alloc_token( );
+				ret = gc_alloc_token( get_current_gc( frame ));
 				ret->type = TYPE_VECTOR;
 				ret->data = shr;
 				ret->flags |= T_FLAG_HAS_SHARED;
@@ -186,11 +194,16 @@ token_t *builtin_vector_from_list( stack_frame_t *frame ){
 			shr = shared_new( nlist, free_vector );
 
 			for ( ; move; move = move->next ){
+				/*
 				temp = clone_token_tree( move );
 				dlist_add( nlist, temp );
+				*/
+
+				dlist_add( nlist, move );
 			}
 
-			ret = alloc_token( );
+			//ret = alloc_token( );
+			ret = gc_alloc_token( get_current_gc( frame ));
 			ret->type = TYPE_VECTOR;
 			ret->data = shr;
 			ret->flags |= T_FLAG_HAS_SHARED;

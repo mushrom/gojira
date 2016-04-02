@@ -18,7 +18,8 @@ token_t *builtin_string_append( stack_frame_t *frame ){
 		op2 = frame->expr->next->next;
 
 		if ( op1->type == TYPE_STRING && op2->type == TYPE_STRING ){
-			ret = alloc_token( );
+			//ret = alloc_token( );
+			ret = gc_alloc_token( get_current_gc( frame ));
 			ret->type = TYPE_STRING;
 
 			op1_str = shared_get( op1->data );
@@ -56,7 +57,8 @@ token_t *builtin_string_contains( stack_frame_t *frame ){
 		op2 = frame->expr->next->next;
 
 		if ( op1->type == TYPE_STRING && op2->type == TYPE_STRING ){
-			ret = alloc_token( );
+			//ret = alloc_token( );
+			ret = gc_alloc_token( get_current_gc( frame ));
 
 			op1_str = shared_get( op1->data );
 			op2_str = shared_get( op2->data );
@@ -90,7 +92,8 @@ token_t *builtin_string_to_symbol( stack_frame_t *frame ){
 		op1 = frame->expr->next;
 
 		if ( op1->type == TYPE_STRING ){
-			ret = alloc_token( );
+			//ret = alloc_token( );
+			ret = gc_alloc_token( get_current_gc( frame ));
 			ret->type = TYPE_SYMBOL;
 			ret->data = shared_aquire( op1->data );
 
@@ -114,7 +117,8 @@ token_t *builtin_symbol_to_string( stack_frame_t *frame ){
 		op1 = frame->expr->next;
 
 		if ( op1->type == TYPE_SYMBOL ){
-			ret = alloc_token( );
+			//ret = alloc_token( );
+			ret = gc_alloc_token( get_current_gc( frame ));
 			ret->type = TYPE_STRING;
 			ret->data = shared_aquire( op1->data );
 
@@ -158,7 +162,8 @@ token_t *builtin_char_to_string( stack_frame_t *frame ){
 
 			if ( all_char ){
 				str[i] = 0;
-				ret = alloc_token( );
+				//ret = alloc_token( );
+				ret = gc_alloc_token( get_current_gc( frame ));
 				ret->type = TYPE_STRING;
 				//ret->data = str;
 				ret->data = shared_new( str, free_string );
@@ -184,7 +189,8 @@ token_t *builtin_is_string( stack_frame_t *frame ){
 	token_t *ret = NULL;
 
 	if ( frame->ntokens == 2 ){
-		ret = alloc_token( );
+		//ret = alloc_token( );
+		ret = gc_alloc_token( get_current_gc( frame ));
 		ret->type = TYPE_BOOLEAN;
 		ret->boolean = frame->expr->next->type == TYPE_STRING;
 
@@ -206,7 +212,8 @@ token_t *builtin_string_ref( stack_frame_t *frame ){
 				unsigned len = strlen( str );
 
 				if ( n < len ){
-					ret = alloc_token( );
+					ret = gc_alloc_token( get_current_gc( frame ));
+					//ret = alloc_token( );
 					ret->type = TYPE_CHAR;
 					ret->character = str[n];
 
@@ -243,7 +250,8 @@ token_t *builtin_string_length( stack_frame_t *frame ){
 		move = frame->expr->next;
 
 		if ( move->type == TYPE_STRING ){
-			ret = alloc_token( );
+			//ret = alloc_token( );
+			ret = gc_alloc_token( get_current_gc( frame ));
 			ret->type = TYPE_NUMBER;
 			ret->number = as_int_number( strlen( shared_get( move->data )));
 

@@ -22,7 +22,8 @@ token_t *builtin_add( stack_frame_t *frame ){
 	}
 
 	if ( !error ){
-		ret = alloc_token( );
+		//ret = alloc_token( );
+		ret = gc_alloc_token( get_current_gc( frame ));
 		ret->type = sum.type;
 		ret->number = sum;
 	}
@@ -65,7 +66,8 @@ token_t *builtin_divide( stack_frame_t *frame ){
 	}
 
 	if ( !error ){
-		ret = alloc_token( );
+		//ret = alloc_token( );
+		ret = gc_alloc_token( get_current_gc( frame ));
 		ret->type = sum.type;
 		ret->number = sum;
 	}
@@ -84,7 +86,8 @@ token_t *builtin_floor( stack_frame_t *frame ){
 
 			temp = number_mul( as_real_number(1.0), move->number );
 
-			ret = alloc_token( );
+			//ret = alloc_token( );
+			ret = gc_alloc_token( get_current_gc( frame ));
 			ret->type = TYPE_NUMBER;
 			ret->number = as_int_number( temp.real );
 
@@ -120,7 +123,8 @@ token_t *builtin_multiply( stack_frame_t *frame ){
 		}
 
 		if ( !error ){
-			ret = alloc_token( );
+			//ret = alloc_token( );
+			ret = gc_alloc_token( get_current_gc( frame ));
 			ret->type = sum.type;
 			ret->number = sum;
 		}
@@ -141,7 +145,8 @@ token_t *builtin_modulo( stack_frame_t *frame ){
 		op2 = frame->expr->next->next;
 
 		if ( op1->type == TYPE_NUMBER && op2->type == TYPE_NUMBER ){
-			ret = alloc_token( );
+			//ret = alloc_token( );
+			ret = gc_alloc_token( get_current_gc( frame ));
 			ret->type = TYPE_NUMBER;
 			ret->number.s_int = op1->number.s_int % op2->number.s_int;
 			ret->number.type = TYPE_NUMBER;
@@ -184,7 +189,8 @@ token_t *builtin_subtract( stack_frame_t *frame ){
 	}
 
 	if ( !error ){
-		ret = alloc_token( );
+		//ret = alloc_token( );
+		ret = gc_alloc_token( get_current_gc( frame ));
 		ret->type = sum.type;
 		ret->number = sum;
 	}
@@ -201,7 +207,8 @@ token_t *builtin_random_int( stack_frame_t *frame ){
 		seeded = true;
 	}
 
-	ret = alloc_token( );
+	//ret = alloc_token( );
+	ret = gc_alloc_token( get_current_gc( frame ));
 	ret->type = TYPE_NUMBER;
 	ret->number = as_int_number( rand( ));
 
@@ -212,7 +219,8 @@ token_t *builtin_is_number( stack_frame_t *frame ){
 	token_t *ret = NULL;
 
 	if ( frame->ntokens == 2 ){
-		ret = alloc_token( );
+		//ret = alloc_token( );
+		ret = gc_alloc_token( get_current_gc( frame ));
 		ret->type = TYPE_BOOLEAN;
 		//ret->boolean = frame->expr->next->type == TYPE_NUMBER;
 		ret->boolean = has_number_type( frame->expr->next );
@@ -228,7 +236,8 @@ token_t *builtin_is_integer( stack_frame_t *frame ){
 	token_t *ret = NULL;
 
 	if ( frame->ntokens == 2 ){
-		ret = alloc_token( );
+		//ret = alloc_token( );
+		ret = gc_alloc_token( get_current_gc( frame ));
 		ret->type = TYPE_BOOLEAN;
 		ret->boolean = frame->expr->next->type == TYPE_NUMBER;
 
@@ -245,7 +254,8 @@ token_t *builtin_is_rational( stack_frame_t *frame ){
 	if ( frame->ntokens == 2 ){
 		token_t *move = frame->expr->next;
 
-		ret = alloc_token( );
+		//ret = alloc_token( );
+		ret = gc_alloc_token( get_current_gc( frame ));
 		ret->type = TYPE_BOOLEAN;
 		ret->boolean =
 			   move->type == TYPE_RATIONAL
@@ -264,7 +274,8 @@ token_t *builtin_is_real( stack_frame_t *frame ){
 	if ( frame->ntokens == 2 ){
 		token_t *move = frame->expr->next;
 
-		ret = alloc_token( );
+		//ret = alloc_token( );
+		ret = gc_alloc_token( get_current_gc( frame ));
 		ret->type = TYPE_BOOLEAN;
 		ret->boolean =
 			   move->type == TYPE_REAL

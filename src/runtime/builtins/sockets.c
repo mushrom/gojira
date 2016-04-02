@@ -37,7 +37,8 @@ token_t *builtin_tcp_socket( stack_frame_t *frame ){
 					if ( connect( sock, (struct sockaddr *)&server_addr,
 					              sizeof( struct sockaddr)) >= 0 )
 					{
-						ret = alloc_token( );
+						//ret = alloc_token( );
+						ret = gc_alloc_token( get_current_gc( frame ));
 						ret->type = TYPE_SOCKET;
 						ret->misc = (unsigned)sock;
 
@@ -83,12 +84,14 @@ token_t *builtin_tcp_getchar( stack_frame_t *frame ){
 			recv_ret = recv( move->misc, &ch, 1, 0 );
 			
 			if ( recv_ret > 0 ){
-				ret = alloc_token( );
+				//ret = alloc_token( );
+				ret = gc_alloc_token( get_current_gc( frame ));
 				ret->type = TYPE_CHAR;
 				ret->character = ch;
 
 			} else {
-				ret = alloc_token( );
+				//ret = alloc_token( );
+				ret = gc_alloc_token( get_current_gc( frame ));
 				ret->type = TYPE_BOOLEAN;
 				ret->boolean = false;
 			}
@@ -121,7 +124,8 @@ token_t *builtin_tcp_putchar( stack_frame_t *frame ){
 				send_ret = send( move->misc, &ch, 1, 0 );
 				
 				if ( send_ret > 0 ){
-					ret = alloc_token( );
+					//ret = alloc_token( );
+					ret = gc_alloc_token( get_current_gc( frame ));
 					ret->type = TYPE_CHAR;
 					ret->character = ch;
 				}
