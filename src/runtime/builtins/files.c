@@ -334,9 +334,10 @@ token_t *builtin_read( stack_frame_t *frame ){
 			buf = read_s_expr( fp );
 
 			//ret = alloc_token( );
-			ret = gc_alloc_token( get_current_gc( frame ));
-			ret->type = TYPE_LIST;
-			ret->down = parse_scheme_tokens( buf );
+			//ret = gc_alloc_token( get_current_gc( frame ));
+			//ret->type = TYPE_LIST;
+			//ret->down = parse_scheme_tokens( buf );
+			ret = gc_register_tokens( get_current_gc( frame ), parse_scheme_tokens( buf ));
 
 			free( buf );
 
