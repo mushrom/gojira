@@ -9,8 +9,6 @@
 void free_bytevector( void *buf ){
 	bytevector_t *bytevec = buf;
 
-	printf( "[%s] got here\n", __func__ );
-
 	free( bytevec->bytes );
 	free( bytevec );
 }
@@ -68,7 +66,7 @@ token_t *builtin_make_bytevector( stack_frame_t *frame ){
 
 				shr = shared_new( bytevec, free_bytevector );
 
-				ret = alloc_token( );
+				ret = gc_alloc_token( get_current_gc( frame ));
 				ret->type = TYPE_BYTEVECTOR;
 				ret->data = shr;
 				ret->flags |= T_FLAG_HAS_SHARED;
@@ -97,7 +95,7 @@ token_t *builtin_bytevector_u8_ref( stack_frame_t *frame ){
 				bytevector_t *bytevec = shared_get( temp->data );
 
 				if ( index->number.u_int < bytevec->length ){
-					ret = alloc_token( );
+					ret = gc_alloc_token( get_current_gc( frame ));
 					ret->type = TYPE_NUMBER;
 					ret->number = as_int_number( bytevec->bytes[ index->number.u_int ]);
 
@@ -129,7 +127,7 @@ token_t *builtin_bytevector_length( stack_frame_t *frame ){
 		if ( temp->type == TYPE_BYTEVECTOR ){
 			bytevector_t *bytevec = shared_get( temp->data );
 
-			ret = alloc_token( );
+			ret = gc_alloc_token( get_current_gc( frame ));
 			ret->type = TYPE_NUMBER;
 			ret->number = as_int_number( bytevec->length );
 
@@ -174,7 +172,7 @@ token_t *builtin_bytevector_from_u8s( stack_frame_t *frame ){
 			}
 
 			if ( !have_error ){
-				ret = alloc_token( );
+				ret = gc_alloc_token( get_current_gc( frame ));
 				ret->type = TYPE_BYTEVECTOR;
 				ret->data = shr;
 				ret->flags |= T_FLAG_HAS_SHARED;
