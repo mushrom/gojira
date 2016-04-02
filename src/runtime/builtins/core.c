@@ -507,7 +507,7 @@ token_t *builtin_load_global_file( stack_frame_t *frame ){
 			//gc_merge( &global->gc, &tempframe->gc );
 			//gc_collect( get_current_gc( tempframe ));
 			//gc_merge( get_current_gc( global ), get_current_gc( tempframe ));
-			frame_free( tempframe );
+			//frame_free( tempframe );
 
 			ret = gc_alloc_token( get_current_gc( frame ));
 			ret->type      = TYPE_BOOLEAN;

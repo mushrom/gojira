@@ -368,6 +368,10 @@ static void free_gbg_node( gbg_node_t *node ){
 			env_free( (env_t *)node );
 			break;
 
+		case GC_TYPE_CONTINUATION:
+			frame_free( (stack_frame_t *)node );
+			break;
+
 		default:
 			break;
 	}
@@ -598,6 +602,7 @@ void gc_mark_frames( gbg_collector_t *garbage, stack_frame_t *top_frame ){
 
 	for ( i = 0; temp; temp = temp->last, i++ ){
 		//printf( "[%s] Marking frame %p, env: %p\n", __func__, temp, temp->env );
+		temp->gc_link.status = GC_MARKED;
 
 		if ( temp->env ){
 			//gc_mark_env( garbage, temp->env );

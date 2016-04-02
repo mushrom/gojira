@@ -360,6 +360,7 @@ st_frame_t *frame_create( st_frame_t *cur_frame, token_t *ptr, bool make_env ){
 	ret->expr = NULL;
 	ret->status = TYPE_NULL;
 	ret->flags  = RUNTIME_FLAG_NULL;
+	ret->gc_link.type = GC_TYPE_CONTINUATION;
 
 	if ( cur_frame ){
 		ret->error_call = cur_frame->error_call;
@@ -374,6 +375,8 @@ st_frame_t *frame_create( st_frame_t *cur_frame, token_t *ptr, bool make_env ){
 			ret->env = cur_frame->env;
 		}
 
+		gc_register( get_current_gc( ret ), ret );
+
 	} else {
 		//gc_init( NULL, &ret->gc );
 		ret->error_call = default_error_printer;
@@ -385,6 +388,7 @@ st_frame_t *frame_create( st_frame_t *cur_frame, token_t *ptr, bool make_env ){
 	if ( make_env ){
 		ret->env = env_create( get_current_gc( ret ), cur_frame? cur_frame->env : NULL );
 	}
+
 
 	//printf( "[%s] Current frame is %p\n", __func__, ret->env );
 

@@ -333,7 +333,7 @@ bool eval_frame_expr( stack_frame_t **frame_ret ){
 			ret = true;
 
 		} else {
-			frame_free( frame );
+			//frame_free( frame );
 			*frame_ret = temp_frame;
 		}
 	}
