@@ -336,9 +336,30 @@ static void free_gbg_node( gbg_node_t *node ){
 	}
 }
 
+void gc_set_interval( gbg_collector_t *gc, unsigned length, unsigned freed ){
+	double target = 1.15;
+	double ratio = (freed && length)? length / (freed * 1.0) : 1;
+	double total = ratio - (target - ratio);
+	//ratio -= 0.05;
+	//unsigned adjust = gc->interval * ratio;
+	//unsigned adjust = gc->interval + gc->interval * (diff * 5 - 0.075);
+	unsigned adjust = gc->interval * total;
+
+	/*
+	printf( "[set_interval] interval: %u, length: %u, freed: %u "
+			"ratio: %f, total: %f, adjust: %u\n",
+		gc->interval, length, freed, ratio, total, adjust );
+		*/
+
+	gc->interval = adjust;
+}
+
 void gc_collect( gbg_collector_t *gc ){
 	gbg_node_t *temp;
 	gbg_node_t *foo;
+
+	unsigned length = gc->length;
+	unsigned freed = 0;
 
 	//gc_grey_gbg_nodes( gc, root_nodes );
 	//gc_color_gbg_nodes( gc, GC_COLOR_GREY, root_nodes );
@@ -349,6 +370,8 @@ void gc_collect( gbg_collector_t *gc ){
 	while ( temp ){
 		switch ( temp->status ){
 			case GC_UNMARKED:
+				freed++;
+
 				foo = temp->next;
 				gc_list_remove( gc, temp );
 				free_gbg_node( temp );
@@ -367,6 +390,7 @@ void gc_collect( gbg_collector_t *gc ){
 		}
 	}
 
+	gc_set_interval( gc, length, freed );
 
 	//unsigned max_iters = (iters > 0)? iters : UINT_MAX;
 	//unsigned i;
@@ -376,18 +400,11 @@ void gc_collect( gbg_collector_t *gc ){
 }
 
 bool gc_should_collect( gbg_collector_t *gc ){
-	gc->interval++;
+	gc->iter++;
 
-	if ( gc->length > 20000 && gc->interval > 50000 ){
-	//if ( gc->length > 100 && gc->interval > 500 ){
-	//if ( true ){
-		/*
-		if ( gc->id > 1 ){
-			printf( "[%s] Got here, %u\n", __func__, gc->id );
-		}
-		*/
-	//if ( gc->id == 1 ){
-		gc->interval = 0;
+	//if ( gc->length > 20000 && gc->iter > 50000 ){
+	if ( gc->iter >= gc->interval ){
+		gc->iter = 0;
 		return true;
 
 	} else {
@@ -416,7 +433,8 @@ gbg_collector_t *gc_init( gbg_collector_t *old_gc, gbg_collector_t *new_gc ){
 
 	new_gc->start = new_gc->end = NULL;
 
-	new_gc->interval = 0;
+	new_gc->iter = 0;
+	new_gc->interval = 10000;
 	new_gc->length = 0;
 
 	/*
@@ -489,7 +507,7 @@ gbg_collector_t *gc_merge( gbg_collector_t *first, gbg_collector_t *second ){
 		first->length = second->length;
 	}
 
-	first->interval += second->interval;
+	first->iter += second->iter;
 
 	return first;
 }

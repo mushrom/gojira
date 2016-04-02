@@ -49,7 +49,13 @@ typedef struct gbg_collector {
 	gbg_node_t *end;
 	unsigned length;
 	unsigned id;
+	unsigned iter;
 	unsigned interval;
+
+	/*
+	unsigned last_length;
+	unsigned last_freed;
+	*/
 } gbg_collector_t;
 
 #include <gojira/tokens.h>
