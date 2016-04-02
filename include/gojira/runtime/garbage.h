@@ -23,6 +23,12 @@ enum {
 	GC_TYPE_CONTINUATION,
 };
 
+enum {
+	GC_PROFILE_FAST,
+	GC_PROFILE_BALANCED,
+	GC_PROFILE_LOWMEM,
+};
+
 /*
 typedef struct gbg_list {
 	token_t *start;
@@ -52,10 +58,8 @@ typedef struct gbg_collector {
 	unsigned iter;
 	unsigned interval;
 
-	/*
-	unsigned last_length;
-	unsigned last_freed;
-	*/
+	unsigned default_interval;
+	double target_ratio;
 } gbg_collector_t;
 
 #include <gojira/tokens.h>
@@ -77,6 +81,8 @@ gbg_collector_t *gc_merge( gbg_collector_t *first, gbg_collector_t *second );
 typedef struct stack_frame stack_frame_t;
 void gc_try_to_collect_frame( stack_frame_t *frame );
 gbg_collector_t *get_current_gc( stack_frame_t *frame );
+
+void gc_set_profile( gbg_collector_t *gbg, unsigned profile );
 
 #define DEPRECATED __attribute__((deprecated))
 

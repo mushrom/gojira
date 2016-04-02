@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <limits.h>
 
+
 static gbg_node_t *gc_list_add( gbg_collector_t *gc, gbg_node_t *node ){
 	//gbg_list_t *list = &gc->colors[color];
 
@@ -63,6 +64,7 @@ static gbg_node_t *gc_list_remove( gbg_collector_t *gc, gbg_node_t *node ){
 
 	//printf( "[%s] removing %p, %u, start = %p, end = %p\n", __func__, node, gc->id, list->start, list->end );
 
+	/*
 	if ((!gc->start && !gc->end) || node->status >= GC_MARKED || gc->length == 0 ){
 		printf( "[%s] Got bad list remove request, node: %p, color: %u\n",
 			__func__, node, node->status );
@@ -72,7 +74,9 @@ static gbg_node_t *gc_list_remove( gbg_collector_t *gc, gbg_node_t *node ){
 			node->id, gc->id );
 		return node;
 	}
+	*/
 
+	/*
 	if ( node->next == node ){
 		printf( "[%s] node %p->next is itself???\n", __func__, node );
 	}
@@ -80,6 +84,7 @@ static gbg_node_t *gc_list_remove( gbg_collector_t *gc, gbg_node_t *node ){
 	if ( node->prev == node ){
 		printf( "[%s] node %p->prev is itself???\n", __func__, node );
 	}
+	*/
 
 	if ( node == gc->start ){
 		gc->start = node->next;
@@ -107,10 +112,12 @@ static gbg_node_t *gc_list_remove( gbg_collector_t *gc, gbg_node_t *node ){
 
 		}
 
+		/*
 		if ( node->prev->next != node ){
 			printf( "\tPrevious node %p in color list does not point to %p, actually points to %p...\n",
 					node->prev, node, node->prev->next );
 		}
+		*/
 
 		//printf( "[%s] Set new %p->next to %p\n", __func__, node->prev, node->next );
 
@@ -127,10 +134,12 @@ static gbg_node_t *gc_list_remove( gbg_collector_t *gc, gbg_node_t *node ){
 		}
 		*/
 
+		/*
 		if ( node->next->prev != node ){
 			printf( "\tNext node %p in color list does not point to %p, actually points to %p... %d\n",
 				node->next, node, node->next->prev, node != node->next->prev );
 		}
+		*/
 
 		//printf( "[%s] Set new %p->prev to %p\n", __func__, node->next, node->prev );
 
@@ -271,32 +280,26 @@ void gc_mark_envs( gbg_collector_t *gc, env_t *env );
 void gc_mark_tokens( gbg_collector_t *gc, token_t *tokens ){
 	token_t *move = tokens;
 
-	//for ( ; move && move->gc_link.status == GC_UNMARKED; move = move->next ){
-	for ( ; move; move = move->next ){
-		//if ( move->gc_id >= gc->id ){
-			//gc_list_move( gc, move );
-			bool already_marked = move->gc_link.status == GC_MARKED;
+	for ( ; move && move->gc_link.status == GC_UNMARKED; move = move->next ){
+	//for ( ; move; move = move->next ){
+		bool already_marked = move->gc_link.status == GC_MARKED;
+
+		if ( !already_marked ){
 			move->gc_link.status = GC_MARKED;
 
 			if ( move->type == TYPE_PROCEDURE ){
 				//printf( "[%s] Got here\n", __func__ );
 				procedure_t *proc = shared_get( move->data );
 
-				//if ( !already_marked ){
-					gc_mark_envs( gc, proc->env );
-					gc_mark_tokens( gc, proc->body );
-					gc_mark_tokens( gc, proc->args );
-				//}
+				gc_mark_envs( gc, proc->env );
+				gc_mark_tokens( gc, proc->body );
+				gc_mark_tokens( gc, proc->args );
 			}
 
-			gc_mark_tokens( gc, move->down );
-
-		//}
-	/*else {
-			printf( "[%s] Somehow got a token from a lower stack frame, %d at gc %d\n",
-				__func__, move->gc_id, gc->id );
+			if ( !already_marked ){
+				gc_mark_tokens( gc, move->down );
+			}
 		}
-		*/
 	}
 }
 
@@ -337,9 +340,9 @@ static void free_gbg_node( gbg_node_t *node ){
 }
 
 void gc_set_interval( gbg_collector_t *gc, unsigned length, unsigned freed ){
-	double target = 1.15;
+	//double target = 1.15;
 	double ratio = (freed && length)? length / (freed * 1.0) : 1;
-	double total = ratio - (target - ratio);
+	double total = ratio - (gc->target_ratio - ratio);
 	//ratio -= 0.05;
 	//unsigned adjust = gc->interval * ratio;
 	//unsigned adjust = gc->interval + gc->interval * (diff * 5 - 0.075);
@@ -414,11 +417,39 @@ bool gc_should_collect( gbg_collector_t *gc ){
 	//return gc->colors[GC_COLOR_WHITE].length > 50;
 }
 
+void gc_set_profile( gbg_collector_t *gbg, unsigned profile ){
+	switch ( profile ){
+		case GC_PROFILE_FAST:
+			gbg->default_interval = 50000;
+			gbg->target_ratio = 1.00;
+			break;
+
+		case GC_PROFILE_BALANCED:
+			gbg->default_interval = 10000;
+			gbg->target_ratio = 1.15;
+			break;
+
+		case GC_PROFILE_LOWMEM:
+			gbg->default_interval = 100;
+			gbg->target_ratio = 1.70;
+			break;
+
+		default:
+			// Unknown profile?
+			break;
+	}
+
+	gbg->interval = gbg->default_interval;
+}
+
 gbg_collector_t *gc_init( gbg_collector_t *old_gc, gbg_collector_t *new_gc ){
 	if ( old_gc ){
 		new_gc->id = old_gc->id + 1;
+		new_gc->default_interval = old_gc->default_interval;
+		new_gc->target_ratio = old_gc->target_ratio;
 
 	} else {
+		gc_set_profile( new_gc, GC_PROFILE_LOWMEM );
 		new_gc->id = 1;
 	}
 
@@ -434,7 +465,7 @@ gbg_collector_t *gc_init( gbg_collector_t *old_gc, gbg_collector_t *new_gc ){
 	new_gc->start = new_gc->end = NULL;
 
 	new_gc->iter = 0;
-	new_gc->interval = 10000;
+	new_gc->interval = new_gc->default_interval;
 	new_gc->length = 0;
 
 	/*
@@ -514,17 +545,24 @@ gbg_collector_t *gc_merge( gbg_collector_t *first, gbg_collector_t *second ){
 
 void gc_mark_envs( gbg_collector_t *garbage, env_t *top_env ){
 	env_t *temp = top_env;
+	unsigned i;
 
-	for ( ; temp && temp->gc_link.status != GC_MARKED; temp = temp->last ){
+	//printf( "[%s] marking envs, %p...\n", __func__, temp );
+
+	for ( i = 0; temp && temp->gc_link.status != GC_MARKED; temp = temp->last ){
 	//for ( ; temp; temp = temp->last ){
 		gc_mark_env( garbage, temp );
+		i++;
 	}
+
+	//printf( "[%s] marked %u environments at %p...\n", __func__, i, top_env );
 }
 
 void gc_mark_frames( gbg_collector_t *garbage, stack_frame_t *top_frame ){
 	stack_frame_t *temp = top_frame;
+	unsigned i;
 
-	for ( ; temp; temp = temp->last ){
+	for ( i = 0; temp; temp = temp->last, i++ ){
 		//printf( "[%s] Marking frame %p, env: %p\n", __func__, temp, temp->env );
 
 		if ( temp->env ){
@@ -540,20 +578,26 @@ void gc_mark_frames( gbg_collector_t *garbage, stack_frame_t *top_frame ){
 		}
 
 		if ( temp->cur_func ){
-			gc_mark_tokens( garbage, temp->cur_func );
+			//gc_mark_tokens( garbage, temp->cur_func );
 		}
 	}
+
+	//printf( "[%s] marked %u frames\n", __func__, i );
 }
 
 void gc_try_to_collect_frame( stack_frame_t *frame ){
 	gbg_collector_t *garbage = get_current_gc( frame );
 
 	if ( gc_should_collect( garbage )){
+		//printf( "[%s] starting garbage collection...\n", __func__ );
+		//printf( "[%s] marking things...\n", __func__ );
 		gc_mark_frames( garbage, frame );
 		//gc_collect( garbage, frame->value );
 		//gc_collect( garbage, NULL );
 		//dump_garbage_list( garbage );
+		//printf( "[%s] trying to collect %u values...\n", __func__, garbage->length );
 		gc_collect( garbage );
+		//printf( "[%s] done\n", __func__ );
 	}
 }
 

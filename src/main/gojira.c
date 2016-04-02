@@ -32,6 +32,8 @@ int main( int argc, char *argv[] ){
 	int lastopt = 0;
 	bool interactive = false;
 	bool load_libs = true;
+	bool set_a_gc_profile = false;
+	unsigned new_gc_profile = 0;
 
 	char *fname = NULL;
 
@@ -46,7 +48,7 @@ int main( int argc, char *argv[] ){
 		// otherwise parse options
 		lastopt = 1;
 
-		while (( option = getopt( argc, argv, "hiL" )) != -1 && i++ < argc ){
+		while (( option = getopt( argc, argv, "hiLf:g:" )) != -1 && i++ < argc ){
 			switch ( option ){
 				case 'f':
 					fname = argv[++i];
@@ -65,6 +67,30 @@ int main( int argc, char *argv[] ){
 				case 'L':
 					load_libs = false;
 					break;
+
+				case 'g':
+					{
+						char *profile = argv[++i];
+
+						set_a_gc_profile = true;
+
+						if ( strcmp( profile, "fast" ) == 0 ){
+							new_gc_profile = GC_PROFILE_FAST;
+
+						} else if ( strcmp( profile, "balanced" ) == 0 ){
+							new_gc_profile = GC_PROFILE_BALANCED;
+
+						} else if ( strcmp( profile, "lowmem" ) == 0 ){
+							new_gc_profile = GC_PROFILE_LOWMEM;
+
+						} else {
+							printf( "Unknown garbage collector profile \"%s\", "
+							        "using \"balanced\" instead...\n", profile );
+
+							new_gc_profile = GC_PROFILE_BALANCED;
+						}
+					}
+
 
 				case 'v':
 					break;
@@ -89,6 +115,10 @@ int main( int argc, char *argv[] ){
 	// Initialize the global interpreter state
 	global_frame = frame_create( NULL, NULL, MAKE_ENV );
 	init_global_frame( global_frame );
+
+	if ( set_a_gc_profile ){
+		gc_set_profile( get_current_gc( global_frame ), new_gc_profile );
+	}
 
 	// Load the 'base' library for needed primatives
 	if ( load_libs ){
