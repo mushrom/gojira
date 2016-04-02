@@ -321,24 +321,24 @@ hashmap_t *syntax_get_names( const token_t *pattern, token_t *args, hashmap_t *m
 	return ret;
 }
 
-token_t *syntax_expand( token_t *args, hashmap_t *map ){
+token_t *syntax_expand( gbg_collector_t *gbg, token_t *args, hashmap_t *map ){
 	token_t *ret = NULL;
 	token_t *temp;
 
 	if ( args ){
 		switch( args->type ){
 			case TYPE_LIST:
-				ret = alloc_token( );
+				ret = gc_alloc_token( gbg );
 				ret->type = TYPE_LIST;
-				ret->down = syntax_expand( args->down, map );
-				ret->next = syntax_expand( args->next, map );
+				ret->down = syntax_expand( gbg, args->down, map );
+				ret->next = syntax_expand( gbg, args->next, map );
 				break;
 
 			case TYPE_QUOTED_TOKEN:
-				ret = alloc_token( );
+				ret = gc_alloc_token( gbg );
 				ret->type = TYPE_QUOTED_TOKEN;
-				ret->down = syntax_expand( args->down, map );
-				ret->next = syntax_expand( args->next, map );
+				ret->down = syntax_expand( gbg, args->down, map );
+				ret->next = syntax_expand( gbg, args->next, map );
 				break;
 
 			case TYPE_SYMBOL: {
@@ -351,32 +351,34 @@ token_t *syntax_expand( token_t *args, hashmap_t *map ){
 						unsigned hash = hash_string( name );
 						hash = hash_string_accum( " #vararg", hash );
 
-						ret = clone_tokens( hashmap_get( map, hash ));
+						//ret = gc_clone_token( gbg, hashmap_get( map, hash ));
+						ret = hashmap_get( map, hash );
 
 					} else {
 						temp = hashmap_get( map, hash_string( name ));
 
-						ret = temp? clone_token_tree( temp )
-						          : clone_token( args );
+						ret = temp? gc_clone_token( gbg, temp )
+						          : gc_clone_token( gbg, args );
 
-						ret->next = syntax_expand( args->next, map );
+
+						ret->next = syntax_expand( gbg, args->next, map );
 					}
 
 				} else {
 					temp = hashmap_get( map, hash_string( name ));
 
-					ret = temp? clone_token_tree( temp )
-					          : clone_token( args );
+					ret = temp? gc_clone_token( gbg, temp )
+					          : gc_clone_token( gbg, args );
 
-					ret->next = syntax_expand( args->next, map );
+					ret->next = syntax_expand( gbg, args->next, map );
 				}
 
 				break;
 		    }
 
 			default:
-				ret = clone_token_tree( args );
-				ret->next = syntax_expand( args->next, map );
+				ret = gc_clone_token( gbg, args );
+				ret->next = syntax_expand( gbg, args->next, map );
 				break;
 		}
 	}
@@ -412,7 +414,9 @@ token_t *expand_syntax_rules( stack_frame_t *frame, token_t *tokens ){
 
 				matched = true;
 				map = syntax_get_names( pattern, tokens, NULL );
-				ret = gc_register_tokens( get_current_gc( frame ), syntax_expand( template, map ));
+
+				//ret = gc_register_tokens( get_current_gc( frame ), syntax_expand( template, map ));
+				ret = syntax_expand( get_current_gc( frame ), template, map );
 
 				// free the map's resources
 				for ( i = 0; i < map->nbuckets; i++ ){
@@ -420,11 +424,6 @@ token_t *expand_syntax_rules( stack_frame_t *frame, token_t *tokens ){
 				}
 				hashmap_free( map );
 
-				/*
-				gc_unmark( ret );
-				frame_register_token_tree( frame, ret );
-				*/
-				//gc_register_token_tree( &frame->gc, ret );
 				break;
 
 			} else {
