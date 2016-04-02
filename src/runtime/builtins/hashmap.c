@@ -20,7 +20,7 @@ static void free_hashmap_token( void *ptr ){
 
 		for ( ; node; node = temp ){
 			temp = node->next;
-			free_tokens( node->data );
+			//free_tokens( node->data );
 			free( node );
 		}
 	}
@@ -41,7 +41,8 @@ token_t *builtin_hashmap_make( stack_frame_t *frame ){
 		for ( ; move; (move = move->next) && (move = move->next) ){
 			if ( move->type == TYPE_SYMBOL || move->type == TYPE_STRING ){
 				str = shared_get( move->data );
-				hashmap_add( map, hash_string( str ), clone_token_tree( move->next ));
+				//hashmap_add( map, hash_string( str ), clone_token_tree( move->next ));
+				hashmap_add( map, hash_string( str ), move->next );
 
 			} else {
 				frame->error_call(
@@ -55,7 +56,7 @@ token_t *builtin_hashmap_make( stack_frame_t *frame ){
 		}
 
 		if ( map ){
-			ret = alloc_token( );
+			ret = gc_alloc_token( get_current_gc( frame ));
 			ret->type = TYPE_HASHMAP;
 			ret->flags = T_FLAG_HAS_SHARED;
 			ret->data = shared_new( map, free_hashmap_token );
@@ -86,10 +87,12 @@ token_t *builtin_hashmap_get( stack_frame_t *frame ){
 				token_t *temp = hashmap_get( map, hash_string( buf ));
 
 				if ( temp ){
-					ret = clone_token_tree( temp );
+					//ret = clone_token_tree( temp );
+					ret = gc_clone_token( get_current_gc( frame ), temp );
 
 				} else {
-					ret = alloc_token( );
+					//ret = alloc_token( );
+					ret = gc_alloc_token( get_current_gc( frame ));
 					ret->type = TYPE_BOOLEAN;
 					ret->boolean = false;
 				}

@@ -276,6 +276,7 @@ token_t *gc_move_token( gbg_collector_t *to, gbg_collector_t *from, token_t *tok
 
 void gc_mark_env( gbg_collector_t *gc, env_t *env );
 void gc_mark_envs( gbg_collector_t *gc, env_t *env );
+void gc_mark_hashmap( gbg_collector_t *gc, hashmap_t *map );
 
 void gc_mark_tokens( gbg_collector_t *gc, token_t *tokens ){
 	token_t *move = tokens;
@@ -296,9 +297,28 @@ void gc_mark_tokens( gbg_collector_t *gc, token_t *tokens ){
 				gc_mark_tokens( gc, proc->args );
 			}
 
-			if ( !already_marked ){
-				gc_mark_tokens( gc, move->down );
+			if ( move->type == TYPE_HASHMAP ){
+				hashmap_t *map = shared_get( move->data );
+
+				gc_mark_hashmap( gc, map );
 			}
+
+			gc_mark_tokens( gc, move->down );
+		}
+	}
+}
+
+void gc_mark_hashmap( gbg_collector_t *gc, hashmap_t *map ){
+	list_node_t *node;
+	list_node_t *temp;
+	unsigned i;
+
+	for ( i = 0; i < map->nbuckets; i++ ){
+		node = map->buckets[i].base;
+
+		for ( ; node; node = temp ){
+			temp = node->next;
+			gc_mark_tokens( gc, node->data );
 		}
 	}
 }
