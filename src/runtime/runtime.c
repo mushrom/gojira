@@ -222,20 +222,12 @@ bool eval_frame_expr( stack_frame_t **frame_ret ){
 			break;
 
 		case TYPE_PROCEDURE:
-			/* TODO: fix tail call elimination again
 			if ( frame->last->ptr == NULL && frame->last->status == TYPE_PROCEDURE ){
 				temp_frame = expand_procedure( frame->last, frame->expr );
-				gc_mark( frame->expr );
-				gc_sweep( frame->heap );
-				frame_register_tokens( frame->last, frame->expr );
-				frame_free( frame );
-
-				DEBUGP( "[%s] Doing tail call elimination\n", __func__ );
 
 			} else {
-			*/
 				temp_frame = expand_procedure( frame, frame->expr );
-			//}
+			}
 
 			frame = *frame_ret = temp_frame;
 

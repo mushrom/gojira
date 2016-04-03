@@ -68,6 +68,12 @@
      ((condition (lambda () a)
                  (lambda () b))))))
 
+(define-syntax begin
+  (syntax-rules ()
+    ((_ body ...)
+     ((lambda ()
+        body ...)))))
+
 ; TODO: Fix symbol clashes between procedures and macro expansion
 (define-syntax or
   (syntax-rules ()
