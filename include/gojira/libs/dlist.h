@@ -7,7 +7,7 @@ extern "C" {
 
 #define DLIST_DEFAULT_BLOCKSIZE 8
 #define foreach_in_dlist( iter, list ) \
-	for( iter = 0; i < list->used; i++ )
+	for( iter = 0; list && i < list->used; i++ )
 
 enum {
 	DLIST_FLAG_NULL
