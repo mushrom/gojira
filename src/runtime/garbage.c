@@ -459,7 +459,7 @@ void gc_set_profile( gbg_collector_t *gbg, unsigned profile ){
 	switch ( profile ){
 		case GC_PROFILE_FAST:
 			gbg->default_interval = 50000;
-			gbg->target_ratio = 1.00;
+			gbg->target_ratio = 1.02;
 			break;
 
 		case GC_PROFILE_BALANCED:
