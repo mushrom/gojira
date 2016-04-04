@@ -207,7 +207,7 @@ variable_t *env_add_var( env_t *env, const char *key, token_t *token, bool recur
 			hashmap_add( env->vars, new_var->hash, new_shared );
 
 		} else if ( new_var->is_mutable ){
-			new_var->token = clone_token_tree( token );
+			new_var->token = token;
 
 		} else {
 			/* TODO: existing variable isn't mutable, so error out */
