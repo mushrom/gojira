@@ -50,7 +50,7 @@
   (let* ((indexes (concat "abcdefghijklmnopqrstuvwxyz"
                           "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
                           "0123456789"))
-         (choices (zip (str-iter indexes) items))
+         (choices (zip (string->list indexes) items))
          (choice-range (list->string
                          (list
                            (string-ref indexes 0)
