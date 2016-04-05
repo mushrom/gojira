@@ -5,7 +5,7 @@ mkdir -p output
 
 tests="`ls src`"
 
-function get_expected_out() {
+function get_expected_out {
 	cat $1 | grep '^;; => ' | sed 's/;; => //'
 }
 
