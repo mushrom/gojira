@@ -85,6 +85,11 @@
        (let (e2 ...) body ...))
       expression))
 
+    ((_ proc-id ((varname expression) e2 ...) body ...)
+     (let ((varname expression) e2 ...)
+       (define (proc-id) body ...)
+       (proc-id)))
+
     ((_ () body ...)
      ((lambda () body ...)))))
 
