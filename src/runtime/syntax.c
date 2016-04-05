@@ -268,11 +268,25 @@ bool syntax_matches( const token_t *pattern, const token_t *args ){
 		}
 
 	} else if ( pattern ){
-		if ( pattern->type == TYPE_STRING ){
-			char *str = shared_get( pattern->data );
+		if ( pattern->type == TYPE_SYMBOL ){
 
-			if ( strcmp(str, "...") == 0 )
-				ret = true;
+			if ( pattern->next ){
+				if ( pattern->next->type == TYPE_SYMBOL ){
+					char *next = shared_get( pattern->next->data );
+
+					if ( strcmp(next, "...") == 0 )
+						ret = true;
+
+				} else {
+					ret = false;
+				}
+
+			} else {
+				char *str = shared_get( pattern->data );
+
+				if ( strcmp(str, "...") == 0 )
+					ret = true;
+			}
 		}
 	}
 
@@ -282,12 +296,14 @@ bool syntax_matches( const token_t *pattern, const token_t *args ){
 hashmap_t *syntax_get_names( const token_t *pattern, token_t *args, hashmap_t *map ){
 	hashmap_t *ret = map? map : hashmap_create(4);
 
-	if ( pattern && args ){
+	if ( pattern ){
 		switch ( pattern->type ){
 			case TYPE_LIST:
 			case TYPE_QUOTED_TOKEN:
-				ret = syntax_get_names( pattern->down, args->down, ret );
-				ret = syntax_get_names( pattern->next, args->next, ret );
+				if ( args ){
+					ret = syntax_get_names( pattern->down, args->down, ret );
+					ret = syntax_get_names( pattern->next, args->next, ret );
+				}
 				break;
 
 			case TYPE_SYMBOL: {
@@ -304,21 +320,27 @@ hashmap_t *syntax_get_names( const token_t *pattern, token_t *args, hashmap_t *m
 						DEBUGP( "[%s] Have variable-length pattern\n", __func__ );
 
 					} else {
-						DEBUGP( "[%s] Adding name \"%s\"\n", __func__, name );
-						hashmap_add( ret, hash_string( name ), args );
-						ret = syntax_get_names( pattern->next, args->next, ret );
+						if ( args ){
+							DEBUGP( "[%s] Adding name \"%s\"\n", __func__, name );
+							hashmap_add( ret, hash_string( name ), args );
+							ret = syntax_get_names( pattern->next, args->next, ret );
+						}
 					}
 
 				} else {
-					hashmap_add( ret, hash_string( name ), args );
-					ret = syntax_get_names( pattern->next, args->next, ret );
+					if ( args ){
+						hashmap_add( ret, hash_string( name ), args );
+						ret = syntax_get_names( pattern->next, args->next, ret );
+					}
 				}
 
 				break;
 		    }
 
 			default:
-				ret = syntax_get_names( pattern->next, args->next, ret );
+				if ( args ){
+					ret = syntax_get_names( pattern->next, args->next, ret );
+				}
 				break;
 		}
 	}

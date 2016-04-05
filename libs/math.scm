@@ -28,27 +28,27 @@
 (define ∑ sigma)
 
 ; repeatedly perform a function for "times", using recursion
-(define for
-  (lambda (times f)
-    (if (> times 0)
-	  (begin
-        (for (- times 1) f)
-		(f times))
-	  times)))
+;(define for
+;  (lambda (times f)
+;    (if (> times 0)
+;	  (begin
+;        (for (- times 1) f)
+;		(f times))
+;	  times)))
 
 ; repeatedly perform a function for "times", using iteration
-(define for-iter
-  (lambda (times f)
-	(define iter
-	  (lambda (count)
-		(if (<= count times)
-		  ;(begin
-          ((lambda ()
-			 (f count)
-			 (iter (seq count))
-             ))
-		  count)))
-	(iter 1)))
+;(define for-iter
+;  (lambda (times f)
+;	(define iter
+;	  (lambda (count)
+;		(if (<= count times)
+;		  ;(begin
+;          ((lambda ()
+;			 (f count)
+;			 (iter (seq count))
+;             ))
+;		  count)))
+;	(iter 1)))
 
 ; Square a number
 (define square

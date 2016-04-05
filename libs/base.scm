@@ -3,54 +3,30 @@
 ; todo: make this simpler
 (intern-set :builtin 'define
   (syntax-rules ()
-    ((_ (funcname args ...) body ...)
+    ((_ (funcname args ...) body more ...)
      (intern-set 'funcname
-        ;(begin
-        ((lambda ()
-          (intern-set :mut 'funcname 0)
-          (intern-set :mut 'funcname
-             (lambda (args ...) body ...))
-          funcname)))
-     )
+        ((lambda (funcname)
+           (intern-set :mut 'funcname
+                       (lambda (args ...) body more ...))
+           funcname)
+         #f)))
 
-    ((_ mutable (funcname args ...) body ...)
+    ((_ mutable (funcname args ...) body more ...)
      (intern-set mutable 'funcname
-        ;(begin
-        ((lambda ()
-          (intern-set :mut 'funcname 0)
-          (intern-set :mut 'funcname
-                      (lambda (args ...) body ...))
-          funcname)))
-     )
-
-    ((_ (funcname) body ...)
-     (intern-set 'funcname
-        ;(begin
-        ((lambda ()
-          (intern-set :mut 'funcname 0)
-          (intern-set :mut 'funcname
-                      (lambda () body ...))
-          funcname)))
-     )
-
-    ((_ mutable (funcname) body ...)
-     (intern-set mutable 'funcname
-        ;(begin
-        ((lambda ()
-          (intern-set :mut 'funcname 0)
-          (intern-set :mut 'funcname
-                      (lambda () body ...))
-          funcname)))
-     )
+        ((lambda (funcname)
+           (intern-set :mut 'funcname
+                       (lambda (args ...) body more ...))
+           funcname)
+         #f)))
 
     ((_ mutable sym def)
-     (intern-set mutable 'sym def))
+     (intern-set 'mutable 'sym def))
 
     ((_ sym def)
      (intern-set 'sym def))
 
     ((_ sym)
-     (intern-set 'sym 0))))
+     (intern-set 'sym #f))))
 
 (define :builtin define-syntax define)
 
@@ -70,50 +46,37 @@
 
 (define-syntax :builtin begin
   (syntax-rules ()
-    ((_ body ...)
+    ((_ body more ...)
      ((lambda ()
-        body ...)))))
+        body more ...)))))
 
-; TODO: Fix symbol clashes between procedures and macro expansion
 (define-syntax :builtin or
   (syntax-rules ()
-    ((_ _op1_ _op2_ more ...)
-     (if _op1_
-       #f
-       (or _op2_ more ...)))
-
-    ((_ _op1_ _op2_)
-     (if _op1_
+    ((_ e1 e2 e3 ...)
+     (if e1
        #t
-       (if _op2_
-         #t
-         #f)))))
+       (or e2 e3 ...)))
+
+    ((_ e1) e1)))
 
 (define-syntax :builtin and
   (syntax-rules ()
-    ((_ _op1_ _op2_ more ...)
-     (if _op1_
-       (and _op2_ more ...)
+    ((_ e1 e2 e3 ...)
+     (if e1
+       (and e2 e3 ...)
        #f))
 
-    ((_ _op1_ _op2_)
-     (if _op1_
-       (if _op2_
-         #t
-         #f)
-       #f))))
+    ((_ e1) e1)))
 
 (define-syntax :builtin cond
   (syntax-rules ()
     ((_ (pred body ...) more ...)
-     (if pred
-       (begin body ...)
-       (cond more ...)))
+     ((pred
+       (lambda () body ...)
+       (lambda () (cond more ...)))))
 
-    ((_ (pred body ...))
-     (if pred
-       (begin body ...)
-       #f))))
+    ((_) ; cond didn't match anything, what do?
+     #f)))
 
 (define-syntax :builtin let
   (syntax-rules ()
@@ -122,10 +85,8 @@
        (let (e2 ...) body ...))
       expression))
 
-    ((_ ((varname expression)) body ...)
-     ((lambda (varname)
-        body ...)
-      expression))))
+    ((_ () body ...)
+     ((lambda () body ...)))))
 
 (define :builtin let* let)
 

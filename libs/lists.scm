@@ -142,13 +142,8 @@
      (let ((a1 (safecar xs)))
        (with (safecdr xs) as (a2 ...) body ...)))
 
-    ((_ xs as (a1 a2) body ...)
-     (let ((a1 (safecar xs)))
-       (with (safecdr xs) as (a2) body ...)))
-
-    ((_ xs as (a1) body ...)
-     (let ((a1 (safecar xs)))
-       body ...))))
+    ((_ xs as () body ...)
+     (begin body ...))))
 
 (define-syntax :builtin for
   (syntax-rules (in)
