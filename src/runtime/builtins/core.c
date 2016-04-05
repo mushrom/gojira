@@ -184,7 +184,7 @@ token_t *builtin_greaterthan( stack_frame_t *frame ){
 	return ret;
 }
 
-static bool set_variable( stack_frame_t *frame, const token_t *tokens, bool mutable ){
+static bool set_variable( stack_frame_t *frame, const token_t *tokens, unsigned mutable ){
 	token_t *temp;
 	variable_t *var;
 	bool ret = false;
@@ -227,15 +227,41 @@ static bool set_variable( stack_frame_t *frame, const token_t *tokens, bool muta
 token_t *builtin_intern_set( stack_frame_t *frame ){
 	token_t *ret = NULL;
 	token_t *move;
-	bool mutable = false;
+	//bool mutable = false;
+	unsigned mutable = VAR_MUTABLE;
 	bool error = false;
 
 	if ( frame->ntokens == 3 ){
 		move = frame->expr->next;
 
 	} else if ( frame->ntokens == 4 ){
+		token_t *mut_spec = frame->expr->next;
 		move = frame->expr->next->next;
-		mutable = true;
+
+		if ( mut_spec->type == TYPE_SYMBOL ){
+			char *str = shared_get( mut_spec->data );
+
+			if ( strcmp( str, ":mut" ) == 0 ){
+				mutable = VAR_MUTABLE;
+
+			} else if ( strcmp( str, ":immut" ) == 0 ){
+				mutable = VAR_IMMUTABLE;
+
+			} else if ( strcmp( str, ":builtin" ) == 0 ){
+				mutable = VAR_MUTABLE_BUILTIN;
+
+			} else {
+				FRAME_ERROR( frame,
+					"invalid mutability specifier: %s",
+					str );
+
+				error = true;
+			}
+
+		} else {
+			FRAME_ERROR_ARGTYPE( frame, symbol, mut_spec->type );
+			error = true;
+		}
 
 	} else {
 		FRAME_ERROR_ARGNUM( frame, 2 );

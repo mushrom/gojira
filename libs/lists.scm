@@ -1,6 +1,6 @@
 ; see http://srfi.schemers.org/srfi-1/srfi-1.html#TheProcedures
 
-(define-syntax iota
+(define-syntax :builtin iota
   (syntax-rules ()
     ((_ count)
      (gen_range count 0 1))
@@ -9,7 +9,7 @@
     ((_ count start step)
      (gen_range count start step))))
 
-(define (gen_range count start step)
+(define :builtin (gen_range count start step)
   (define (gen_iter i sum)
     (if (< i count)
       (cons sum (gen_iter (+ i 1) (+ sum step)))
@@ -17,17 +17,17 @@
 
   (gen_iter 0 start))
 
-(define (any fn xs)
+(define :builtin (any fn xs)
   (member? #t (map fn xs)))
 
-(define ∃ any)
+(define :builtin ∃ any)
 
-(define (every fn xs)
+(define :builtin (every fn xs)
   (not (member? #f (map fn xs))))
 
-(define ∀ every)
+(define :builtin ∀ every)
 
-(define (assq key xs)
+(define :builtin (assq key xs)
   (if (or (null? xs)
           (not (list? (car xs))))
     #f
@@ -35,20 +35,20 @@
       (car (cdr (car xs)))
       (assq key (cdr xs)))))
 
-(define (take x i)
+(define :builtin (take x i)
   (if (or (eq? i 0) (null? x))
     '()
     else
     (cons (car x)
           (take (cdr x) (- i 1)))))
 
-(define (drop x i)
+(define :builtin (drop x i)
   (if (or (eq? i 0) (null? x))
     x
     else
     (drop (cdr x) (- i 1))))
 
-(define (equal? xs ys)
+(define :builtin (equal? xs ys)
     (if (list? xs)
       (or (and (null? xs) (null? ys))
           (and
@@ -61,14 +61,14 @@
      else
       (eq? xs ys)))
 
-(define (for-each f xs)
+(define :builtin (for-each f xs)
   (if (null? xs)
     '()
     (begin
       (f (car xs))
       (for-each f (cdr xs)))))
 
-(define (list-replace xs old new)
+(define :builtin (list-replace xs old new)
   (if (null? xs)
     '()
     (if (eq? (car xs) old)
@@ -76,14 +76,14 @@
       else
       (cons (car xs) (list-replace (cdr xs) old new)))))
 
-(define (delim xs token)
+(define :builtin (delim xs token)
   (if (null? xs)
     '()
     (if (eq? (car xs) token)
       '()
       (cons (car xs) (delim (cdr xs) token)))))
 
-(define (after xs token)
+(define :builtin (after xs token)
   (if (null? xs)
     '()
     (if (eq? (car xs) token)
@@ -91,26 +91,26 @@
       else
       (after (cdr xs) token))))
 
-(define (list-split xs token)
+(define :builtin (list-split xs token)
   (if (null? xs)
     '()
     (cons (delim xs token) (list-split (after xs token) token))))
 
-(define (list-ref xs n)
+(define :builtin (list-ref xs n)
   (if (null? xs)
     '()
     (if (eq? n 0)
       (car xs)
       (list-ref (cdr xs) (- n 1)))))
 
-(define (filter sieve xs)
+(define :builtin (filter sieve xs)
   (if (null? xs)
     '()
     (if (sieve (car xs))
       (cons (car xs) (filter sieve (cdr xs)))
       (filter sieve (cdr xs)))))
 
-(define (zip xs ys)
+(define :builtin (zip xs ys)
   (if (or (null? xs)
           (null? ys))
     '()
@@ -118,7 +118,7 @@
     (cons (list (car xs) (car ys))
           (zip  (cdr xs) (cdr ys)))))
 
-(define (where pred funct xs)
+(define :builtin (where pred funct xs)
   (cond 
     ((null? xs) '())
     ((pred xs) (cons (funct (car xs))
@@ -126,17 +126,17 @@
     (true (cons (car xs)
                 (where pred funct (cdr xs))))))
 
-(define (safecar xs)
+(define :builtin (safecar xs)
   (if (null? xs)
     '()
     (car xs)))
 
-(define (safecdr xs)
+(define :builtin (safecdr xs)
   (if (null? xs)
     '()
     (cdr xs)))
 
-(define-syntax with
+(define-syntax :builtin with
   (syntax-rules (as)
     ((_ xs as (a1 a2 ...) body ...)
      (let ((a1 (safecar xs)))
@@ -150,7 +150,7 @@
      (let ((a1 (safecar xs)))
        body ...))))
 
-(define-syntax for
+(define-syntax :builtin for
   (syntax-rules (in)
     ((_ (args ...) in somelist body ...)
      (map
@@ -165,7 +165,7 @@
          body ...)
        somelist))))
 
-(define-syntax for-var
+(define-syntax :builtin for-var
   (syntax-rules (in)
     ((_ (args ...) in somelist body ...)
      (for-each
@@ -180,5 +180,5 @@
          body ...)
        somelist))))
 
-(define (display-list :rest xs)
+(define :builtin (display-list :rest xs)
   (map display xs))

@@ -1,7 +1,7 @@
 ; necessary bits of the language that aren't implemented by the interpreter
 
 ; todo: make this simpler
-(intern-set 'define
+(intern-set :builtin 'define
   (syntax-rules ()
     ((_ (funcname args ...) body ...)
      (intern-set 'funcname
@@ -52,14 +52,14 @@
     ((_ sym)
      (intern-set 'sym 0))))
 
-(define define-syntax define)
+(define :builtin define-syntax define)
 
-(define-syntax set!
+(define-syntax :builtin set!
   (syntax-rules ()
     ((_ varname value)
      (intern-set! 'varname value))))
 
-(define-syntax if
+(define-syntax :builtin if
   (syntax-rules ()
     ((_ condition a else b)
      ((condition (lambda () a)
@@ -68,14 +68,14 @@
      ((condition (lambda () a)
                  (lambda () b))))))
 
-(define-syntax begin
+(define-syntax :builtin begin
   (syntax-rules ()
     ((_ body ...)
      ((lambda ()
         body ...)))))
 
 ; TODO: Fix symbol clashes between procedures and macro expansion
-(define-syntax or
+(define-syntax :builtin or
   (syntax-rules ()
     ((_ _op1_ _op2_ more ...)
      (if _op1_
@@ -89,7 +89,7 @@
          #t
          #f)))))
 
-(define-syntax and
+(define-syntax :builtin and
   (syntax-rules ()
     ((_ _op1_ _op2_ more ...)
      (if _op1_
@@ -103,7 +103,7 @@
          #f)
        #f))))
 
-(define-syntax cond
+(define-syntax :builtin cond
   (syntax-rules ()
     ((_ (pred body ...) more ...)
      (if pred
@@ -115,7 +115,7 @@
        (begin body ...)
        #f))))
 
-(define-syntax let
+(define-syntax :builtin let
   (syntax-rules ()
     ((_ ((varname expression) e2 ...) body ...)
      ((lambda (varname)
@@ -127,11 +127,11 @@
         body ...)
       expression))))
 
-(define let* let)
+(define :builtin let* let)
 
-(define (ident x) x)
+(define :builtin (ident x) x)
 
-(define (intern-quasiquote expr)
+(define :builtin (intern-quasiquote expr)
   (cond
     ((null? expr) '())
 
@@ -150,71 +150,71 @@
     (true (cons (car expr)
           (intern-quasiquote (cdr expr))))))
 
-(define-syntax quasiquote
+(define-syntax :builtin quasiquote
   (syntax-rules ()
     ((_ expr)
      (intern-quasiquote 'expr))))
 
 (define help "To see the gojira scheme tutorial, visit https://example.com. To see the currently defined variables, try (stacktrace).")
 
-(define (not x)
+(define :builtin (not x)
   (if x
     #f
     #t))
 
-(define = eq?)
+(define :builtin = eq?)
 
-(define (<= a b)
+(define :builtin (<= a b)
   (or
     (< a b)
     (eq? a b)))
 
-(define (>= a b)
+(define :builtin (>= a b)
   (or
     (> a b)
     (eq? a b)))
 
-(define (caaar xs) (car (car (car xs))))
-(define (caadr xs) (car (car (cdr xs))))
-(define (caar  xs) (car (car xs)))
-(define (cadar xs) (car (cdr (car xs))))
-(define (caddr xs) (car (cdr (cdr xs))))
-(define (cadr  xs) (car (cdr xs)))
-(define (cdaar xs) (cdr (car (car xs))))
-(define (cdadr xs) (cdr (car (cdr xs))))
-(define (cdar  xs) (cdr (car xs)))
-(define (cddar xs) (cdr (cdr (car xs))))
-(define (cdddr xs) (cdr (cdr (cdr xs))))
-(define (cddr  xs) (cdr (cdr xs)))
+(define :builtin (caaar xs) (car (car (car xs))))
+(define :builtin (caadr xs) (car (car (cdr xs))))
+(define :builtin (caar  xs) (car (car xs)))
+(define :builtin (cadar xs) (car (cdr (car xs))))
+(define :builtin (caddr xs) (car (cdr (cdr xs))))
+(define :builtin (cadr  xs) (car (cdr xs)))
+(define :builtin (cdaar xs) (cdr (car (car xs))))
+(define :builtin (cdadr xs) (cdr (car (cdr xs))))
+(define :builtin (cdar  xs) (cdr (car xs)))
+(define :builtin (cddar xs) (cdr (cdr (car xs))))
+(define :builtin (cdddr xs) (cdr (cdr (cdr xs))))
+(define :builtin (cddr  xs) (cdr (cdr xs)))
 
-(define (print x)
+(define :builtin (print x)
   (display x)
   (newline))
 
-(define (map fn set)
+(define :builtin (map fn set)
   (if (null? set)
     '()
     (cons
       (fn (car set))
       (map fn (cdr set)))))
 
-(define (member? obj xs)
+(define :builtin (member? obj xs)
   (if (not (null? xs))
     (if (eq? obj (car xs))
       #t
       (member? obj (cdr xs)))
     #f))
 
-(define ∈ member?)
+(define :builtin ∈ member?)
 
-(define (append xs obj)
+(define :builtin (append xs obj)
   (if (null? xs)
     obj
     (if (null? (cdr xs))
       (cons (car xs) obj)
       (cons (car xs) (append (cdr xs) obj)))))
 
-(define (length ls)
+(define :builtin (length ls)
   (if (null? ls)
     0
     (+ (length (cdr ls)) 1)))
@@ -223,10 +223,10 @@
 (define :mut modules '(base))
 (define :mut modpath "")
 
-(define (as_modpath name)
+(define :builtin (as_modpath name)
     (string-append (string-append modpath name) ".scm"))
 
-(define (import! modname)
+(define :builtin (import! modname)
   (if (not (member? modname modules))
     (if (load! (as_modpath (symbol->string modname)))
       (begin
@@ -235,7 +235,7 @@
       #f)
     #f))
 
-(define-syntax use
+(define-syntax :builtin use
   (syntax-rules ()
     ((_ mod)
      (import! 'mod))))

@@ -115,7 +115,8 @@ struct global_builtin {
 // Adds an "external function" to a frame, and handles registering the tokens for garbage collection
 variable_t *global_add_func( stack_frame_t *frame, char *name, scheme_func handle ){
 	token_t *proc = gc_register( get_current_gc( frame ), ext_proc_token( handle ));
-	variable_t *ret = env_add_var( frame->env, name, proc, NO_RECURSE, VAR_IMMUTABLE );
+	//variable_t *ret = env_add_var( frame->env, name, proc, NO_RECURSE, VAR_IMMUTABLE );
+	variable_t *ret = env_add_var( frame->env, name, proc, NO_RECURSE, VAR_MUTABLE_BUILTIN );
 
 	//free_token( proc );
 

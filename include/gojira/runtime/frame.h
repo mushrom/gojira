@@ -28,8 +28,9 @@ enum runtime_flags {
 };
 
 enum variable_mutability {
-	VAR_IMMUTABLE,
-	VAR_MUTABLE,
+	VAR_IMMUTABLE,       // variable can't be changed
+	VAR_MUTABLE,         // variable can be changed
+	VAR_MUTABLE_BUILTIN, // variable can be changed, but with a warning if changed
 };
 
 enum toggle_environment {
@@ -43,7 +44,7 @@ typedef struct variable {
 
 	unsigned references;
 	unsigned hash;
-	bool is_mutable;
+	unsigned is_mutable;
 } variable_t;
 
 struct stack_frame;
@@ -106,7 +107,7 @@ token_t *frame_alloc_token( st_frame_t *frame ) DEPRECATED;
 
 //variable_t *frame_add_var( st_frame_t *frame, char *key, token_t *token, bool recurse );
      env_t *env_free_vars( env_t *env );
-variable_t *env_add_var( env_t *env, const char *key, token_t *token, bool recurse, bool mutable );
+variable_t *env_add_var( env_t *env, const char *key, token_t *token, bool recurse, unsigned mutable );
    token_t *env_find_var( env_t *env, const char *key, bool recurse );
 variable_t *env_find_var_struct( env_t *env, const char *key, bool recurse );
   shared_t *env_find_shared_struct( env_t *env, const char *key, bool recurse );

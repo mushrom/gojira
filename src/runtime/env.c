@@ -185,7 +185,7 @@ void free_var( void *ptr ){
 	}
 }
 
-variable_t *env_add_var( env_t *env, const char *key, token_t *token, bool recurse, bool mutable ){
+variable_t *env_add_var( env_t *env, const char *key, token_t *token, bool recurse, unsigned mutable ){
 	variable_t *new_var = NULL;
 	shared_t *new_shared = NULL;
 
@@ -207,6 +207,15 @@ variable_t *env_add_var( env_t *env, const char *key, token_t *token, bool recur
 			hashmap_add( env->vars, new_var->hash, new_shared );
 
 		} else if ( new_var->is_mutable ){
+			if ( new_var->is_mutable == VAR_MUTABLE_BUILTIN ){
+				// change variable to 'mutable' after changing the variable to prevent
+				// spamming output with warning messages
+				new_var->is_mutable = VAR_MUTABLE;
+
+				printf( "[%s] Warning: changing built-in \"%s\"\n",
+					__func__, key );
+			}
+
 			new_var->token = token;
 
 		} else {

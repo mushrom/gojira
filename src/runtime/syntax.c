@@ -172,7 +172,8 @@ stack_frame_t *expand_procedure( stack_frame_t *frame, token_t *tokens ){
 						newlist->down = move;
 
 						//frame_add_var( frame, var_name, newlist, NO_RECURSE, VAR_IMMUTABLE );
-						env_add_var( frame->env, var_name, newlist, NO_RECURSE, VAR_IMMUTABLE );
+						//env_add_var( frame->env, var_name, newlist, NO_RECURSE, VAR_IMMUTABLE );
+						env_add_var( frame->env, var_name, newlist, NO_RECURSE, VAR_MUTABLE );
 
 						//free_token( newlist );
 						break;
@@ -191,7 +192,8 @@ stack_frame_t *expand_procedure( stack_frame_t *frame, token_t *tokens ){
 						//frame_add_var( frame, var_name, move, NO_RECURSE, VAR_IMMUTABLE );
 						token_t *newtoken = gc_clone_token( get_current_gc( frame ), move );
 						newtoken->next = NULL;
-						env_add_var( frame->env, var_name, newtoken, NO_RECURSE, VAR_IMMUTABLE );
+						//env_add_var( frame->env, var_name, newtoken, NO_RECURSE, VAR_IMMUTABLE );
+						env_add_var( frame->env, var_name, newtoken, NO_RECURSE, VAR_MUTABLE );
 						move = move->next;
 
 					} else {
