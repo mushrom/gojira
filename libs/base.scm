@@ -85,15 +85,38 @@
        (let (e2 ...) body ...))
       expression))
 
-    ((_ proc-id ((varname expression) e2 ...) body ...)
-     (let ((varname expression) e2 ...)
-       (define (proc-id) body ...)
-       (proc-id)))
-
     ((_ () body ...)
-     ((lambda () body ...)))))
+     ((lambda () body ...)))
+
+    ((_ proc-id (vardefs ...) body ...)
+     (let (vardefs ...)
+       (define (proc-id) body ...)
+       (proc-id)))))
 
 (define :builtin let* let)
+
+(define-syntax :builtin when
+  (syntax-rules ()
+    ((_ condition body ...)
+     (if condition
+       (begin
+         body ...)
+       '()))))
+
+(define-syntax :builtin unless
+  (syntax-rules ()
+    ((_ condition body ...)
+     (if condition
+       '()
+       (begin body ...)))))
+
+(define-syntax :builtin while
+  (syntax-rules ()
+    ((_ condition body ...)
+     (let loopy ()
+       (when condition
+         (begin body ...)
+         (loopy))))))
 
 (define :builtin (ident x) x)
 
@@ -157,13 +180,6 @@
   (display x)
   (newline))
 
-(define :builtin (map fn set)
-  (if (null? set)
-    '()
-    (cons
-      (fn (car set))
-      (map fn (cdr set)))))
-
 (define :builtin (member? obj xs)
   (if (not (null? xs))
     (if (eq? obj (car xs))
@@ -172,18 +188,6 @@
     #f))
 
 (define :builtin ∈ member?)
-
-(define :builtin (append xs obj)
-  (if (null? xs)
-    obj
-    (if (null? (cdr xs))
-      (cons (car xs) obj)
-      (cons (car xs) (append (cdr xs) obj)))))
-
-(define :builtin (length ls)
-  (if (null? ls)
-    0
-    (+ (length (cdr ls)) 1)))
 
 ; A basic module system
 (define :mut modules '(base))

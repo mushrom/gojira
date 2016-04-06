@@ -31,3 +31,14 @@
       (set! i (+ i 1))
       (foo))
     '()))
+
+;; => test
+;; => test
+(define thing-called? #f)
+(let thing ()
+  (print 'test)
+  (if (not thing-called?)
+    (begin
+      (set! thing-called? #t)
+      (thing))
+    '()))

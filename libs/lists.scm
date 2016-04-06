@@ -17,15 +17,17 @@
 
   (gen_iter 0 start))
 
-(define :builtin (any fn xs)
-  (member? #t (map fn xs)))
+(define :builtin (append xs obj)
+  (if (null? xs)
+    obj
+    (if (null? (cdr xs))
+      (cons (car xs) obj)
+      (cons (car xs) (append (cdr xs) obj)))))
 
-(define :builtin ∃ any)
-
-(define :builtin (every fn xs)
-  (not (member? #f (map fn xs))))
-
-(define :builtin ∀ every)
+(define :builtin (length ls)
+  (if (null? ls)
+    0
+    (+ (length (cdr ls)) 1)))
 
 (define :builtin (assq key xs)
   (if (or (null? xs)
@@ -60,6 +62,13 @@
             (equal? (cdr xs) (cdr ys))))
      else
       (eq? xs ys)))
+
+(define :builtin (map fn set)
+  (if (null? set)
+    '()
+    (cons
+      (fn (car set))
+      (map fn (cdr set)))))
 
 (define :builtin (for-each f xs)
   (if (null? xs)
@@ -177,3 +186,13 @@
 
 (define :builtin (display-list :rest xs)
   (map display xs))
+
+(define :builtin (any fn xs)
+  (member? #t (map fn xs)))
+
+(define :builtin ∃ any)
+
+(define :builtin (every fn xs)
+  (not (member? #f (map fn xs))))
+
+(define :builtin ∀ every)
