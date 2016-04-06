@@ -53,6 +53,7 @@ typedef enum {
 	TYPE_EXTERN_PROC,
 	TYPE_SYNTAX,
 	TYPE_VARIABLE_REF,
+	TYPE_CONTINUATION,
 
 	// Types for custom extensions
 	TYPE_FILE,
@@ -103,6 +104,7 @@ typedef struct token {
 		uint32_t character;
 		uint32_t misc;
 		bool boolean;
+		stack_frame_t *cont;
 	};
 
 	type_t type;

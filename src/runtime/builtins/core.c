@@ -21,6 +21,30 @@ token_t *ext_proc_token( scheme_func handle ){
 	return ret;
 }
 
+token_t *builtin_get_last_continuation( stack_frame_t *frame ){
+	token_t *ret = NULL;
+
+	if ( frame->last && frame->last->last ){
+		stack_frame_t *temp = frame->last->last;
+
+		ret = gc_alloc_token( get_current_gc( frame ));
+		ret->type = TYPE_CONTINUATION;
+
+		if ( temp->last && temp->status == TYPE_PROCEDURE ){
+			temp = temp->last;
+		}
+
+		// TODO: mark this frame and all lower as captured
+		//ret->cont = frame->last->last;
+		//ret->cont = frame_capture( frame->last->last );
+
+		//ret->cont = frame_capture( frame->last->last->last );
+		ret->cont = frame_capture( temp );
+	}
+
+	return ret;
+}
+
 token_t *builtin_car( stack_frame_t *frame ){
 	token_t *move = frame->expr->next;
 	token_t *ret = NULL;

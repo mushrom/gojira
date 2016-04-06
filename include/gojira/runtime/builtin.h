@@ -63,6 +63,7 @@ token_t *builtin_floor( stack_frame_t *frame );
 
 token_t *builtin_eval( stack_frame_t *frame );
 token_t *builtin_apply( stack_frame_t *frame );
+token_t *builtin_get_last_continuation( stack_frame_t *frame );
 
 // miscellaneous
 token_t *builtin_random_int( stack_frame_t *frame );

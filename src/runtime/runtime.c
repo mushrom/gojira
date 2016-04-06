@@ -292,6 +292,15 @@ bool eval_frame_expr( stack_frame_t **frame_ret ){
 
 			break;
 
+		case TYPE_CONTINUATION:
+			{
+				stack_frame_t *temp = frame_restore( frame->expr->cont );
+				frame_add_token_noclone( temp, frame->expr->next );
+				*frame_ret = temp;
+				apply = false;
+			}
+			break;
+
 		default:
 			frame->error_call( frame, "[%s] Can't apply \"%s\"\n", __func__, type_str( frame->expr->type ));
 			ret = true;
@@ -299,7 +308,9 @@ bool eval_frame_expr( stack_frame_t **frame_ret ){
 	}
 
 	if ( apply && !ret ){
-		temp_frame = frame->last;
+		//temp_frame = frame->last;
+		temp_frame = frame_restore( frame->last );
+		frame->last = temp_frame;
 
 		/*
 		gc_mark_tree( frame->value );

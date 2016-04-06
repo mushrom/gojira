@@ -193,6 +193,21 @@ token_t *gc_clone_token( gbg_collector_t *gc, token_t *token ){
 
 	return ret;
 }
+
+token_t *gc_clone_token_spine( gbg_collector_t *gc, token_t *token ){
+	token_t *ret = NULL;
+
+	if ( token ){
+		ret = gc_clone_token( gc, token );
+
+		if ( token->next ){
+			ret->next = gc_clone_token_spine( gc, token->next );
+		}
+	}
+
+	return ret;
+}
+
 #include <signal.h>
 
 void *gc_register( gbg_collector_t *gc, void *thing ){
@@ -279,6 +294,7 @@ void gc_mark_env( gbg_collector_t *gc, env_t *env );
 void gc_mark_envs( gbg_collector_t *gc, env_t *env );
 void gc_mark_hashmap( gbg_collector_t *gc, hashmap_t *map );
 void gc_mark_vector( gbg_collector_t *gc, dlist_t *dlst );
+void gc_mark_frames( gbg_collector_t *garbage, stack_frame_t *top_frame );
 
 void gc_mark_tokens( gbg_collector_t *gc, token_t *tokens ){
 	token_t *move = tokens;
@@ -307,6 +323,10 @@ void gc_mark_tokens( gbg_collector_t *gc, token_t *tokens ){
 			dlist_t *dlst = shared_get( move->data );
 
 			gc_mark_vector( gc, dlst );
+		}
+
+		if ( move->type == TYPE_CONTINUATION ){
+			gc_mark_frames( gc, move->cont );
 		}
 
 		gc_mark_tokens( gc, move->down );

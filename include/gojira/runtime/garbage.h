@@ -67,6 +67,7 @@ typedef struct token token_t;
 
 token_t *gc_alloc_token( gbg_collector_t *gc );
 token_t *gc_clone_token( gbg_collector_t *gc, token_t *token );
+token_t *gc_clone_token_spine( gbg_collector_t *gc, token_t *token );
 void *gc_register( gbg_collector_t *gc, void *thing );
 //token_t *gc_register_token( gbg_collector_t *gc, token_t *token );
 token_t *gc_register_token_tree( gbg_collector_t *gc, token_t *tokens );

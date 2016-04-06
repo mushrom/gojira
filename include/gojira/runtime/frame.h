@@ -88,6 +88,9 @@ variable_t *global_add_func( stack_frame_t *frame, char *name, scheme_func handl
 st_frame_t *init_global_frame( st_frame_t *frame );
 st_frame_t *frame_create( st_frame_t *cur_frame, token_t *ptr, bool make_env );
 st_frame_t *frame_free( st_frame_t *frame );
+
+st_frame_t *frame_capture( stack_frame_t *frame );
+st_frame_t *frame_restore( stack_frame_t *frame );
 //void env_release( env_t *env );
 //env_t *env_aquire( env_t *env );
 //env_t *env_create( env_t *last );

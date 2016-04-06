@@ -49,6 +49,7 @@ struct global_builtin {
 
 	{ "eval",            builtin_eval },
 	{ "apply",           builtin_apply },
+	{ "intern-get-continuation", builtin_get_last_continuation },
 
 	// string functions
 	{ "string-append",   builtin_string_append },
@@ -453,6 +454,40 @@ token_t *frame_add_token_noclone( st_frame_t *frame, token_t *token ){
 	}
 
 	frame->ntokens++;
+
+	return ret;
+}
+
+stack_frame_t *frame_capture( stack_frame_t *frame ){
+	stack_frame_t *temp = frame;
+
+	//printf( "[%s] got here\n", __func__ );
+
+	for ( ; temp && !(temp->flags & RUNTIME_FLAG_CAPTURED); temp = temp->last ){
+		temp->flags |= RUNTIME_FLAG_CAPTURED;
+	}
+
+	return frame;
+}
+
+stack_frame_t *frame_restore( stack_frame_t *frame ){
+	stack_frame_t *ret = frame;
+
+	//printf( "[%s] Got here too\n", __func__ );
+
+	if ( frame->last && frame->flags & RUNTIME_FLAG_CAPTURED ){
+		//printf( "[%s] Restoring frame at %p...\n", __func__, frame );
+		ret = malloc( sizeof( stack_frame_t ));
+		*ret = *frame;
+		gc_register( get_current_gc( ret ), ret );
+		token_t *new_end = NULL;
+
+		ret->expr = gc_clone_token_spine( get_current_gc( ret ), frame->expr );
+		for ( new_end = ret->expr; new_end && new_end->next; new_end = new_end->next );
+
+		ret->end = new_end;
+		ret->flags &= ~RUNTIME_FLAG_CAPTURED;
+	}
 
 	return ret;
 }

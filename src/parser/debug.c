@@ -39,6 +39,8 @@ char *debug_strings[] = {
 	"external procedure",
 	"syntax",
 	"variable reference",
+	"continuation",
+
 	"file",
 	"iterator",
 	"socket",

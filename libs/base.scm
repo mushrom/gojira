@@ -95,6 +95,13 @@
 
 (define :builtin let* let)
 
+(define-syntax :builtin call-with-current-continuation
+  (syntax-rules ()
+    ((_ fn)
+     (fn (intern-get-continuation)))))
+
+(define :builtin call/cc call-with-current-continuation)
+
 (define-syntax :builtin when
   (syntax-rules ()
     ((_ condition body ...)
