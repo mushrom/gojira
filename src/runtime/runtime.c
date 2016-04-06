@@ -294,10 +294,19 @@ bool eval_frame_expr( stack_frame_t **frame_ret ){
 
 		case TYPE_CONTINUATION:
 			{
-				stack_frame_t *temp = frame_restore( frame->expr->cont );
-				frame_add_token_noclone( temp, frame->expr->next );
-				*frame_ret = temp;
-				apply = false;
+				if ( frame->ntokens == 2 ){
+					stack_frame_t *temp = frame_restore( frame->expr->cont );
+					frame_add_token_noclone( temp, frame->expr->next );
+					*frame_ret = temp;
+					apply = false;
+
+				} else {
+					frame->error_call( frame, "[%s] in continuation application: "
+						"expected 2 tokens, but have %u\n",
+						__func__, frame->ntokens );
+
+					ret = true;
+				}
 			}
 			break;
 
