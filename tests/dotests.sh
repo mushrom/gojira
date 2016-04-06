@@ -1,16 +1,17 @@
-#!/bin/bash
+#!/bin/sh
 
 echo "Running tests for ../out/gojira in $PWD"
 mkdir -p output
 
 tests="`ls src`"
 
-function get_expected_out {
+get_expected_out() {
 	cat $1 | grep '^;; => ' | sed 's/;; => //'
 }
 
+failed=0
+
 for module in $tests; do
-	failed=0
 	echo "  ====> $module"
 
 	for thing in `ls src/$module | grep -e ".scm$"`; do
