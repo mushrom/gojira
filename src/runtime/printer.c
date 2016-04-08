@@ -104,12 +104,13 @@ void file_print_token( FILE *fp, token_t *token, print_readable_t readable ){
 				shr = token->data;
 				proc = shared_get( shr );
 
-				fprintf( fp, "#<%s (", type_str( token->type ));
-				file_dump_tokens( fp, proc->args, readable );
+				fprintf( fp, "#<%s ", type_str( token->type ));
+				file_print_token( fp, proc->args, readable );
+
 #if GOJIRA_PUBLIC_MODE
-				fprintf( fp, ")>" );
+				fprintf( fp, ">" );
 #else
-				fprintf( fp, ") @ %p>", (void *)shr );
+				fprintf( fp, " @ %p>", (void *)shr );
 #endif
 				break;
 

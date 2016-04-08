@@ -84,7 +84,7 @@ token_t *expand_lambda( stack_frame_t *frame, token_t *tokens ){
 
 	//printf( "[%s] Storing environment at %p\n", __func__, proc->env );
 	//proc->args = gc_clone_token( get_current_gc( frame ), tokens->next->down );
-	proc->args = tokens->next->down;
+	proc->args = tokens->next;
 		//clone_tokens( tokens->next->down );
 	proc->body = temp;
 	shr = shared_new( proc, free_procedure );
@@ -126,40 +126,14 @@ token_t *expand_vector( stack_frame_t *frame, token_t *tokens ){
 	return ret;
 }
 
-stack_frame_t *expand_procedure( stack_frame_t *frame, token_t *tokens ){
-	stack_frame_t *ret = NULL;
-	token_t *move;
-	token_t *temp;
-	procedure_t *proc;
-	char *var_name;
-	shared_t *shr;
-
-	if ( tokens->type == TYPE_PROCEDURE ){
-		shr = tokens->data;
-		proc = shared_get( shr );
-		move = tokens->next;
-		temp = proc->args;
-
-		//gc_mark_env( &frame->gc, frame->env );
-		//env_release( frame->env );
-		//printf( "[%s] Old env was %p\n", __func__, frame->env );
-		if ( frame->last ){
-			//printf( "[%s] Previous frame env is %p\n", __func__, frame->last->env );
-		}
-
-		frame->env = env_create( get_current_gc( frame ), proc->env );
-		//printf( "[%s] New env is %p\n", __func__, frame->env );
-		frame->cur_func = gc_clone_token( get_current_gc( frame ), tokens );
-		frame->cur_func->next = NULL;
-
-		if ( frame->env->vars && frame->env->vars->nbuckets == 0 ){
-			printf( "[%s} have no buckets at %p based on %p...\n",
-				__func__, frame->env, proc->env );
-		}
+static void expand_procedure_args( stack_frame_t *frame, token_t *args, token_t *tokens ){
+	if ( args->type == TYPE_LIST ){
+		token_t *temp = args->down;
+		token_t *move = tokens;
 
 		foreach_in_list( temp ){
 			if ( temp->type == TYPE_SYMBOL ){
-				var_name = shared_get( temp->data );
+				const char *var_name = shared_get( temp->data );
 
 				// Handle variable-length arguments, which use the :rest keyword
 				if ( strcmp( var_name, ":rest" ) == 0 ){
@@ -171,45 +145,72 @@ stack_frame_t *expand_procedure( stack_frame_t *frame, token_t *tokens ){
 						newlist->type = TYPE_LIST;
 						newlist->down = move;
 
-						//frame_add_var( frame, var_name, newlist, NO_RECURSE, VAR_IMMUTABLE );
-						//env_add_var( frame->env, var_name, newlist, NO_RECURSE, VAR_IMMUTABLE );
 						env_add_var( frame->env, var_name, newlist, NO_RECURSE, VAR_MUTABLE );
-
-						//free_token( newlist );
 						break;
 
 					} else {
 						frame->error_call( frame,
-							"[%s] Error: Have unbound variable after :rest\n",
-							__func__ );
+										   "[%s] Error: Have unbound variable after :rest\n",
+										   __func__ );
 						break;
 					}
 
 				// otherwise handle regular variable bindings
 				} else {
 					if ( move ){
-						// TODO: allow specifying mutable parameters
-						//frame_add_var( frame, var_name, move, NO_RECURSE, VAR_IMMUTABLE );
 						token_t *newtoken = gc_clone_token( get_current_gc( frame ), move );
 						newtoken->next = NULL;
-						//env_add_var( frame->env, var_name, newtoken, NO_RECURSE, VAR_IMMUTABLE );
 						env_add_var( frame->env, var_name, newtoken, NO_RECURSE, VAR_MUTABLE );
 						move = move->next;
 
 					} else {
 						frame->error_call( frame,
-							"[%s] Error: Have unbound variable \"%s\"\n",
-							__func__, var_name );
+						   "[%s] Error: Have unbound variable \"%s\"\n",
+						   __func__, var_name );
 						break;
 					}
 				}
 
 			} else {
 				frame->error_call( frame,
-					"[%s] Error: expected symbol in procedure definition, have \"%s\"\n",
-					__func__, type_str( temp->type ));
+				   "[%s] Error: expected symbol in procedure definition, have \"%s\"\n",
+				   __func__, type_str( temp->type ));
 			}
 		}
+
+	} else if ( args->type == TYPE_SYMBOL ){
+		const char *var_name = shared_get( args->data );
+		token_t *temp = gc_alloc_token( get_current_gc( frame ));
+		temp->type = TYPE_LIST;
+		temp->down = tokens;
+		env_add_var( frame->env, var_name, temp, NO_RECURSE, VAR_MUTABLE );
+
+	} else {
+		frame->error_call( frame,
+		   "[%s] Error: invalid procedure definition, "
+		   "expected parameter list or symbol but have %s\n",
+		   __func__, type_str( args->type ));
+	}
+}
+
+stack_frame_t *expand_procedure( stack_frame_t *frame, token_t *tokens ){
+	stack_frame_t *ret = NULL;
+	//token_t *move;
+	//token_t *temp;
+	procedure_t *proc;
+	//char *var_name;
+	shared_t *shr;
+	token_t *temp;
+
+	if ( tokens->type == TYPE_PROCEDURE ){
+		shr = tokens->data;
+		proc = shared_get( shr );
+
+		frame->env = env_create( get_current_gc( frame ), proc->env );
+		frame->cur_func = gc_clone_token( get_current_gc( frame ), tokens );
+		frame->cur_func->next = NULL;
+
+		expand_procedure_args( frame, proc->args, tokens->next );
 
 		ret = frame;
 		ret->expr = ret->end = NULL;
