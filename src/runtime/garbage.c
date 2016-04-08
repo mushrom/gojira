@@ -299,9 +299,7 @@ void gc_mark_frames( gbg_collector_t *garbage, stack_frame_t *top_frame );
 void gc_mark_tokens( gbg_collector_t *gc, token_t *tokens ){
 	token_t *move = tokens;
 
-	for ( ; move; move = move->next ){
-		bool already_marked = move->gc_link.status == GC_MARKED;
-
+	for ( ; move && move->gc_link.status == GC_UNMARKED; move = move->next ){
 		move->gc_link.status = GC_MARKED;
 
 		if ( move->type == TYPE_PROCEDURE ){
