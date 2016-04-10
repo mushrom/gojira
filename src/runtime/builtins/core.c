@@ -479,9 +479,23 @@ token_t *builtin_return_last( stack_frame_t *frame ){
 token_t *builtin_stacktrace( stack_frame_t *frame ){
 	token_t *ret;
 
+	if ( frame->ntokens == 1 ){
+		stack_trace( frame );
+
+	} else if ( frame->ntokens == 2 &&
+	            frame->expr->next->type == TYPE_CONTINUATION )
+	{
+		stack_trace( frame->expr->next->cont );
+
+	} else {
+		FRAME_ERROR( frame,
+			"Expected no arguments or a continuation, but have %u args\n",
+			frame->ntokens );
+
+	}
+
 	ret = gc_alloc_token( get_current_gc( frame ));
 	ret->type = TYPE_NULL;
-	stack_trace( frame );
 
 	return ret;
 }

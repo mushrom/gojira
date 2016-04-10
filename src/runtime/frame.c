@@ -421,6 +421,7 @@ token_t *frame_add_token( st_frame_t *frame, token_t *token ){
 		//frame->expr = frame->end = meh = clone_token_tree( token );
 		//frame_register_token_tree( frame, meh );
 		frame->expr = frame->end = gc_clone_token( get_current_gc( frame ), token );
+		frame->end->next = NULL;
 		//frame_register_one_token( frame, meh );
 		//meh->status = GC_UNMARKED;
 
@@ -430,6 +431,7 @@ token_t *frame_add_token( st_frame_t *frame, token_t *token ){
 		frame->end->next = gc_clone_token( get_current_gc( frame ), token );
 		//frame->end->next->status = GC_UNMARKED;
 		frame->end = frame->end->next;
+		frame->end->next = NULL;
 	}
 
 	frame->ntokens++;
