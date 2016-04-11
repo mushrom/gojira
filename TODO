@@ -1,9 +1,28 @@
-(in no particular order)
+      - Implement i/o ports as specified in r7rs small, and adapt the socket functions
+        to use the port interface
 
-- Make garbage collection more efficient
-- Change stack frames to use immutable data structures,
-  so that tails calls and continuations would be easy to implement.
-- Add more bytevector functions as specified in r6rs
-- Begin working on a C FFI
-  - idea for FFI: have a 'messaging' or 'event' interface,
-    which can have multiple scheme functions registered to some key.
+      - implement exception handlers as specified in r7rs
+        - dynamic environment = not lexically scoped?
+          possibly store pointer to the current exception handler in stack frames
+
+      - rewrite parser to do iterative parsing, so (read) can be implemented correctly
+        - maybe complete that toy LL(1) parser, and use it to generate parsing rules
+
+      - Reimplement tri-color marking algorithm in GC. Once all objects are marked,
+        append the free list to a cache list which gets used for object allocation.
+        This should be much faster, since only live objects would ever have to be
+        traversed during GC cycles, and memory would be reused rather than having
+        to go to the malloc()/free() repeatedly.
+        Could also open the possibility of doing compacting.
+
+      - Clean up source a bit, add useful comments
+
+      - Add more bytevector functions as specified in r7rs
+
+      - Begin working on a C FFI
+        - idea for FFI: have a 'messaging' or 'event' interface,
+          which can have multiple scheme functions registered to some key.
+
+DONE  - Make garbage collection more efficient
+DONE  - implement tail call elimination
+DONE  - implement continuations
