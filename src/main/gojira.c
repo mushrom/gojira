@@ -15,14 +15,17 @@
 #include <linenoise/linenoise.h>
 
 // Some function definitions used only in this file.
+void make_argument_var( stack_frame_t *frame, int lastopt, int argc, char *argv[] );
+void read_eval_print( stack_frame_t *frame );
 void print_help( );
+
 char *read_input_file( FILE *fp );
 char *read_with_parens( FILE *fp );
 
 void goj_linenoise_complete( const char *buf, linenoiseCompletions *lc );
 
 // needed because linenoise doesn't support passing some sort of datastructure
-// to the completion callback, sorry
+// to the completion callback
 stack_frame_t *really_global_frame = NULL;
 
 int main( int argc, char *argv[] ){
@@ -48,13 +51,8 @@ int main( int argc, char *argv[] ){
 		// otherwise parse options
 		lastopt = 1;
 
-		while (( option = getopt( argc, argv, "hiLf:g:" )) != -1 && i++ < argc ){
+		while (( option = getopt( argc, argv, "hiLg:" )) != -1 && i++ < argc ){
 			switch ( option ){
-				case 'f':
-					fname = argv[++i];
-					interactive = false;
-					break;
-
 				case 'i':
 					interactive = true;
 					break;
@@ -125,74 +123,15 @@ int main( int argc, char *argv[] ){
 		evaluate_file( global_frame, BASE_LIB );
 	}
 
-	// If there were files passed, interpet them
-	if ( lastopt ){
-		for ( i = lastopt; i < argc; i++ ){
-			fname = argv[i];
-
-			// Let the user know what files are being interpreted, if in an REPL
-			if ( interactive )
-				printf( "Have file \"%s\"\n", fname );
-
-            evaluate_file( global_frame, fname );
-		}
-	}
+	make_argument_var( global_frame, lastopt, argc, argv );
+	evaluate_file( global_frame, argv[lastopt] );
 
 	// Go into the REPL if the interpreter flag is set
 	if ( interactive ){
-		linenoiseSetMultiLine( 1 );
-		linenoiseSetCompletionCallback( goj_linenoise_complete );
-		really_global_frame = global_frame;
-		char *buf = "";
-		unsigned n = 0;
-
-		while ( buf ){
-			// Read a statement
-			//printf( "> " );
-			//char *buf = read_with_parens( stdin );
-			buf = linenoise( "> " );
-			n++;
-
-			if ( buf ){
-				// generate a parse tree, and make sure all tokens are "clean" for the GC
-				//tree = remove_punc_tokens( parse_tokens( remove_meta_tokens( lexerize( buf ))));
-				tree = parse_scheme_tokens( buf );
-				//gc_unmark( tree );
-
-				// Only interpret the tree if there is a tree
-				if ( tree ){
-					char varexpr[64];
-					linenoiseHistoryAdd( buf );
-					global_frame->ptr = tree;
-
-					eval_loop( global_frame );
-
-					snprintf( varexpr, sizeof(varexpr) - 1, "..%u", n );
-
-					// do clone here
-					env_add_var( global_frame->env, varexpr,
-						global_frame->end, NO_RECURSE, VAR_IMMUTABLE );
-
-					env_add_var( global_frame->env, "..last",
-						global_frame->end, NO_RECURSE, VAR_MUTABLE );
-
-					printf( "..%u = ", n );
-					print_token( global_frame->end, OUTPUT_READABLE );
-					putchar( '\n' );
-
-					//free_tokens( tree );
-				}
-			}
-
-			// Free the statement that was read
-			free( buf );
-		}
+		read_eval_print( global_frame );
 	}
 
 	// Clean up the global frame, and free all tokens left in the token cache
-	//gc_sweep( global_frame->heap );
-	//gc_collect( &global_frame->env->gc, NULL );
-	//gc_collect( get_current_gc( global_frame ), NULL );
 	gc_collect( get_current_gc( global_frame ));
 	frame_free( global_frame );
 	destroy_token_cache( );
@@ -202,7 +141,89 @@ int main( int argc, char *argv[] ){
 
 // Displays the handy help message dialog
 void print_help( ){
-	printf( "Usage: gojira [-hiL] [files]\n" );
+	printf( "Usage: gojira [-hiLG] [file] [program arguments ...]\n"
+			"\t-i: enter REPL after [file] is executed. If no file is specified this is the default.\n"
+			"\t-G: Specify a garbage collector profile to use, out of the following:\n"
+			"\t      lowmem   : run the garbage collector frequently to reduce memory usage\n"
+			"\t      balanced : a compromise between speed and memory usage (default)\n"
+			"\t      fast     : run the garbage collector infrequently for better performance\n"
+
+			"\t-L: Don't load the base library when initializing. This option is really only\n"
+			"\t    useful for debugging the interpreter's internals.\n"
+			"\t-h: show this help and exit\n"
+			);
+}
+
+void make_argument_var( stack_frame_t *frame, int lastopt, int argc, char *argv[] ){
+	int i;
+	token_t *arglist = NULL;
+
+	if ( lastopt ){
+		token_t *move;
+		token_t *temp;
+		for ( i = lastopt + 1; i < argc; i++ ){
+			temp = gc_alloc_token( get_current_gc( frame ));
+			char *arg = argv[i];
+
+			temp->type = TYPE_STRING;
+			temp->flags |= T_FLAG_HAS_SHARED;
+			temp->data = shared_new( strdup( arg ), free_string );
+
+			if ( !arglist ){
+				arglist = move = temp;
+
+			} else {
+				move->next = temp;
+				move = temp;
+			}
+		}
+	}
+
+	token_t *argvar = gc_alloc_token( get_current_gc( frame ));
+	argvar->type = TYPE_LIST;
+	argvar->down = arglist;
+	env_add_var( frame->env, "*arguments*", argvar, NO_RECURSE, VAR_MUTABLE_BUILTIN );
+}
+
+void read_eval_print( stack_frame_t *frame ){
+	linenoiseSetMultiLine( 1 );
+	linenoiseSetCompletionCallback( goj_linenoise_complete );
+	really_global_frame = frame;
+	char *buf = "";
+	unsigned n = 0;
+	token_t *tree;
+
+	while ( buf ){
+		buf = linenoise( "> " );
+		n++;
+
+		if ( buf ){
+			tree = parse_scheme_tokens( buf );
+
+			if ( tree ){
+				char varexpr[64];
+
+				linenoiseHistoryAdd( buf );
+				frame->ptr = tree;
+				eval_loop( frame );
+
+				snprintf( varexpr, sizeof(varexpr) - 1, "..%u", n );
+
+				env_add_var( frame->env, varexpr,
+							 frame->end, NO_RECURSE, VAR_IMMUTABLE );
+
+				env_add_var( frame->env, "..last",
+							 frame->end, NO_RECURSE, VAR_MUTABLE );
+
+				printf( "..%u = ", n );
+				print_token( frame->end, OUTPUT_READABLE );
+				putchar( '\n' );
+			}
+		}
+
+		// Free the statement that was read
+		free( buf );
+	}
 }
 
 void goj_linenoise_complete( const char *buf, linenoiseCompletions *lc ){
