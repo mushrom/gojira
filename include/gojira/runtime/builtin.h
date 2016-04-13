@@ -9,6 +9,7 @@ extern "C" {
 #include <gojira/debugger/debugger.h>
 
 #include <gojira/runtime/builtins/bytevector.h>
+#include <gojira/runtime/builtins/port.h>
 
 // Convenience macros for displaying various errors builtins may have
 #define FRAME_ERROR( frame, msg, ... ) \
