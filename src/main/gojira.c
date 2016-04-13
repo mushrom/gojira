@@ -124,7 +124,10 @@ int main( int argc, char *argv[] ){
 	}
 
 	make_argument_var( global_frame, lastopt, argc, argv );
-	evaluate_file( global_frame, argv[lastopt] );
+
+	if ( lastopt ){
+		evaluate_file( global_frame, argv[lastopt] );
+	}
 
 	// Go into the REPL if the interpreter flag is set
 	if ( interactive ){
