@@ -320,10 +320,12 @@ void dump_runtime_to_dot( const char *fname, stack_frame_t *frame ){
 		//dump_tokens_to_dot( fp, frame->expr );
 		dump_env_to_dot( fp, frame->env );
 
+		/*
 		if ( frame->cur_func ){
 			fprintf( fp, "\tframe_%p -> token_%p [label=function, color=red, decorate=true]\n", frame, frame->cur_func );
 			dump_tokens_to_dot( fp, frame->cur_func );
 		}
+		*/
 
 		if ( frame->value ){
 			fprintf( fp, "\tframe_%p -> token_%p [label=value, color=red, decorate=true]\n", frame, frame->value );
@@ -368,7 +370,7 @@ st_frame_t *frame_create( st_frame_t *cur_frame, token_t *ptr, bool make_env ){
 	if ( cur_frame ){
 		ret->error_call = cur_frame->error_call;
 		ret->flags |= cur_frame->flags & RUNTIME_FLAG_TRACE;
-		ret->cur_func = cur_frame->cur_func;
+		//ret->cur_func = cur_frame->cur_func;
 		ret->garbage = cur_frame->garbage;
 
 		//gc_init( &cur_frame->gc, &ret->gc );

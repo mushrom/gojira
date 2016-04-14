@@ -58,28 +58,24 @@ typedef struct environment {
 	//unsigned refs;
 } env_t;
 
+#include <stdint.h>
+
 typedef struct stack_frame {
 	gbg_node_t gc_link;
-	struct stack_frame *last; // Pointer to previous frame
-	//token_t *ret;         // pointer to original place in code (return position)
-	token_t *ptr;         // pointer to next token to evaluate
-
-	env_t *env;
-	token_t *expr;        // reverse token list built during evaluation
-	token_t *end;       // Last token in the expression
-
-	token_t *value;       // value to return to last continuation
-	token_t *heap;        // List of all tokens allocated in the frame
-	token_t *cur_func;
-
-	error_printer error_call;
-
 	gbg_collector_t *garbage;
 
-	unsigned ntokens;     // Number of tokens in expr
-	unsigned status;
-	unsigned flags;       // various runtime flags
-	//unsigned references;
+	token_t *expr;            // reverse token list built during evaluation
+	token_t *end;             // Last token in the expression
+	token_t *ptr;             // pointer to next token to evaluate
+	token_t *value;           // value to return to last continuation
+
+	env_t *env;
+	struct stack_frame *last; // Pointer to previous frame
+	error_printer error_call;
+
+	unsigned ntokens;         // Number of tokens in expr
+	uint16_t status;
+	uint16_t flags;           // various runtime flags
 } stack_frame_t;
 typedef stack_frame_t st_frame_t;
 

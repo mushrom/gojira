@@ -161,7 +161,7 @@ static gbg_node_t *gc_list_move( gbg_collector_t *gc, gbg_node_t *node, unsigned
 	} else {
 		printf( "[%s] Invalid move request\n", __func__ );
 		printf( "\tToken color: %u, token: %p, next: %p, token gc: %u, gc id: %u\n",
-			__func__, node->status, node, node->next, node->id, gc->id );
+			__func__, node->status, node, node->next, /*node->id*/ 1, gc->id );
 	}
 
 	return ret;

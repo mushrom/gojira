@@ -33,7 +33,6 @@ typedef struct gbg_node {
 	struct gbg_node *prev;
 	unsigned type;
 	unsigned status;
-	unsigned id;
 } gbg_node_t;
 
 typedef struct gbg_list {

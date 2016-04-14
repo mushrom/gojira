@@ -108,7 +108,7 @@ typedef struct token {
 	};
 
 	type_t type;
-	unsigned gc_id;
+	//unsigned gc_id;
 	unsigned status;    // Used for rule reduction while parsing, and for
 	                    // garbage status during runtime.
 	token_flag_t flags; // special flags about the token

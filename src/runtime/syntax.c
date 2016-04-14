@@ -207,8 +207,8 @@ stack_frame_t *expand_procedure( stack_frame_t *frame, token_t *tokens ){
 		proc = shared_get( shr );
 
 		frame->env = env_create( get_current_gc( frame ), proc->env );
-		frame->cur_func = gc_clone_token( get_current_gc( frame ), tokens );
-		frame->cur_func->next = NULL;
+		//frame->cur_func = gc_clone_token( get_current_gc( frame ), tokens );
+		//frame->cur_func->next = NULL;
 
 		expand_procedure_args( frame, proc->args, tokens->next );
 

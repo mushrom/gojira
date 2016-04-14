@@ -36,7 +36,7 @@ static unsigned dump_frame_heaps( stack_frame_t *frame, unsigned limit, unsigned
 
 	if ((( limit && n < limit ) || !limit ) && frame ){
 		printf( "frame %3u: ", n );
-		total += p_heap( frame->heap );
+		//total += p_heap( frame->heap );
 		printf( "\n" );
 		total += dump_frame_heaps( frame->last, limit, n + 1 );
 	}

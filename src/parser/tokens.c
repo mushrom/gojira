@@ -156,7 +156,7 @@ token_t *clone_token( const token_t *token ){
 
 	ret = alloc_token( );
 	*ret = *token;
-	ret->gc_id = 0;
+	//ret->gc_id = 0;
 
 	//if ( has_shared_data( token->type )){
 	if ( token->flags & T_FLAG_HAS_SHARED ){ 
