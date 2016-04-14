@@ -4,46 +4,43 @@
 #include <stdbool.h>
 #include <limits.h>
 
-
-static gbg_node_t *gc_list_add( gbg_collector_t *gc, gbg_node_t *node ){
-	//gbg_list_t *list = &gc->colors[color];
+static gbg_node_t *gc_list_add( gbg_collector_t *gc, gbg_node_t *node, unsigned color ){
+	gbg_list_t *list = &gc->colors[color];
 
 	if ( !gc ){
 		printf( "[%s] Given a null GC, things will break\n", __func__ );
 	}
 
-	if ( gc->start && !gc->end ){
+	if ( list->start && !list->end ){
 		printf( "[%s] Have a list with a start but no end\n", __func__ );
 	}
 
 	//node->id = gc->id;
-	node->next = gc->start;
+	node->next = list->start;
 	node->prev = NULL;
 	//node->gc_data = gc;
-	//node->status = color;
+	node->status = color;
 
 	//list->start = node;
-	gc->start = node;
-	gc->length++;
+	list->start = node;
+	list->length++;
 
 	if ( node->next ){
 		node->next->prev = node;
 	}
 
-	//if ( list->start ){
-	//	list->start->gc_prev = node;
-	//	gc->white->gc_prev = node;
-	//}
-
-	if ( !gc->end ){
-		gc->end = node;
+	if ( !list->end ){
+		list->end = node;
 	}
 
-	if ( gc->start->prev != NULL ){
+	// TODO: remove these comments eventually,
+	//       these are here in case they're needed for debugging
+	/*
+	if ( list->start->prev != NULL ){
 		printf( "[%s] Have a start with nodes after it...\n", __func__ );
 	}
 
-	if ( gc->end->next != NULL ){
+	if ( list->end->next != NULL ){
 		printf( "[%s] Have an end with nodes after it...\n", __func__ );
 		//for ( ; gc->end->gc_next; gc->end = gc->end->gc_next );
 	}
@@ -55,12 +52,13 @@ static gbg_node_t *gc_list_add( gbg_collector_t *gc, gbg_node_t *node ){
 	if ( node->prev == node ){
 		printf( "[%s] node %p->gc_prev is itself???\n", __func__, node );
 	}
+	*/
 
 	return node;
 }
 
 static gbg_node_t *gc_list_remove( gbg_collector_t *gc, gbg_node_t *node ){
-	//gbg_list_t *list = &gc->colors[node->status];
+	gbg_list_t *list = &gc->colors[node->status];
 
 	//printf( "[%s] removing %p, %u, start = %p, end = %p\n", __func__, node, gc->id, list->start, list->end );
 
@@ -86,16 +84,16 @@ static gbg_node_t *gc_list_remove( gbg_collector_t *gc, gbg_node_t *node ){
 	}
 	*/
 
-	if ( node == gc->start ){
-		gc->start = node->next;
+	if ( node == list->start ){
+		list->start = node->next;
 		//printf( "[%s] Set new list start, %p\n", __func__, list->start );
 	}
 
-	if ( node == gc->end ){
+	if ( node == list->end ){
 		if ( node->prev ){
-			gc->end = node->prev;
+			list->end = node->prev;
 		} else {
-			gc->end = gc->start;
+			list->end = list->start;
 		}
 
 		//printf( "[%s] Set new list end, %p\n", __func__, list->start );
@@ -148,28 +146,26 @@ static gbg_node_t *gc_list_remove( gbg_collector_t *gc, gbg_node_t *node ){
 
 	node->prev = node->next = NULL;
 
-	gc->length--;
+	list->length--;
 
 	return node;
 }
 
-/*
-static token_t *gc_list_move( gbg_collector_t *gc, unsigned color, token_t *token ){
-	token_t *ret = token;
+static gbg_node_t *gc_list_move( gbg_collector_t *gc, gbg_node_t *node, unsigned color ){
+	gbg_node_t *ret = node;
 
-	if ( token->status < 3 && gc->id >= gc->id ){
-		gc_list_remove( gc, token );
-		gc_list_add( gc, color, token );
+	if ( node->status < 3 /* && gc->id >= gc->id */ ){
+		gc_list_remove( gc, node );
+		gc_list_add( gc, node, color );
 
 	} else {
 		printf( "[%s] Invalid move request\n", __func__ );
 		printf( "\tToken color: %u, token: %p, next: %p, token gc: %u, gc id: %u\n",
-			__func__, token->status, token, token->gc_next, token->gc_id, gc->id );
+			__func__, node->status, node, node->next, node->id, gc->id );
 	}
 
 	return ret;
 }
-*/
 
 token_t *gc_alloc_token( gbg_collector_t *gc ){
 	//token_t *ret = gc_list_add( gc, GC_COLOR_WHITE, alloc_token( ));
@@ -213,9 +209,9 @@ token_t *gc_clone_token_spine( gbg_collector_t *gc, token_t *token ){
 void *gc_register( gbg_collector_t *gc, void *thing ){
 	gbg_node_t *node = thing;
 
-	node->status = GC_UNMARKED;
+	//node->status = GC_UNMARKED;
 
-	gc_list_add( gc, node );
+	gc_list_add( gc, node, GC_COLOR_WHITE );
 
 	//return node;
 	return thing;
@@ -290,44 +286,52 @@ token_t *gc_move_token( gbg_collector_t *to, gbg_collector_t *from, token_t *tok
 #include <gojira/runtime/runtime.h>
 #include <gojira/libs/dlist.h>
 
+void gc_move_upwards( gbg_collector_t *gc, void *thing, unsigned color ){
+	if ( thing ){
+		gbg_node_t *node = thing;
+
+		if ( node->status == GC_COLOR_WHITE || color > node->status ){
+			gc_list_move( gc, node, color );
+		}
+	}
+}
+
 void gc_mark_env( gbg_collector_t *gc, env_t *env );
-void gc_mark_envs( gbg_collector_t *gc, env_t *env );
 void gc_mark_hashmap( gbg_collector_t *gc, hashmap_t *map );
 void gc_mark_vector( gbg_collector_t *gc, dlist_t *dlst );
-void gc_mark_frames( gbg_collector_t *garbage, stack_frame_t *top_frame );
+void gc_mark_frame( gbg_collector_t *garbage, stack_frame_t *top_frame );
 
-void gc_mark_tokens( gbg_collector_t *gc, token_t *tokens ){
-	token_t *move = tokens;
+void gc_mark_token( gbg_collector_t *gc, token_t *token ){
+	if ( token ){
+		gc_move_upwards( gc, token, GC_COLOR_GREY );
 
-	for ( ; move && move->gc_link.status == GC_UNMARKED; move = move->next ){
-		move->gc_link.status = GC_MARKED;
-
-		if ( move->type == TYPE_PROCEDURE ){
+		if ( token->type == TYPE_PROCEDURE ){
 			//printf( "[%s] Got here\n", __func__ );
-			procedure_t *proc = shared_get( move->data );
+			procedure_t *proc = shared_get( token->data );
 
-			gc_mark_envs( gc, proc->env );
-			gc_mark_tokens( gc, proc->body );
-			gc_mark_tokens( gc, proc->args );
+			gc_move_upwards( gc, proc->env, GC_COLOR_GREY );
+			gc_move_upwards( gc, proc->body, GC_COLOR_GREY );
+			gc_move_upwards( gc, proc->args, GC_COLOR_GREY );
 		}
 
-		if ( move->type == TYPE_HASHMAP ){
-			hashmap_t *map = shared_get( move->data );
+		if ( token->type == TYPE_HASHMAP ){
+			hashmap_t *map = shared_get( token->data );
 
 			gc_mark_hashmap( gc, map );
 		}
 
-		if ( move->type == TYPE_VECTOR ){
-			dlist_t *dlst = shared_get( move->data );
+		if ( token->type == TYPE_VECTOR ){
+			dlist_t *dlst = shared_get( token->data );
 
 			gc_mark_vector( gc, dlst );
 		}
 
-		if ( move->type == TYPE_CONTINUATION ){
-			gc_mark_frames( gc, move->cont );
+		if ( token->type == TYPE_CONTINUATION ){
+			gc_move_upwards( gc, token->cont, GC_COLOR_GREY );
 		}
 
-		gc_mark_tokens( gc, move->down );
+		gc_move_upwards( gc, token->down, GC_COLOR_GREY );
+		gc_move_upwards( gc, token->next, GC_COLOR_GREY );
 	}
 }
 
@@ -341,7 +345,8 @@ void gc_mark_hashmap( gbg_collector_t *gc, hashmap_t *map ){
 
 		for ( ; node; node = temp ){
 			temp = node->next;
-			gc_mark_tokens( gc, node->data );
+			//gc_mark_token( gc, node->data );
+			gc_move_upwards( gc, node->data, GC_COLOR_GREY );
 		}
 	}
 }
@@ -350,14 +355,13 @@ void gc_mark_vector( gbg_collector_t *gc, dlist_t *dlst ){
 	unsigned i;
 
 	foreach_in_dlist( i, dlst ){
-		//printf( "[%s] Freeing vector element at %p\n", __func__, dlist_get( dlst, i ));
-		gc_mark_tokens( gc, dlist_get( dlst, i ));
+		gc_move_upwards( gc, dlist_get( dlst, i ), GC_COLOR_GREY );
 	}
 }
 
 void gc_mark_env( gbg_collector_t *gc, env_t *env ){
-	if ( env && env->gc_link.status != GC_MARKED ){
-		env->gc_link.status = GC_MARKED;
+	if ( env ){
+		gc_move_upwards( gc, env, GC_COLOR_GREY );
 
 		if ( env->vars ){
 			unsigned i;
@@ -368,11 +372,39 @@ void gc_mark_env( gbg_collector_t *gc, env_t *env ){
 
 				foreach_in_list( node ){
 					variable_t *var = shared_get( node->data );
-					//gc_color_tokens( gc, GC_COLOR_GREY, var->token );
-					gc_mark_tokens( gc, var->token );
+					gc_move_upwards( gc, var->token, GC_COLOR_GREY );
 				}
 			}
 		}
+
+		gc_move_upwards( gc, env->last, GC_COLOR_GREY );
+	}
+}
+
+void gc_mark_frame( gbg_collector_t *garbage, stack_frame_t *frame ){
+	unsigned i;
+
+	if ( frame ){
+		gc_move_upwards( garbage, frame, GC_COLOR_GREY );
+
+		if ( frame->env ){
+			gc_move_upwards( garbage, frame->env, GC_COLOR_GREY );
+		}
+
+		gc_move_upwards( garbage, frame->expr, GC_COLOR_GREY );
+		gc_move_upwards( garbage, frame->ptr, GC_COLOR_GREY );
+
+		if ( frame->value ){
+			gc_move_upwards( garbage, frame->value, GC_COLOR_GREY );
+		}
+
+		/*
+		if ( frame->cur_func ){
+			//gc_mark_tokens( garbage, temp->cur_func );
+		}
+		*/
+
+		gc_move_upwards( garbage, frame->last, GC_COLOR_GREY );
 	}
 }
 
@@ -408,7 +440,7 @@ void gc_set_interval( gbg_collector_t *gc, unsigned length, unsigned freed ){
 	printf( "[set_interval] interval: %u, length: %u, freed: %u "
 			"ratio: %f, total: %f, adjust: %u\n",
 		gc->interval, length, freed, ratio, total, adjust );
-		*/
+	*/
 
 	gc->interval = adjust;
 }
@@ -417,45 +449,49 @@ void gc_collect( gbg_collector_t *gc ){
 	gbg_node_t *temp;
 	gbg_node_t *foo;
 
-	unsigned length = gc->length;
+	foo = gc->colors[GC_COLOR_GREY].start;
+
+	unsigned length = gc->colors[GC_COLOR_WHITE].length + gc->colors[GC_COLOR_GREY].length;
 	unsigned freed = 0;
 
-	//gc_grey_gbg_nodes( gc, root_nodes );
-	//gc_color_gbg_nodes( gc, GC_COLOR_GREY, root_nodes );
-	//gc_mark_gbg_nodes( gc, root_nodes );
+	while ( foo ){
+		gc_move_upwards( gc, foo, GC_COLOR_BLACK );
 
-	temp = gc->start;
-
-	while ( temp ){
-		switch ( temp->status ){
-			case GC_UNMARKED:
-				freed++;
-
-				foo = temp->next;
-				gc_list_remove( gc, temp );
-				free_gbg_node( temp );
-				temp = foo;
-
+		switch ( foo->type ){
+			case GC_TYPE_TOKEN:
+				//puts( "marking token..." );
+				gc_mark_token( gc, (token_t *)foo );
 				break;
 
-			case GC_MARKED:
-				temp->status = GC_UNMARKED;
-				temp = temp->next;
+			case GC_TYPE_ENVIRONMENT:
+				//puts( "marking environment..." );
+				gc_mark_env( gc, (env_t *)foo );
+				break;
+
+			case GC_TYPE_CONTINUATION:
+				//puts( "marking continuation..." );
+				gc_mark_frame( gc, (stack_frame_t *)foo );
 				break;
 
 			default:
-				temp = temp->next;
+				puts( "shouldn't get here..." );
 				break;
 		}
+
+		foo = gc->colors[GC_COLOR_GREY].start;
 	}
 
+	while (( temp = gc->colors[GC_COLOR_WHITE].start )){
+		gc_list_remove( gc, temp );
+		free_gbg_node( temp );
+	}
+
+	while (( temp = gc->colors[GC_COLOR_BLACK].start )){
+		gc_list_move( gc, temp, GC_COLOR_WHITE );
+	}
+
+	freed = length - gc->colors[GC_COLOR_WHITE].length;
 	gc_set_interval( gc, length, freed );
-
-	//unsigned max_iters = (iters > 0)? iters : UINT_MAX;
-	//unsigned i;
-
-	//printf( "[%s] doing garbage collection...\n", __func__ );
-	//printf( "[%s] done\n", __func__ );
 }
 
 bool gc_should_collect( gbg_collector_t *gc ){
@@ -505,24 +541,22 @@ gbg_collector_t *gc_init( gbg_collector_t *old_gc, gbg_collector_t *new_gc ){
 		new_gc->target_ratio = old_gc->target_ratio;
 
 	} else {
-		gc_set_profile( new_gc, GC_PROFILE_LOWMEM );
+		gc_set_profile( new_gc, GC_PROFILE_BALANCED );
 		new_gc->id = 1;
 	}
 
 	unsigned i;
-	/*
 	for ( i = 0; i < 3; i++ ){
 		new_gc->colors[i].start  = NULL;
 		new_gc->colors[i].end    = NULL;
 		new_gc->colors[i].length = 0;
 	}
-	*/
 
-	new_gc->start = new_gc->end = NULL;
+	//new_gc->start = new_gc->end = NULL;
 
 	new_gc->iter = 0;
 	new_gc->interval = new_gc->default_interval;
-	new_gc->length = 0;
+	//new_gc->length = 0;
 
 	/*
 	new_gc->white = new_gc->black = new_gc->grey = NULL;
@@ -575,6 +609,7 @@ gbg_collector_t *gc_merge( gbg_collector_t *first, gbg_collector_t *second ){
 	*/
 		//printf( "[%s] Got here\n", __func__ );
 
+	/*
 	if ( first == second ){
 		return first;
 	}
@@ -595,10 +630,12 @@ gbg_collector_t *gc_merge( gbg_collector_t *first, gbg_collector_t *second ){
 	}
 
 	first->iter += second->iter;
+	*/
 
 	return first;
 }
 
+/*
 void gc_mark_envs( gbg_collector_t *garbage, env_t *top_env ){
 	env_t *temp = top_env;
 	unsigned i;
@@ -613,34 +650,8 @@ void gc_mark_envs( gbg_collector_t *garbage, env_t *top_env ){
 
 	//printf( "[%s] marked %u environments at %p...\n", __func__, i, top_env );
 }
+*/
 
-void gc_mark_frames( gbg_collector_t *garbage, stack_frame_t *top_frame ){
-	stack_frame_t *temp = top_frame;
-	unsigned i;
-
-	for ( i = 0; temp; temp = temp->last, i++ ){
-		//printf( "[%s] Marking frame %p, env: %p\n", __func__, temp, temp->env );
-		temp->gc_link.status = GC_MARKED;
-
-		if ( temp->env ){
-			//gc_mark_env( garbage, temp->env );
-			gc_mark_envs( garbage, temp->env );
-		}
-
-		gc_mark_tokens( garbage, temp->expr );
-		gc_mark_tokens( garbage, temp->ptr );
-
-		if ( temp->value ){
-			gc_mark_tokens( garbage, temp->value );
-		}
-
-		if ( temp->cur_func ){
-			//gc_mark_tokens( garbage, temp->cur_func );
-		}
-	}
-
-	//printf( "[%s] marked %u frames\n", __func__, i );
-}
 
 void gc_try_to_collect_frame( stack_frame_t *frame ){
 	gbg_collector_t *garbage = get_current_gc( frame );
@@ -648,7 +659,7 @@ void gc_try_to_collect_frame( stack_frame_t *frame ){
 	if ( gc_should_collect( garbage )){
 		//printf( "[%s] starting garbage collection...\n", __func__ );
 		//printf( "[%s] marking things...\n", __func__ );
-		gc_mark_frames( garbage, frame );
+		gc_mark_frame( garbage, frame );
 		//gc_collect( garbage, frame->value );
 		//gc_collect( garbage, NULL );
 		//dump_garbage_list( garbage );

@@ -2,19 +2,18 @@
 #define _GOJIRA_RUNTIME_GARBAGE_H
 #include <stdbool.h>
 
-// Debugging stuff, remove me eventually
-//#include <gojira/runtime/frame.h>
 #include <stdio.h>
 
 enum {
-	/*
 	GC_COLOR_WHITE,
-	GC_COLOR_BLACK,
 	GC_COLOR_GREY,
-	*/
+	GC_COLOR_BLACK,
+
+	/*
 	GC_UNMARKED,
 	GC_MARKED,
 	GC_FREED,
+	*/
 };
 
 enum {
@@ -29,14 +28,6 @@ enum {
 	GC_PROFILE_LOWMEM,
 };
 
-/*
-typedef struct gbg_list {
-	token_t *start;
-	token_t *end;
-	unsigned length;
-} gbg_list_t;
-*/
-
 typedef struct gbg_node {
 	struct gbg_node *next;
 	struct gbg_node *prev;
@@ -45,15 +36,14 @@ typedef struct gbg_node {
 	unsigned id;
 } gbg_node_t;
 
-typedef struct gbg_collector {
-	//gbg_list_t colors[3];
-	/*
-	token_t *start;
-	token_t *end;
-	*/
+typedef struct gbg_list {
 	gbg_node_t *start;
 	gbg_node_t *end;
 	unsigned length;
+} gbg_list_t;
+
+typedef struct gbg_collector {
+	gbg_list_t colors[3];
 	unsigned id;
 	unsigned iter;
 	unsigned interval;

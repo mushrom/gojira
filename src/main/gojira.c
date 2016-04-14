@@ -136,7 +136,7 @@ int main( int argc, char *argv[] ){
 
 	// Clean up the global frame, and free all tokens left in the token cache
 	gc_collect( get_current_gc( global_frame ));
-	frame_free( global_frame );
+	//frame_free( global_frame );
 	destroy_token_cache( );
 
 	return ret;
