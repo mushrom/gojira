@@ -17,7 +17,8 @@ static void expand_mlisp_indent( stack_t *stack, token_t *pos );
 static void expand_mlisp_newline( stack_t *stack, token_t *pos );
 
 static inline token_t *make_token( type_t type, token_t *next ){
-	token_t *ret = calloc( 1, sizeof( token_t ));
+	//token_t *ret = calloc( 1, sizeof( token_t ));
+	token_t *ret = alloc_block( );
 
 	ret->type = type;
 	ret->next = next;

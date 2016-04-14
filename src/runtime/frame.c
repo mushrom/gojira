@@ -354,7 +354,8 @@ void default_error_printer( stack_frame_t *frame, char *fmt, ... ){
 st_frame_t *frame_create( st_frame_t *cur_frame, token_t *ptr, bool make_env ){
 	st_frame_t *ret;
 
-	ret = calloc( 1, sizeof( st_frame_t ));
+	//ret = calloc( 1, sizeof( st_frame_t ));
+	ret = alloc_block( );
 	ret->last = cur_frame;
 	ret->ptr = ptr;
 

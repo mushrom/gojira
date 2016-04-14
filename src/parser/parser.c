@@ -69,7 +69,8 @@ token_t *baseline( token_t *tokens, rule_t *rules ){
 	move = baseline_iter( move, rules );
 
 	if ( move->status != TYPE_NULL ){
-		temp = calloc( 1, sizeof( token_t ));
+		//temp = calloc( 1, sizeof( token_t ));
+		temp = alloc_block( );
 		temp->type = move->status;
 		temp->down = ret;
 

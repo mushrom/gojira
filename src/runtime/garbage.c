@@ -423,6 +423,7 @@ static void free_gbg_node( gbg_node_t *node ){
 			break;
 
 		default:
+			printf( "have unknown type %u?\n", node->type );
 			break;
 	}
 }
@@ -440,10 +441,12 @@ void gc_set_interval( gbg_collector_t *gc, unsigned length, unsigned freed ){
 	printf( "[set_interval] interval: %u, length: %u, freed: %u "
 			"ratio: %f, total: %f, adjust: %u\n",
 		gc->interval, length, freed, ratio, total, adjust );
-	*/
+		*/
 
 	gc->interval = adjust;
 }
+
+#include <gojira/runtime/allocate.h>
 
 void gc_collect( gbg_collector_t *gc ){
 	gbg_node_t *temp;
@@ -481,14 +484,25 @@ void gc_collect( gbg_collector_t *gc ){
 		foo = gc->colors[GC_COLOR_GREY].start;
 	}
 
+	/*
 	while (( temp = gc->colors[GC_COLOR_WHITE].start )){
 		gc_list_remove( gc, temp );
 		free_gbg_node( temp );
+	}
+	*/
+	cache_blocks( &gc->colors[GC_COLOR_WHITE] );
+
+	{
+		gbg_list_t *list = &gc->colors[GC_COLOR_WHITE];
+
+		list->start = list->end = NULL;
+		list->length = 0;
 	}
 
 	while (( temp = gc->colors[GC_COLOR_BLACK].start )){
 		gc_list_move( gc, temp, GC_COLOR_WHITE );
 	}
+
 
 	freed = length - gc->colors[GC_COLOR_WHITE].length;
 	gc_set_interval( gc, length, freed );

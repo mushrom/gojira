@@ -44,7 +44,8 @@ void env_free( env_t *env ){
 
 env_t *env_create( gbg_collector_t *gc, env_t *last ){
 	//env_t *ret = calloc( 1, sizeof( env_t ));
-	env_t *ret = gc_register( gc, calloc( 1, sizeof( env_t )));
+	//env_t *ret = gc_register( gc, calloc( 1, sizeof( env_t )));
+	env_t *ret = gc_register( gc, alloc_block ( ));
 	//ret->last = env_aquire( last );
 	ret->last = last;
 	ret->gc_link.type = GC_TYPE_ENVIRONMENT;

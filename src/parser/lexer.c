@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <gojira/lexer.h>
 #include <gojira/libs/shared.h>
+#include <gojira/runtime/allocate.h>
 
 #define ALPHABET	"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #define DIGITS		"0123456789"
@@ -50,7 +51,8 @@ token_t *lexerize( const char *string ){
 		foo = get_token_from_str( foo.string );
 	}
 
-	move->next = calloc( 1, sizeof( token_t ));
+	//move->next = calloc( 1, sizeof( token_t ));
+	move->next = alloc_block( );
 	move->next->type = TYPE_NULL;
 
 	return temp.next;
@@ -120,7 +122,8 @@ static token_return_t get_token_from_str( const char *string ){
 	unsigned i, indent = 0;
 	
 	ret = (token_return_t){
-		.token 	= calloc( 1, sizeof( token_t )),
+		//.token 	= calloc( 1, sizeof( token_t )),
+		.token 	= alloc_block( ),
 		.string	= NULL,
 		.found	= false,
 		.freed  = false,
