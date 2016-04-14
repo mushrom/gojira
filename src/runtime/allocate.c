@@ -77,7 +77,6 @@ token_t *alloc_token( void ){
 }
 
 void cache_blocks( gbg_list_t *list ){
-	printf( "%u\n", sizeof( memblock_t ));
 	if ( nodeheap.start && list->start ){
 		nodeheap.end->next = list->start;
 		list->start->prev = nodeheap.end;
