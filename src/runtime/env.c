@@ -35,8 +35,16 @@ void env_release( env_t *env ){
 }
 */
 
+static inline variable_t *variable_create( gbg_collector_t *gc ){
+	variable_t *ret = gc_register( gc, alloc_block( ));
+
+	ret->gc_link.type = GC_TYPE_VARIABLE;
+
+	return ret;
+}
+
 void env_free( env_t *env ){
-	env_free_vars( env );
+	//env_free_vars( env );
 
 	free( env );
 	//printf( "[%s] Got here, %p\n", __func__, env );
@@ -49,6 +57,7 @@ env_t *env_create( gbg_collector_t *gc, env_t *last ){
 	//ret->last = env_aquire( last );
 	ret->last = last;
 	ret->gc_link.type = GC_TYPE_ENVIRONMENT;
+	ret->garbage = gc;
 	//ret->refs = 1;
 
 	/*
@@ -65,6 +74,7 @@ env_t *env_create( gbg_collector_t *gc, env_t *last ){
 	return ret;
 }
 
+/*
 env_t *env_free_vars( env_t *env ){
 	list_node_t *move, *temp;
 	hashmap_t *map;
@@ -90,18 +100,30 @@ env_t *env_free_vars( env_t *env ){
 
 	return NULL;
 }
+*/
 
 //variable_t *frame_find_var_struct_hash( st_frame_t *frame, unsigned hash, bool recurse ){
 variable_t *env_find_var_struct_hash( env_t *env, unsigned hash, bool recurse ){
 	variable_t *ret = NULL;
-	shared_t *shr;
+	//shared_t *shr;
 
 	if ( env ){
 		if ( env->vars ){
-			shr = hashmap_get( env->vars, hash );
+			variable_t *move = env->vars;
+
+			foreach_in_list( move ){
+				if ( move->hash == hash ){
+					ret = move;
+					break;
+				}
+			}
+
+			//shr = hashmap_get( env->vars, hash );
+			/*
 			if ( shr ){
 				ret = shared_get( shr );
 			}
+			*/
 
 			if ( !ret && recurse ){
 				ret = env_find_var_struct_hash( env->last, hash, recurse );
@@ -115,6 +137,7 @@ variable_t *env_find_var_struct_hash( env_t *env, unsigned hash, bool recurse ){
 	return ret;
 }
 
+/*
 shared_t *env_find_shared_struct_hash( env_t *env, unsigned hash, bool recurse ){
 	shared_t *ret = NULL;
 
@@ -133,6 +156,7 @@ shared_t *env_find_shared_struct_hash( env_t *env, unsigned hash, bool recurse )
 
 	return ret;
 }
+*/
 
 token_t *env_find_var_hash( env_t *env, unsigned hash, bool recurse ){
 	token_t *ret = NULL;
@@ -166,6 +190,7 @@ variable_t *env_find_var_struct( env_t *env, const char *key, bool recurse ){
 	return ret;
 }
 
+/*
 shared_t *env_find_shared_struct( env_t *env, const char *key, bool recurse ){
 	shared_t *ret = NULL;
 	unsigned hash;
@@ -175,6 +200,7 @@ shared_t *env_find_shared_struct( env_t *env, const char *key, bool recurse ){
 
 	return ret;
 }
+*/
 
 void free_var( void *ptr ){
 	if ( ptr ){
@@ -191,21 +217,26 @@ variable_t *env_add_var( env_t *env, const char *key, token_t *token, bool recur
 	shared_t *new_shared = NULL;
 
 	if ( env ){
+		/*
 		if ( !env->vars )
 			env->vars = hashmap_create( 8 );
+		*/
 
 		new_var = env_find_var_struct( env, key, recurse );
 
 		if ( !new_var ){
-			new_var = calloc( 1, sizeof( variable_t ));
+			//new_var = calloc( 1, sizeof( variable_t ));
+			new_var = variable_create( env->garbage );
 			new_var->key = strdup( key );
 			new_var->hash = hash_string( key );
 			new_var->is_mutable = mutable;
 			//new_var->token = clone_token_tree( token );
 			new_var->token = token;
-			new_shared = shared_new( new_var, free_var );
+			//new_shared = shared_new( new_var, free_var );
+			new_var->next = env->vars;
+			env->vars = new_var;
 
-			hashmap_add( env->vars, new_var->hash, new_shared );
+			//hashmap_add( env->vars, new_var->hash, new_shared );
 
 		} else if ( new_var->is_mutable ){
 			if ( new_var->is_mutable == VAR_MUTABLE_BUILTIN ){

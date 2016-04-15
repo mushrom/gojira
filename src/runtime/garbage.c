@@ -300,6 +300,7 @@ void gc_mark_env( gbg_collector_t *gc, env_t *env );
 void gc_mark_hashmap( gbg_collector_t *gc, hashmap_t *map );
 void gc_mark_vector( gbg_collector_t *gc, dlist_t *dlst );
 void gc_mark_frame( gbg_collector_t *garbage, stack_frame_t *top_frame );
+void gc_mark_variable( gbg_collector_t *garbage, variable_t *var );
 
 void gc_mark_token( gbg_collector_t *gc, token_t *token ){
 	if ( token ){
@@ -362,9 +363,13 @@ void gc_mark_vector( gbg_collector_t *gc, dlist_t *dlst ){
 void gc_mark_env( gbg_collector_t *gc, env_t *env ){
 	if ( env ){
 		gc_move_upwards( gc, env, GC_COLOR_GREY );
+		gc_move_upwards( gc, env->last, GC_COLOR_GREY );
+		gc_move_upwards( gc, env->vars, GC_COLOR_GREY );
 
+		/*
 		if ( env->vars ){
 			unsigned i;
+
 			hashmap_t *map = env->vars;
 
 			for ( i = 0; i < map->nbuckets; i++ ){
@@ -376,8 +381,8 @@ void gc_mark_env( gbg_collector_t *gc, env_t *env ){
 				}
 			}
 		}
+		*/
 
-		gc_move_upwards( gc, env->last, GC_COLOR_GREY );
 	}
 }
 
@@ -405,6 +410,13 @@ void gc_mark_frame( gbg_collector_t *garbage, stack_frame_t *frame ){
 		*/
 
 		gc_move_upwards( garbage, frame->last, GC_COLOR_GREY );
+	}
+}
+
+void gc_mark_variable( gbg_collector_t *gc, variable_t *var ){
+	if ( var ){
+		gc_move_upwards( gc, var->token, GC_COLOR_GREY );
+		gc_move_upwards( gc, var->next, GC_COLOR_GREY );
 	}
 }
 
@@ -438,10 +450,10 @@ void gc_set_interval( gbg_collector_t *gc, unsigned length, unsigned freed ){
 	unsigned adjust = gc->interval * total;
 
 	/*
-	printf( "[set_interval] interval: %u, length: %u, freed: %u "
+	printf( "[set_interval] interval: %u, length: %u, freed: %u, remaining: %u, "
 			"ratio: %f, total: %f, adjust: %u\n",
-		gc->interval, length, freed, ratio, total, adjust );
-		*/
+		gc->interval, length, freed, length - freed, ratio, total, adjust );
+	 */
 
 	gc->interval = adjust;
 }
@@ -474,6 +486,10 @@ void gc_collect( gbg_collector_t *gc ){
 			case GC_TYPE_CONTINUATION:
 				//puts( "marking continuation..." );
 				gc_mark_frame( gc, (stack_frame_t *)foo );
+				break;
+
+			case GC_TYPE_VARIABLE:
+				gc_mark_variable( gc, (variable_t *)foo );
 				break;
 
 			default:

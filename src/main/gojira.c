@@ -232,13 +232,12 @@ void read_eval_print( stack_frame_t *frame ){
 void goj_linenoise_complete( const char *buf, linenoiseCompletions *lc ){
 	const char        *pos, *move;
 	const st_frame_t  *frame = really_global_frame;
-	const hashmap_t   *map = frame->env->vars;
+	//const hashmap_t   *map = frame->env->vars;
 	const list_node_t *node;
-	const variable_t  *var;
 	unsigned i, k, pos_num;
 	bool has_punct = false;
 
-	if ( map ){
+	if ( frame->env->vars ){
 		for ( pos = move = buf, pos_num = k = 0; *move; move++, k++ ){
 			if ( strchr( " ()[]{}\t\n", *move )) {
 				pos = move + 1;
@@ -247,22 +246,18 @@ void goj_linenoise_complete( const char *buf, linenoiseCompletions *lc ){
 			}
 		}
 
-		for ( i = 0; i < map->nbuckets; i++ ){
-			node = map->buckets[i].base;
-			foreach_in_list( node ){
-				var = shared_get( node->data );
-				if ( strstr( var->key, pos )){
-					char *newbuf = malloc( sizeof( char[ strlen(buf) + strlen(var->key) + 4 ]));
-					strcpy( newbuf, buf );
-					strncpy( newbuf + pos_num + has_punct, var->key, strlen(var->key) + 1 );
-					linenoiseAddCompletion( lc, newbuf );
-					free( newbuf );
-				}
+		const variable_t *var = frame->env->vars;
+
+		foreach_in_list( var ){
+			if ( strstr( var->key, pos )){
+				char *newbuf = malloc( sizeof( char[ strlen(buf) + strlen(var->key) + 4 ]));
+				strcpy( newbuf, buf );
+				strncpy( newbuf + pos_num + has_punct, var->key, strlen(var->key) + 1 );
+				linenoiseAddCompletion( lc, newbuf );
+				free( newbuf );
 			}
 		}
 	}
-
-	//linenoiseAddCompletion( lc, "foo" );
 }
 
 // Allocates a buffer, reads a complete (meaning with matching parenthesis) statement into it,

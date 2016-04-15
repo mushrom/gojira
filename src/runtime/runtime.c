@@ -134,8 +134,9 @@ bool eval_frame_subexpr( stack_frame_t **frame_ret ){
 
 		case TYPE_VARIABLE_REF:
 			{
-				variable_t *var;
-				var = shared_get( frame->ptr->data );
+				//variable_t *var;
+				//var = shared_get( frame->ptr->data );
+				variable_t *var = frame->ptr->data;
 
 				if ( var->token->type != TYPE_SYNTAX || frame->expr ){
 					frame_add_token( frame, var->token );

@@ -27,20 +27,30 @@ gbg_list_t nodeheap = {
 	.length = 0
 };
 
-void free_block_data( gbg_node_t *node ){
+static inline void free_block_data( gbg_node_t *node ){
 	if ( node->type == GC_TYPE_TOKEN ){
 		token_t *token = (token_t *)node;
 
 		if ( token->flags & T_FLAG_HAS_SHARED ){
 			shared_release( token->data );
 		}
-	}
 
+	}
+	/*
+	else if ( node->type == GC_TYPE_VARIABLE ){
+		variable_t *var = (variable_t *)node;
+
+		free( var->key );
+	}
+	*/
+
+	/*
 	else if ( node->type == GC_TYPE_ENVIRONMENT ){
 		env_t *env = (env_t *)node;
 
 		env_free_vars( env );
 	}
+	*/
 }
 
 void *alloc_block( void ){
@@ -77,6 +87,8 @@ token_t *alloc_token( void ){
 }
 
 void cache_blocks( gbg_list_t *list ){
+	printf( "%u\n", sizeof( void *[4] ));
+
 	if ( nodeheap.start && list->start ){
 		nodeheap.end->next = list->start;
 		list->start->prev = nodeheap.end;

@@ -39,10 +39,13 @@ enum toggle_environment {
 };
 
 typedef struct variable {
+	gbg_node_t gc_link;
+	struct variable *next;
+
 	token_t *token;
 	char *key;
 
-	unsigned references;
+	//unsigned references;
 	unsigned hash;
 	unsigned is_mutable;
 } variable_t;
@@ -52,9 +55,11 @@ typedef void (*error_printer)( struct stack_frame *, char *fmt, ... );
 
 typedef struct environment {
 	gbg_node_t gc_link;
+	gbg_collector_t *garbage;
 	struct environment *last;
 
-	hashmap_t *vars;
+	variable_t *vars;
+	//hashmap_t *vars;
 	//unsigned refs;
 } env_t;
 
@@ -105,15 +110,15 @@ token_t *frame_alloc_token( st_frame_t *frame ) DEPRECATED;
 #undef DEPRECATED
 
 //variable_t *frame_add_var( st_frame_t *frame, char *key, token_t *token, bool recurse );
-     env_t *env_free_vars( env_t *env );
+//     env_t *env_free_vars( env_t *env );
 variable_t *env_add_var( env_t *env, const char *key, token_t *token, bool recurse, unsigned mutable );
    token_t *env_find_var( env_t *env, const char *key, bool recurse );
 variable_t *env_find_var_struct( env_t *env, const char *key, bool recurse );
-  shared_t *env_find_shared_struct( env_t *env, const char *key, bool recurse );
+//  shared_t *env_find_shared_struct( env_t *env, const char *key, bool recurse );
 
    token_t *env_find_var_hash( env_t *env, unsigned hash, bool recurse );
 variable_t *env_find_var_struct_hash( env_t *env, unsigned hash, bool recurse );
-  shared_t *env_find_shared_struct_hash( env_t *env, unsigned hash, bool recurse );
+//  shared_t *env_find_shared_struct_hash( env_t *env, unsigned hash, bool recurse );
 
 void default_error_printer( stack_frame_t *frame, char *fmt, ... );
 void stack_trace( st_frame_t *frame );
