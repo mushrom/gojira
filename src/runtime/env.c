@@ -43,6 +43,41 @@ static inline variable_t *variable_create( gbg_collector_t *gc ){
 	return ret;
 }
 
+static variable_t *variable_insert( variable_t *tree, variable_t *value ){
+	variable_t *ret = value;
+
+	if ( tree ){
+		if ( value->hash < tree->hash ){
+			tree->left = variable_insert( tree->left, value );
+
+		} else {
+			tree->right = variable_insert( tree->right, value );
+		}
+
+		ret = tree;
+	}
+
+	return ret;
+}
+
+static variable_t *variable_find( variable_t *tree, unsigned hash ){
+	variable_t *ret = NULL;
+
+	if ( tree ){
+		if ( hash == tree->hash ){
+			ret = tree;
+
+		} else if ( hash < tree->hash ){
+			ret = variable_find( tree->left, hash );
+
+		} else {
+			ret = variable_find( tree->right, hash );
+		}
+	}
+
+	return ret;
+}
+
 void env_free( env_t *env ){
 	//env_free_vars( env );
 
@@ -111,12 +146,15 @@ variable_t *env_find_var_struct_hash( env_t *env, unsigned hash, bool recurse ){
 		if ( env->vars ){
 			variable_t *move = env->vars;
 
+			/*
 			foreach_in_list( move ){
 				if ( move->hash == hash ){
 					ret = move;
 					break;
 				}
 			}
+			*/
+			ret = variable_find( env->vars, hash );
 
 			//shr = hashmap_get( env->vars, hash );
 			/*
@@ -233,8 +271,10 @@ variable_t *env_add_var( env_t *env, const char *key, token_t *token, bool recur
 			//new_var->token = clone_token_tree( token );
 			new_var->token = token;
 			//new_shared = shared_new( new_var, free_var );
-			new_var->next = env->vars;
-			env->vars = new_var;
+
+			//new_var->next = env->vars;
+			//env->vars = new_var;
+			env->vars = variable_insert( env->vars, new_var );
 
 			//hashmap_add( env->vars, new_var->hash, new_shared );
 

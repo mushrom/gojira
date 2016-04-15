@@ -35,14 +35,11 @@ static inline void free_block_data( gbg_node_t *node ){
 			shared_release( token->data );
 		}
 
-	}
-	/*
-	else if ( node->type == GC_TYPE_VARIABLE ){
+	} else if ( node->type == GC_TYPE_VARIABLE ){
 		variable_t *var = (variable_t *)node;
 
 		free( var->key );
 	}
-	*/
 
 	/*
 	else if ( node->type == GC_TYPE_ENVIRONMENT ){
@@ -87,8 +84,6 @@ token_t *alloc_token( void ){
 }
 
 void cache_blocks( gbg_list_t *list ){
-	printf( "%u\n", sizeof( void *[4] ));
-
 	if ( nodeheap.start && list->start ){
 		nodeheap.end->next = list->start;
 		list->start->prev = nodeheap.end;

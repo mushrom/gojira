@@ -416,7 +416,9 @@ void gc_mark_frame( gbg_collector_t *garbage, stack_frame_t *frame ){
 void gc_mark_variable( gbg_collector_t *gc, variable_t *var ){
 	if ( var ){
 		gc_move_upwards( gc, var->token, GC_COLOR_GREY );
-		gc_move_upwards( gc, var->next, GC_COLOR_GREY );
+		//gc_move_upwards( gc, var->next, GC_COLOR_GREY );
+		gc_move_upwards( gc, var->left, GC_COLOR_GREY );
+		gc_move_upwards( gc, var->right, GC_COLOR_GREY );
 	}
 }
 

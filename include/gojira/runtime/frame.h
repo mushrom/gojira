@@ -40,7 +40,9 @@ enum toggle_environment {
 
 typedef struct variable {
 	gbg_node_t gc_link;
-	struct variable *next;
+	//struct variable *next;
+	struct variable *left;
+	struct variable *right;
 
 	token_t *token;
 	char *key;
