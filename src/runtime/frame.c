@@ -482,7 +482,8 @@ stack_frame_t *frame_restore( stack_frame_t *frame ){
 
 	if ( frame->last && frame->flags & RUNTIME_FLAG_CAPTURED ){
 		//printf( "[%s] Restoring frame at %p...\n", __func__, frame );
-		ret = malloc( sizeof( stack_frame_t ));
+		//ret = malloc( sizeof( stack_frame_t ));
+		ret = alloc_block_nozero( );
 		*ret = *frame;
 		gc_register( get_current_gc( ret ), ret );
 		token_t *new_end = NULL;
