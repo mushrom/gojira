@@ -65,6 +65,14 @@ typedef struct environment {
 	//unsigned refs;
 } env_t;
 
+typedef struct procedure {
+	gbg_node_t gc_link;
+
+	token_t *args;
+	token_t *body;
+	env_t   *env;
+} procedure_t;
+
 #include <stdint.h>
 
 typedef struct stack_frame {

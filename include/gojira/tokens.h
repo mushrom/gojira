@@ -76,6 +76,7 @@ typedef enum {
 typedef struct stack_frame stack_frame_t;
 typedef struct token token_t;
 typedef struct gbg_node gbg_node_t;
+typedef struct procedure procedure_t;
 typedef token_t *(*scheme_func)( stack_frame_t * );
 
 #include <gojira/libs/numbers.h>
@@ -105,6 +106,7 @@ typedef struct token {
 		uint32_t misc;
 		bool boolean;
 		stack_frame_t *cont;
+		procedure_t *proc;
 	};
 
 	type_t type;

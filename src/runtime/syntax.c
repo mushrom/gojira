@@ -66,7 +66,8 @@ token_t *expand_lambda( stack_frame_t *frame, token_t *tokens ){
 	token_t *temp;
 	shared_t *shr;
 
-	procedure_t *proc = calloc( 1, sizeof( procedure_t ));;
+	//procedure_t *proc = calloc( 1, sizeof( procedure_t ));;
+	procedure_t *proc = gc_register( get_current_gc( frame ), alloc_block( ));
 
 	if ( tokens_length( tokens ) < 3 ){
 		frame->error_call( frame,
@@ -87,11 +88,12 @@ token_t *expand_lambda( stack_frame_t *frame, token_t *tokens ){
 	proc->args = tokens->next;
 		//clone_tokens( tokens->next->down );
 	proc->body = temp;
-	shr = shared_new( proc, free_procedure );
+	//shr = shared_new( proc, free_procedure );
 
 	ret->type = TYPE_PROCEDURE;
-	ret->data = shr;
-	ret->flags |= T_FLAG_HAS_SHARED;
+	ret->proc = proc;
+	//ret->data = shr;
+	//ret->flags |= T_FLAG_HAS_SHARED;
 
 	//ret->status = GC_MARKED;
 	//gc_mark_tokens( get_current_gc( frame ), ret );
@@ -203,8 +205,9 @@ stack_frame_t *expand_procedure( stack_frame_t *frame, token_t *tokens ){
 	token_t *temp;
 
 	if ( tokens->type == TYPE_PROCEDURE ){
-		shr = tokens->data;
-		proc = shared_get( shr );
+		proc = tokens->proc;
+		//shr = tokens->data;
+		//proc = shared_get( shr );
 
 		frame->env = env_create( get_current_gc( frame ), proc->env );
 		//frame->cur_func = gc_clone_token( get_current_gc( frame ), tokens );

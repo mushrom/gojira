@@ -9,22 +9,8 @@ extern "C" {
 #include <gojira/libs/list.h>
 #include <gojira/libs/hashmap.h>
 #include <gojira/libs/shared.h>
+#include <gojira/runtime/garbage.h>
 #include <stdbool.h>
-
-typedef struct binding {
-	token_t *symbol;
-	token_t *value;
-
-	struct binding *next;
-} binding_t;
-
-typedef struct procedure {
-	token_t *args;
-	token_t *body;
-	env_t   *env;
-
-	binding_t *bindings;
-} procedure_t;
 
 typedef struct iterator {
 	shared_t *procedure;

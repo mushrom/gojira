@@ -272,7 +272,7 @@ void dump_tokens_to_dot( FILE *fp, token_t *tokens ){
 			move, move, statuses[move->status], type_str( move->type ));
 
 		if ( move->type == TYPE_PROCEDURE ){
-			procedure_t *proc = shared_get( move->data );
+			procedure_t *proc = move->proc;
 
 			fprintf( fp, "\ttoken_%p -> environment_%p [color=green]\n", move, proc->env );
 

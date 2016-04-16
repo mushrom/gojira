@@ -308,8 +308,10 @@ void gc_mark_token( gbg_collector_t *gc, token_t *token ){
 
 		if ( token->type == TYPE_PROCEDURE ){
 			//printf( "[%s] Got here\n", __func__ );
-			procedure_t *proc = shared_get( token->data );
+			//procedure_t *proc = shared_get( token->data );
+			procedure_t *proc = token->proc;
 
+			gc_move_upwards( gc, proc, GC_COLOR_GREY );
 			gc_move_upwards( gc, proc->env, GC_COLOR_GREY );
 			gc_move_upwards( gc, proc->body, GC_COLOR_GREY );
 			gc_move_upwards( gc, proc->args, GC_COLOR_GREY );
@@ -387,8 +389,6 @@ void gc_mark_env( gbg_collector_t *gc, env_t *env ){
 }
 
 void gc_mark_frame( gbg_collector_t *garbage, stack_frame_t *frame ){
-	unsigned i;
-
 	if ( frame ){
 		gc_move_upwards( garbage, frame, GC_COLOR_GREY );
 
@@ -600,9 +600,9 @@ gbg_collector_t *gc_init( gbg_collector_t *old_gc, gbg_collector_t *new_gc ){
 }
 
 gbg_collector_t *gc_merge( gbg_collector_t *first, gbg_collector_t *second ){
+	/*
 	unsigned i;
 
-	/*
 	for ( i = 0; i < 3; i++ ){
 		gbg_list_t *a = &first->colors[i];
 		gbg_list_t *b = &second->colors[i];
