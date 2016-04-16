@@ -35,11 +35,13 @@ static inline void free_block_data( gbg_node_t *node ){
 			shared_release( token->data );
 		}
 
-	} else if ( node->type == GC_TYPE_VARIABLE ){
+	}
+	/* else if ( node->type == GC_TYPE_VARIABLE ){
 		variable_t *var = (variable_t *)node;
 
 		free( var->key );
 	}
+	*/
 
 	/*
 	else if ( node->type == GC_TYPE_ENVIRONMENT ){

@@ -265,7 +265,8 @@ variable_t *env_add_var( env_t *env, const char *key, token_t *token, bool recur
 		if ( !new_var ){
 			//new_var = calloc( 1, sizeof( variable_t ));
 			new_var = variable_create( env->garbage );
-			new_var->key = strdup( key );
+			//new_var->key = strdup( key );
+			new_var->key = "<tab complete borked, TODO: fix tab completion>";
 			new_var->hash = hash_string( key );
 			new_var->is_mutable = mutable;
 			//new_var->token = clone_token_tree( token );
