@@ -52,7 +52,7 @@ static inline void free_block_data( gbg_node_t *node ){
 	*/
 }
 
-void *alloc_block( void ){
+inline void *alloc_block( void ){
 	//token_t *ret;
 	void *ret;
 
@@ -77,8 +77,42 @@ void *alloc_block( void ){
 	return ret;
 }
 
+inline void *alloc_block_nozero( void ){
+	//token_t *ret;
+	void *ret;
+
+	if ( nodeheap.length ){
+		ret = nodeheap.start;
+		free_block_data( ret );
+
+		nodeheap.start = nodeheap.start->next;
+		nodeheap.length--;
+
+		//memset( ret, 0, sizeof( memblock_t ));
+
+		if ( nodeheap.length == 0 ){
+			nodeheap.start = nodeheap.end = NULL;
+		}
+
+	} else {
+		//printf( "%u\n", sizeof( memblock_t ));
+		//ret = calloc( 1, sizeof( memblock_t ));
+		ret = malloc( sizeof( memblock_t ));
+	}
+
+	return ret;
+}
+
 token_t *alloc_token( void ){
 	token_t *ret = alloc_block( );
+
+	ret->gc_link.type = GC_TYPE_TOKEN;
+
+	return ret;
+}
+
+token_t *alloc_token_nozero( void ){
+	token_t *ret = alloc_block_nozero( );
 
 	ret->gc_link.type = GC_TYPE_TOKEN;
 

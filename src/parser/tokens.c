@@ -154,7 +154,7 @@ bool has_shared_data( type_t type ){
 token_t *clone_token( const token_t *token ){
 	token_t *ret = NULL;
 
-	ret = alloc_token( );
+	ret = alloc_token_nozero( );
 	*ret = *token;
 	//ret->gc_id = 0;
 

@@ -494,6 +494,9 @@ void gc_collect( gbg_collector_t *gc ){
 				gc_mark_variable( gc, (variable_t *)foo );
 				break;
 
+			case GC_TYPE_PROCEDURE:
+				break;
+
 			default:
 				puts( "shouldn't get here..." );
 				break;

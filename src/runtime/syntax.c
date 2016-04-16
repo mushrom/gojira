@@ -67,7 +67,9 @@ token_t *expand_lambda( stack_frame_t *frame, token_t *tokens ){
 	shared_t *shr;
 
 	//procedure_t *proc = calloc( 1, sizeof( procedure_t ));;
-	procedure_t *proc = gc_register( get_current_gc( frame ), alloc_block( ));
+	procedure_t *proc = gc_register( get_current_gc( frame ), alloc_block_nozero( ));
+
+	proc->gc_link.type = GC_TYPE_PROCEDURE;
 
 	if ( tokens_length( tokens ) < 3 ){
 		frame->error_call( frame,

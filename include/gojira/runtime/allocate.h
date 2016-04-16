@@ -4,7 +4,9 @@
 #include <gojira/runtime/garbage.h>
 
 token_t *alloc_token( void );
+token_t *alloc_token_nozero( void );
 void *alloc_block( void );
+void *alloc_block_nozero( void );
 void cache_blocks( gbg_list_t *list );
 
 void free_node( gbg_node_t *node );
