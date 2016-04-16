@@ -35,7 +35,7 @@ void env_release( env_t *env ){
 }
 */
 
-static inline variable_t *variable_create( gbg_collector_t *gc ){
+inline variable_t *variable_create( gbg_collector_t *gc ){
 	variable_t *ret = gc_register( gc, alloc_block( ));
 
 	ret->gc_link.type = GC_TYPE_VARIABLE;
@@ -43,7 +43,7 @@ static inline variable_t *variable_create( gbg_collector_t *gc ){
 	return ret;
 }
 
-static variable_t *variable_insert( variable_t *tree, variable_t *value ){
+variable_t *variable_insert( variable_t *tree, variable_t *value ){
 	variable_t *ret = value;
 
 	if ( tree ){
@@ -60,7 +60,7 @@ static variable_t *variable_insert( variable_t *tree, variable_t *value ){
 	return ret;
 }
 
-static variable_t *variable_find( variable_t *tree, unsigned hash ){
+variable_t *variable_find( variable_t *tree, unsigned hash ){
 	variable_t *ret = NULL;
 
 	if ( tree ){

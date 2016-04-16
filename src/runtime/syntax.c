@@ -299,16 +299,18 @@ bool syntax_matches( const token_t *pattern, const token_t *args ){
 	return ret;
 }
 
-hashmap_t *syntax_get_names( const token_t *pattern, token_t *args, hashmap_t *map ){
-	hashmap_t *ret = map? map : hashmap_create(4);
+variable_t *syntax_get_names( gbg_collector_t *gc, const token_t *pattern, token_t *args, variable_t *vars ){
+	//hashmap_t *ret = map? map : hashmap_create(4);
+	variable_t *ret = vars;
+	variable_t *temp;
 
 	if ( pattern ){
 		switch ( pattern->type ){
 			case TYPE_LIST:
 			case TYPE_QUOTED_TOKEN:
 				if ( args ){
-					ret = syntax_get_names( pattern->down, args->down, ret );
-					ret = syntax_get_names( pattern->next, args->next, ret );
+					ret = syntax_get_names( gc, pattern->down, args->down, ret );
+					ret = syntax_get_names( gc, pattern->next, args->next, ret );
 				}
 				break;
 
@@ -321,22 +323,43 @@ hashmap_t *syntax_get_names( const token_t *pattern, token_t *args, hashmap_t *m
 					if ( strcmp(str, "...") == 0 ){
 						unsigned hash = hash_string( name );
 						unsigned varhash = hash_string_accum( " #vararg", hash );
-						hashmap_add( ret, varhash, args );
-						hashmap_add( ret, hash, args );
+						//hashmap_add( ret, varhash, args );
+						//hashmap_add( ret, hash, args );
+						temp = variable_create( gc );
+						temp->hash = hash;
+						temp->token = args;
+						ret = variable_insert( ret, temp );
+
+						temp = variable_create( gc );
+						temp->hash = varhash;
+						temp->token = args;
+						ret = variable_insert( ret, temp );
 						DEBUGP( "[%s] Have variable-length pattern\n", __func__ );
 
 					} else {
 						if ( args ){
 							DEBUGP( "[%s] Adding name \"%s\"\n", __func__, name );
-							hashmap_add( ret, hash_string( name ), args );
-							ret = syntax_get_names( pattern->next, args->next, ret );
+							//hashmap_add( ret, hash_string( name ), args );
+							temp = variable_create( gc );
+							temp->hash = hash_string( name );
+							temp->token = args;
+
+							ret = variable_insert( ret, temp );
+
+							ret = syntax_get_names( gc, pattern->next, args->next, ret );
 						}
 					}
 
 				} else {
 					if ( args ){
-						hashmap_add( ret, hash_string( name ), args );
-						ret = syntax_get_names( pattern->next, args->next, ret );
+						//hashmap_add( ret, hash_string( name ), args );
+						temp = variable_create( gc );
+						temp->hash = hash_string( name );
+						temp->token = args;
+
+						ret = variable_insert( ret, temp );
+
+						ret = syntax_get_names( gc, pattern->next, args->next, ret );
 					}
 				}
 
@@ -345,7 +368,7 @@ hashmap_t *syntax_get_names( const token_t *pattern, token_t *args, hashmap_t *m
 
 			default:
 				if ( args ){
-					ret = syntax_get_names( pattern->next, args->next, ret );
+					ret = syntax_get_names( gc, pattern->next, args->next, ret );
 				}
 				break;
 		}
@@ -354,24 +377,25 @@ hashmap_t *syntax_get_names( const token_t *pattern, token_t *args, hashmap_t *m
 	return ret;
 }
 
-token_t *syntax_expand( gbg_collector_t *gbg, token_t *args, hashmap_t *map ){
+token_t *syntax_expand( gbg_collector_t *gbg, token_t *args, variable_t *vars ){
 	token_t *ret = NULL;
-	token_t *temp;
+	//token_t *temp;
+	variable_t *tempvar;
 
 	if ( args ){
 		switch( args->type ){
 			case TYPE_LIST:
 				ret = gc_alloc_token( gbg );
 				ret->type = TYPE_LIST;
-				ret->down = syntax_expand( gbg, args->down, map );
-				ret->next = syntax_expand( gbg, args->next, map );
+				ret->down = syntax_expand( gbg, args->down, vars );
+				ret->next = syntax_expand( gbg, args->next, vars );
 				break;
 
 			case TYPE_QUOTED_TOKEN:
 				ret = gc_alloc_token( gbg );
 				ret->type = TYPE_QUOTED_TOKEN;
-				ret->down = syntax_expand( gbg, args->down, map );
-				ret->next = syntax_expand( gbg, args->next, map );
+				ret->down = syntax_expand( gbg, args->down, vars );
+				ret->next = syntax_expand( gbg, args->next, vars );
 				break;
 
 			case TYPE_SYMBOL: {
@@ -385,25 +409,31 @@ token_t *syntax_expand( gbg_collector_t *gbg, token_t *args, hashmap_t *map ){
 						hash = hash_string_accum( " #vararg", hash );
 
 						//ret = gc_clone_token( gbg, hashmap_get( map, hash ));
-						ret = hashmap_get( map, hash );
+						//ret = hashmap_get( map, hash );
+						tempvar = variable_find( vars, hash );
+						if ( tempvar ){
+							ret = tempvar->token;
+						}
 
 					} else {
-						temp = hashmap_get( map, hash_string( name ));
+						//temp = hashmap_get( map, hash_string( name ));
+						tempvar = variable_find( vars, hash_string( name ));
 
-						ret = temp? gc_clone_token( gbg, temp )
-						          : gc_clone_token( gbg, args );
+						ret = tempvar? gc_clone_token( gbg, tempvar->token )
+						             : gc_clone_token( gbg, args );
 
 
-						ret->next = syntax_expand( gbg, args->next, map );
+						ret->next = syntax_expand( gbg, args->next, vars );
 					}
 
 				} else {
-					temp = hashmap_get( map, hash_string( name ));
+					//temp = hashmap_get( map, hash_string( name ));
+					tempvar = variable_find( vars, hash_string( name ));
 
-					ret = temp? gc_clone_token( gbg, temp )
-					          : gc_clone_token( gbg, args );
+					ret = tempvar? gc_clone_token( gbg, tempvar->token )
+					             : gc_clone_token( gbg, args );
 
-					ret->next = syntax_expand( gbg, args->next, map );
+					ret->next = syntax_expand( gbg, args->next, vars );
 				}
 
 				break;
@@ -411,7 +441,7 @@ token_t *syntax_expand( gbg_collector_t *gbg, token_t *args, hashmap_t *map ){
 
 			default:
 				ret = gc_clone_token( gbg, args );
-				ret->next = syntax_expand( gbg, args->next, map );
+				ret->next = syntax_expand( gbg, args->next, vars );
 				break;
 		}
 	}
@@ -440,22 +470,27 @@ token_t *expand_syntax_rules( stack_frame_t *frame, token_t *tokens ){
 			template = cur->down->next;
 
 			if ( syntax_matches( pattern, tokens )){
-				hashmap_t *map;
+				//hashmap_t *map;
+				variable_t *vars;
 				unsigned i;
 
 				DEBUGP( "[%s] matched successfully\n", __func__ );
 
 				matched = true;
-				map = syntax_get_names( pattern, tokens, NULL );
+				vars = syntax_get_names( get_current_gc( frame ), pattern, tokens, NULL );
+
+				//printf( "got vars, %p\n", vars );
 
 				//ret = gc_register_tokens( get_current_gc( frame ), syntax_expand( template, map ));
-				ret = syntax_expand( get_current_gc( frame ), template, map );
+				ret = syntax_expand( get_current_gc( frame ), template, vars );
 
 				// free the map's resources
+				/*
 				for ( i = 0; i < map->nbuckets; i++ ){
 					list_free_nodes( map->buckets[i].base );
 				}
 				hashmap_free( map );
+				*/
 
 				break;
 

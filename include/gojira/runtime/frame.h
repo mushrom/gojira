@@ -130,6 +130,10 @@ variable_t *env_find_var_struct( env_t *env, const char *key, bool recurse );
 variable_t *env_find_var_struct_hash( env_t *env, unsigned hash, bool recurse );
 //  shared_t *env_find_shared_struct_hash( env_t *env, unsigned hash, bool recurse );
 
+variable_t *variable_create( gbg_collector_t *gc );
+variable_t *variable_insert( variable_t *tree, variable_t *value );
+variable_t *variable_find( variable_t *tree, unsigned hash );
+
 void default_error_printer( stack_frame_t *frame, char *fmt, ... );
 void stack_trace( st_frame_t *frame );
 
