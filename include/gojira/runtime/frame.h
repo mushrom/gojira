@@ -71,6 +71,8 @@ typedef struct procedure {
 	token_t *args;
 	token_t *body;
 	env_t   *env;
+
+	unsigned calls;
 } procedure_t;
 
 #include <stdint.h>

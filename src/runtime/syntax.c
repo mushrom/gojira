@@ -61,12 +61,38 @@ void free_vector( void *ptr ){
 	}
 }
 
+token_t *compile_lambda_body( stack_frame_t *frame, token_t *body ){
+	token_t *ret = body;
+
+	if ( ret ){
+		if ( ret && ret->type == TYPE_SYMBOL ){
+			const char *varname = shared_get( ret->data );
+
+			token_t *vardata = env_find_var( frame->env, varname, RECURSE );
+
+			if ( vardata && vardata->type == TYPE_SYNTAX ){
+				vardata = gc_clone_token( get_current_gc( frame ), vardata );
+				vardata->next = ret->next;
+
+				ret = expand_syntax_rules( frame, vardata );
+				if ( ret->type == TYPE_LIST ){
+					ret = ret->down;
+				}
+			}
+		}
+
+		ret->down = compile_lambda_body( frame, ret->down );
+		ret->next = compile_lambda_body( frame, ret->next );
+	}
+
+	return ret;
+}
+
 token_t *expand_lambda( stack_frame_t *frame, token_t *tokens ){
 	token_t *ret = gc_alloc_token( get_current_gc( frame ));
 	token_t *temp;
 	shared_t *shr;
 
-	//procedure_t *proc = calloc( 1, sizeof( procedure_t ));;
 	procedure_t *proc = gc_register( get_current_gc( frame ), alloc_block_nozero( ));
 
 	proc->gc_link.type = GC_TYPE_PROCEDURE;
@@ -78,27 +104,15 @@ token_t *expand_lambda( stack_frame_t *frame, token_t *tokens ){
 		return NULL;
 	}
 
-	//temp = clone_tokens( tokens->next->next );
-	//temp = gc_clone_token( get_current_gc( frame ), tokens->next->next );
 	temp = tokens->next->next;
 
-	//proc->env = frame->env? env_aquire( frame->env ) : NULL;
 	proc->env = frame->env;
-
-	//printf( "[%s] Storing environment at %p\n", __func__, proc->env );
-	//proc->args = gc_clone_token( get_current_gc( frame ), tokens->next->down );
 	proc->args = tokens->next;
-		//clone_tokens( tokens->next->down );
 	proc->body = temp;
-	//shr = shared_new( proc, free_procedure );
+	proc->calls = 0;
 
 	ret->type = TYPE_PROCEDURE;
 	ret->proc = proc;
-	//ret->data = shr;
-	//ret->flags |= T_FLAG_HAS_SHARED;
-
-	//ret->status = GC_MARKED;
-	//gc_mark_tokens( get_current_gc( frame ), ret );
 
 	return ret;
 }
@@ -199,22 +213,22 @@ static void expand_procedure_args( stack_frame_t *frame, token_t *args, token_t 
 
 stack_frame_t *expand_procedure( stack_frame_t *frame, token_t *tokens ){
 	stack_frame_t *ret = NULL;
-	//token_t *move;
-	//token_t *temp;
 	procedure_t *proc;
-	//char *var_name;
-	shared_t *shr;
 	token_t *temp;
 
 	if ( tokens->type == TYPE_PROCEDURE ){
 		proc = tokens->proc;
-		//shr = tokens->data;
-		//proc = shared_get( shr );
+
+		if ( proc->calls == 3 ){
+			token_t *temp = gc_register_tokens( get_current_gc( frame ), clone_tokens( proc->body ));
+			proc->body = compile_lambda_body( frame, temp );
+			proc->calls++;
+
+		} else {
+			proc->calls++;
+		}
 
 		frame->env = env_create( get_current_gc( frame ), proc->env );
-		//frame->cur_func = gc_clone_token( get_current_gc( frame ), tokens );
-		//frame->cur_func->next = NULL;
-
 		expand_procedure_args( frame, proc->args, tokens->next );
 
 		ret = frame;
