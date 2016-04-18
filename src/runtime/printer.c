@@ -63,11 +63,7 @@ void file_print_token( FILE *fp, token_t *token, print_readable_t readable ){
 				break;
 
 			case TYPE_SYMBOL:
-				if ( readable ){
-					fprintf( fp, "'%s", (char *)shared_get( token->data ));
-				} else {
-					fprintf( fp, "%s", (char *)shared_get( token->data ));
-				}
+				fprintf( fp, "%s", (char *)shared_get( token->data ));
 				break;
 
 			case TYPE_CHAR:
@@ -101,8 +97,7 @@ void file_print_token( FILE *fp, token_t *token, print_readable_t readable ){
 				break;
 
 			case TYPE_PROCEDURE:
-				shr = token->data;
-				proc = shared_get( shr );
+				proc = token->proc;
 
 				fprintf( fp, "#<%s ", type_str( token->type ));
 				file_print_token( fp, proc->args, readable );
@@ -110,7 +105,7 @@ void file_print_token( FILE *fp, token_t *token, print_readable_t readable ){
 #if GOJIRA_PUBLIC_MODE
 				fprintf( fp, ">" );
 #else
-				fprintf( fp, " @ %p>", (void *)shr );
+				fprintf( fp, " @ %p>", proc );
 #endif
 				break;
 
