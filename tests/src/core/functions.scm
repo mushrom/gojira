@@ -1,8 +1,8 @@
-;; => 'test
+;; => test
 (write ((lambda () 'test)))
 (newline)
 
-;; => 'foo'thing
+;; => foothing
 (((lambda (x)
     (lambda (y)
       (x y)))

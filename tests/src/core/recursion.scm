@@ -42,15 +42,15 @@
 ;; => 10
 (recurse)
 
-;; => 'abc
-;; => 'qwerty
-;; => 'abc
-;; => 'qwerty
-;; => 'abc
-;; => 'qwerty
-;; => 'abc
-;; => 'qwerty
-;; => 'abc
-;; => 'qwerty
-;; => 'abc
+;; => abc
+;; => qwerty
+;; => abc
+;; => qwerty
+;; => abc
+;; => qwerty
+;; => abc
+;; => qwerty
+;; => abc
+;; => qwerty
+;; => abc
 (abc 10)

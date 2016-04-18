@@ -1,6 +1,6 @@
 ; test program for libs/base.scm
 
-;; => ('this 'is 'a 'variable 'eh)
+;; => (this is a variable eh)
 (define testing '(this is a variable eh))
 (write testing)
 (newline)

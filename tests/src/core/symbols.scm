@@ -1,9 +1,9 @@
 ; symbols
-;; => 'a
+;; => a
 (write 'a)
 (newline)
 
-;; => 'abc
+;; => abc
 (write 'abc)
 (newline)
 
@@ -15,15 +15,15 @@
 (write (eq? 'abc 'def))
 (newline)
 
-;; => 'zeblarg
+;; => zeblarg
 (write 'zeblarg)
 (newline)
 
-;; => 'fooba&r-_baz?
+;; => fooba&r-_baz?
 (write 'fooba&r-_baz?)
 (newline)
 
-;; => ':asdf
+;; => :asdf
 (write :asdf)
 (newline)
 

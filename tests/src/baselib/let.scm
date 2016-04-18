@@ -1,4 +1,4 @@
-;; => 'wut
+;; => wut
 (let ()
   (write 'wut)
   (newline))
