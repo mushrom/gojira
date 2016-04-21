@@ -23,6 +23,7 @@ char *read_input_file( FILE *fp );
 char *read_with_parens( FILE *fp );
 
 void goj_linenoise_complete( const char *buf, linenoiseCompletions *lc );
+char *goj_linenoise_hints( const char *buf, int *color, int *bold );
 
 // needed because linenoise doesn't support passing some sort of datastructure
 // to the completion callback
@@ -191,6 +192,7 @@ void make_argument_var( stack_frame_t *frame, int lastopt, int argc, char *argv[
 void read_eval_print( stack_frame_t *frame ){
 	linenoiseSetMultiLine( 1 );
 	linenoiseSetCompletionCallback( goj_linenoise_complete );
+	linenoiseSetHintsCallback( goj_linenoise_hints );
 	really_global_frame = frame;
 	char *buf = "";
 	unsigned n = 0;
@@ -259,6 +261,61 @@ static void add_completions( linenoiseCompletions *lc, variable_t *vars, const c
 void goj_linenoise_complete( const char *buf, linenoiseCompletions *lc ){
 	add_completions( lc, really_global_frame->env->vars, buf );
 }
+
+char *goj_linenoise_hints( const char *buf, int *color, int *bold ){
+	int count = 0;
+	unsigned i;
+
+	for ( i = 0; buf[i]; i++ ){
+		switch ( buf[i] ){
+			case '(':
+				count++;
+				break;
+
+			case ')':
+				count--;
+				break;
+
+			default:
+				break;
+		}
+	}
+
+	if ( count > 0 ){
+		unsigned pbuf_len = 16;
+		char *pbuf = calloc( 1, pbuf_len );
+		unsigned nparens = count;
+
+		memset( pbuf, 0, pbuf_len );
+
+		pbuf[0] = ' ';
+		for ( i = 0; i < nparens && i < pbuf_len - 5; i++ ){
+			pbuf[i + 1] = ')';
+		}
+
+		i++;
+
+		if ( nparens > pbuf_len - 5 ){
+			strcat( pbuf + i, "..." );
+			i += 3;
+		}
+
+		pbuf[i] = 0;
+
+		*color = 35;
+		*bold = 0;
+
+		return pbuf;
+
+	} else if ( count < 0 ) {
+		*color = 31;
+		*bold = 0;
+		return "  parenthesis overflow";
+	}
+
+	return NULL;
+}
+
 
 // Allocates a buffer, reads a complete (meaning with matching parenthesis) statement into it,
 // and returns the buffer.
