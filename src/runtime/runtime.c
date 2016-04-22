@@ -217,8 +217,14 @@ bool eval_frame_expr( stack_frame_t **frame_ret ){
 			if ( handle )
 				frame->value = handle( frame );
 
-			if ( !frame->value )
-				ret = true;
+			if ( frame->flags & RUNTIME_FLAG_CONTINUE ){
+				frame->flags &= ~RUNTIME_FLAG_CONTINUE;
+				apply = false;
+
+			} else {
+				if ( !frame->value )
+					ret = true;
+			}
 
 			break;
 
@@ -295,6 +301,20 @@ bool eval_frame_expr( stack_frame_t **frame_ret ){
 
 		case TYPE_CONTINUATION:
 			{
+				stack_frame_t *temp = frame_restore( frame->expr->cont );
+
+				if ( frame->expr->next ){
+					token_t *foo = frame->expr->next;
+
+					for ( ; foo; foo = foo->next ){
+						frame_add_token_noclone( temp, foo );
+					}
+				}
+
+				*frame_ret = temp;
+				apply = false;
+
+				/*
 				if ( frame->ntokens == 2 ){
 					stack_frame_t *temp = frame_restore( frame->expr->cont );
 					frame_add_token_noclone( temp, frame->expr->next );
@@ -308,6 +328,7 @@ bool eval_frame_expr( stack_frame_t **frame_ret ){
 
 					ret = true;
 				}
+				*/
 			}
 			break;
 

@@ -16,11 +16,9 @@ token_t *builtin_eval( stack_frame_t *frame ){
 		token_t *move = frame->expr->next;
 
 		if ( move->type == TYPE_LIST ){
-			stack_frame_t *tempframe = frame_create( frame, move->down, DONT_MAKE_ENV );
-			tempframe->flags |= RUNTIME_FLAG_BREAK;
-
-			eval_loop( tempframe );
-			ret = frame->end;
+			frame->ptr = move->down;
+			frame->flags |= RUNTIME_FLAG_CONTINUE;
+			frame->expr = NULL;
 
 		} else {
 			FRAME_ERROR_ARGTYPE( frame, "list", move->type );
@@ -40,34 +38,18 @@ token_t *builtin_apply( stack_frame_t *frame ){
 		token_t *func = frame->expr->next;
 		token_t *arglist = frame->expr->next->next;
 
-		if ( func->type == TYPE_EXTERN_PROC
-			|| func->type == TYPE_PROCEDURE
-			|| func->type == TYPE_BOOLEAN
-			|| func->type == TYPE_SYNTAX
-			|| func->type == TYPE_HASHMAP )
-		{
-			if ( arglist->type == TYPE_LIST ){
-				token_t *code = clone_token( func );
-				stack_frame_t *tempframe;
+		if ( arglist->type == TYPE_LIST ){
+			token_t *code = gc_clone_token( get_current_gc( frame ), func );
+			stack_frame_t *tempframe;
 
-				code->next = arglist->down;
-				tempframe = frame_create( frame, NULL, DONT_MAKE_ENV );
-				tempframe->expr = code;
-				tempframe->flags |= RUNTIME_FLAG_BREAK;
-
-				eval_loop( tempframe );
-				ret = tempframe->value;
-
-				free_token( code );
-
-			} else {
-				FRAME_ERROR_ARGTYPE( frame, "list", func->type );
-			}
+			code->next = arglist->down;
+			frame->expr = code;
+			frame->flags |= RUNTIME_FLAG_CONTINUE;
 
 		} else {
-			FRAME_ERROR_ARGTYPE( frame, "procedure", func->type );
+			FRAME_ERROR_ARGTYPE( frame, "list", func->type );
 		}
-		
+
 	} else {
 		FRAME_ERROR_ARGNUM( frame, 2 );
 	}

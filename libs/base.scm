@@ -102,6 +102,11 @@
 
 (define :builtin call/cc call-with-current-continuation)
 
+(define :builtin (values :rest things)
+  (call/cc
+    (lambda (c)
+      (apply c things))))
+
 (define-syntax :builtin when
   (syntax-rules ()
     ((_ condition body ...)

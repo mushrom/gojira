@@ -25,6 +25,9 @@ enum runtime_flags {
 	                           // as part of a continuation and shouldn't be changed
 	RUNTIME_FLAG_NO_EVAL  = 8, // don't evaluate the expression in this frame
 	                           // used when loading files
+	RUNTIME_FLAG_CONTINUE = 16, // flag for external functions to signal that evaluation
+	                            // for the current frame should be continued, rather than
+	                            // returning the result of frame->value
 };
 
 enum variable_mutability {
