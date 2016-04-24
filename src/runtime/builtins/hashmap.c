@@ -20,7 +20,6 @@ static void free_hashmap_token( void *ptr ){
 
 		for ( ; node; node = temp ){
 			temp = node->next;
-			//free_tokens( node->data );
 			free( node );
 		}
 	}
@@ -41,7 +40,6 @@ token_t *builtin_hashmap_make( stack_frame_t *frame ){
 		for ( ; move; (move = move->next) && (move = move->next) ){
 			if ( move->type == TYPE_SYMBOL || move->type == TYPE_STRING ){
 				str = shared_get( move->data );
-				//hashmap_add( map, hash_string( str ), clone_token_tree( move->next ));
 				hashmap_add( map, hash_string( str ), move->next );
 
 			} else {
@@ -80,18 +78,15 @@ token_t *builtin_hashmap_get( stack_frame_t *frame ){
 			if ( frame->expr->next->next->type == TYPE_SYMBOL ||
 					frame->expr->next->next->type == TYPE_STRING )
 			{
-				//token_t *map_tok = frame->expr->next;
 				token_t *sym = frame->expr->next->next;
 				char *buf = shared_get( sym->data );
 				hashmap_t *map = shared_get( frame->expr->next->data );
 				token_t *temp = hashmap_get( map, hash_string( buf ));
 
 				if ( temp ){
-					//ret = clone_token_tree( temp );
 					ret = gc_clone_token( get_current_gc( frame ), temp );
 
 				} else {
-					//ret = alloc_token( );
 					ret = gc_alloc_token( get_current_gc( frame ));
 					ret->type = TYPE_BOOLEAN;
 					ret->boolean = false;

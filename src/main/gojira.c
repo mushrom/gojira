@@ -39,10 +39,7 @@ int main( int argc, char *argv[] ){
 	bool set_a_gc_profile = false;
 	unsigned new_gc_profile = 0;
 
-	char *fname = NULL;
-
 	stack_frame_t *global_frame;
-	token_t *tree;
 
 	if ( argc < 2 ){
 		// By default, go into an REPL
@@ -137,7 +134,6 @@ int main( int argc, char *argv[] ){
 
 	// Clean up the global frame, and free all tokens left in the token cache
 	gc_collect( get_current_gc( global_frame ));
-	//frame_free( global_frame );
 	destroy_token_cache( );
 
 	return ret;
@@ -233,7 +229,7 @@ void read_eval_print( stack_frame_t *frame ){
 
 static void add_completions( linenoiseCompletions *lc, variable_t *vars, const char *buf ){
 	const char        *pos, *move;
-	unsigned i, k, pos_num;
+	unsigned k, pos_num;
 	bool has_punct = false;
 
 	if ( vars ){
@@ -315,7 +311,6 @@ char *goj_linenoise_hints( const char *buf, int *color, int *bold ){
 
 	return NULL;
 }
-
 
 // Allocates a buffer, reads a complete (meaning with matching parenthesis) statement into it,
 // and returns the buffer.

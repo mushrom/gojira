@@ -105,7 +105,6 @@ static void expand_closing_parens( stack_t *stack, token_t **pos ){
 
 static void expand_mlisp_newline( stack_t *stack, token_t *pos ){
 	token_t *next = pos->next;
-	indent_pos_t *foo;
 
 	if ( !( next->next && next->next->type == TYPE_INDENT )){
 		expand_closing_parens( stack, &pos );
@@ -115,7 +114,6 @@ static void expand_mlisp_newline( stack_t *stack, token_t *pos ){
 static void expand_mlisp_indent( stack_t *stack, token_t *pos ){
 	indent_pos_t *foo = stack_peek( stack );
 	bool period = (pos->next->next && pos->next->next->type == TYPE_PERIOD);
-	token_t *next = pos->next;
 
 	if ( foo ) {
 		// handle an indent larger than the last

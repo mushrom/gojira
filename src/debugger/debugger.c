@@ -5,38 +5,11 @@
 #include <stdio.h>
 #include <string.h>
 
-static unsigned p_heap( token_t *heap ){
-	token_t *move = heap;
-	unsigned i = 0;
-	unsigned unmarked = 0;
-	unsigned marked = 0;
-	unsigned freed = 0;
-
-	/*
-	for ( ; move; move = move->gc_link ){
-		switch ( move->status ){
-			case GC_UNMARKED: unmarked++; break;
-			case GC_MARKED:   marked++; break;
-			case GC_FREED:    freed++; break;
-			default: break;
-		};
-
-		i++;
-	}
-
-	printf( "%3u tokens, %3u unmarked, %3u marked, %3u freed",
-			i, unmarked, marked, freed );
-	*/
-
-	return i;
-}
-
 static unsigned dump_frame_heaps( stack_frame_t *frame, unsigned limit, unsigned n ){
 	unsigned total = 0;
 
 	if ((( limit && n < limit ) || !limit ) && frame ){
 		printf( "frame %3u: ", n );
-		//total += p_heap( frame->heap );
 		printf( "\n" );
 		total += dump_frame_heaps( frame->last, limit, n + 1 );
 	}

@@ -24,8 +24,6 @@ static bytevector_t *make_bytevector( size_t size ){
 	ret->bytes = calloc( 1, alloc_size );
 	ret->length = size;
 
-	//printf( "[%s] allocated %lu bytes for size %lu\n", __func__, alloc_size, size );
-
 	return ret;
 }
 
@@ -54,12 +52,8 @@ token_t *builtin_make_bytevector( stack_frame_t *frame ){
 			} 
 
 			if ( !error ){
-				/*
-				bytevec = malloc( sizeof( bytevector_t ));
-				bytevec->bytes = malloc( len );
-				bytevec->length = len;
-				*/
 				bytevec = make_bytevector( len );
+
 				if ( setval ){
 					memset( bytevec->bytes, setval, len );
 				}

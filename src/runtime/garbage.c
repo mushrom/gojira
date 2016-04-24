@@ -65,7 +65,7 @@ static gbg_node_t *gc_list_move( gbg_collector_t *gc, gbg_node_t *node, unsigned
 	} else {
 		printf( "[%s] Invalid move request\n", __func__ );
 		printf( "\tToken color: %u, token: %p, next: %p, token gc: %u, gc id: %u\n",
-			__func__, node->status, node, node->next, /*node->id*/ 1, gc->id );
+			node->status, (void *)node, (void *)node->next, 1, gc->id );
 	}
 
 	return ret;
@@ -252,26 +252,6 @@ void gc_mark_variable( gbg_collector_t *gc, variable_t *var ){
 		gc_move_upwards( gc, var->token, GC_COLOR_GREY );
 		gc_move_upwards( gc, var->left, GC_COLOR_GREY );
 		gc_move_upwards( gc, var->right, GC_COLOR_GREY );
-	}
-}
-
-static void free_gbg_node( gbg_node_t *node ){
-	switch( node->type ){
-		case GC_TYPE_TOKEN:
-			free_token( (token_t *)node );
-			break;
-
-		case GC_TYPE_ENVIRONMENT:
-			env_free( (env_t *)node );
-			break;
-
-		case GC_TYPE_CONTINUATION:
-			frame_free( (stack_frame_t *)node );
-			break;
-
-		default:
-			printf( "have unknown type %u?\n", node->type );
-			break;
 	}
 }
 

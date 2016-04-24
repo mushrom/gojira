@@ -105,7 +105,7 @@ void file_print_token( FILE *fp, token_t *token, print_readable_t readable ){
 #if GOJIRA_PUBLIC_MODE
 				fprintf( fp, ">" );
 #else
-				fprintf( fp, " @ %p>", proc );
+				fprintf( fp, " @ %p>", (void *)proc );
 #endif
 				break;
 

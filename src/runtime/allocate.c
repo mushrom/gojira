@@ -16,7 +16,6 @@ enum alloc_config {
 	// about 16MB with 128 byte blocks
 	// TODO: add an option to tweak this from the command line
 	MAX_TOKEN_CACHE = 0x1ffff,
-	//MAX_TOKEN_CACHE = 0,
 };
 
 //token_t *nodeheap = NULL;
@@ -27,33 +26,17 @@ gbg_list_t nodeheap = {
 	.length = 0
 };
 
-static inline void free_block_data( gbg_node_t *node ){
+inline void free_block_data( gbg_node_t *node ){
 	if ( node->type == GC_TYPE_TOKEN ){
 		token_t *token = (token_t *)node;
 
 		if ( token->flags & T_FLAG_HAS_SHARED ){
 			shared_release( token->data );
 		}
-
 	}
-	/* else if ( node->type == GC_TYPE_VARIABLE ){
-		variable_t *var = (variable_t *)node;
-
-		free( var->key );
-	}
-	*/
-
-	/*
-	else if ( node->type == GC_TYPE_ENVIRONMENT ){
-		env_t *env = (env_t *)node;
-
-		env_free_vars( env );
-	}
-	*/
 }
 
 inline void *alloc_block( void ){
-	//token_t *ret;
 	void *ret;
 
 	if ( nodeheap.length ){
@@ -70,7 +53,6 @@ inline void *alloc_block( void ){
 		}
 
 	} else {
-		//printf( "%u\n", sizeof( memblock_t ));
 		ret = calloc( 1, sizeof( memblock_t ));
 	}
 
@@ -78,7 +60,6 @@ inline void *alloc_block( void ){
 }
 
 inline void *alloc_block_nozero( void ){
-	//token_t *ret;
 	void *ret;
 
 	if ( nodeheap.length ){
@@ -88,15 +69,11 @@ inline void *alloc_block_nozero( void ){
 		nodeheap.start = nodeheap.start->next;
 		nodeheap.length--;
 
-		//memset( ret, 0, sizeof( memblock_t ));
-
 		if ( nodeheap.length == 0 ){
 			nodeheap.start = nodeheap.end = NULL;
 		}
 
 	} else {
-		//printf( "%u\n", sizeof( memblock_t ));
-		//ret = calloc( 1, sizeof( memblock_t ));
 		ret = malloc( sizeof( memblock_t ));
 	}
 

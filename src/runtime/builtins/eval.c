@@ -40,7 +40,6 @@ token_t *builtin_apply( stack_frame_t *frame ){
 
 		if ( arglist->type == TYPE_LIST ){
 			token_t *code = gc_clone_token( get_current_gc( frame ), func );
-			stack_frame_t *tempframe;
 
 			code->next = arglist->down;
 			frame->expr = code;

@@ -30,33 +30,12 @@ bool has_symbol( token_t *tokens, char *sym ){
 void free_procedure( void *ptr ){
 	if ( ptr ){
 		procedure_t *proc = ptr;
-
-		//printf( "[%s] Freeing procedure at %p\n", __func__, ptr );
-		/*
-		if ( proc->env ){
-			env_release( proc->env );
-		}
-		*/
-
-		//free_tokens( proc->body );
-		//free_tokens( proc->args );
 		free( proc );
 	}
 }
 
 void free_vector( void *ptr ){
 	if ( ptr ){
-		dlist_t *dlst = ptr;
-		unsigned i;
-
-		//printf( "[%s] Freeing vector at %p\n", __func__, ptr );
-
-		/*
-		foreach_in_dlist( i, dlst ){
-			//printf( "[%s] Freeing vector element at %p\n", __func__, dlist_get( dlst, i ));
-			//free_tokens( dlist_get( dlst, i ));
-		}
-		*/
 		dlist_free( ptr );
 	}
 }
@@ -91,7 +70,6 @@ token_t *compile_lambda_body( stack_frame_t *frame, token_t *body ){
 token_t *expand_lambda( stack_frame_t *frame, token_t *tokens ){
 	token_t *ret = gc_alloc_token( get_current_gc( frame ));
 	token_t *temp;
-	shared_t *shr;
 
 	procedure_t *proc = gc_register( get_current_gc( frame ), alloc_block_nozero( ));
 
@@ -314,7 +292,6 @@ bool syntax_matches( const token_t *pattern, const token_t *args ){
 }
 
 variable_t *syntax_get_names( gbg_collector_t *gc, const token_t *pattern, token_t *args, variable_t *vars ){
-	//hashmap_t *ret = map? map : hashmap_create(4);
 	variable_t *ret = vars;
 	variable_t *temp;
 
@@ -337,8 +314,7 @@ variable_t *syntax_get_names( gbg_collector_t *gc, const token_t *pattern, token
 					if ( strcmp(str, "...") == 0 ){
 						unsigned hash = hash_string( name );
 						unsigned varhash = hash_string_accum( " #vararg", hash );
-						//hashmap_add( ret, varhash, args );
-						//hashmap_add( ret, hash, args );
+
 						temp = variable_create( gc );
 						temp->hash = hash;
 						temp->token = args;
@@ -353,26 +329,22 @@ variable_t *syntax_get_names( gbg_collector_t *gc, const token_t *pattern, token
 					} else {
 						if ( args ){
 							DEBUGP( "[%s] Adding name \"%s\"\n", __func__, name );
-							//hashmap_add( ret, hash_string( name ), args );
 							temp = variable_create( gc );
 							temp->hash = hash_string( name );
 							temp->token = args;
 
 							ret = variable_insert( ret, temp );
-
 							ret = syntax_get_names( gc, pattern->next, args->next, ret );
 						}
 					}
 
 				} else {
 					if ( args ){
-						//hashmap_add( ret, hash_string( name ), args );
 						temp = variable_create( gc );
 						temp->hash = hash_string( name );
 						temp->token = args;
 
 						ret = variable_insert( ret, temp );
-
 						ret = syntax_get_names( gc, pattern->next, args->next, ret );
 					}
 				}
@@ -393,7 +365,6 @@ variable_t *syntax_get_names( gbg_collector_t *gc, const token_t *pattern, token
 
 token_t *syntax_expand( gbg_collector_t *gbg, token_t *args, variable_t *vars ){
 	token_t *ret = NULL;
-	//token_t *temp;
 	variable_t *tempvar;
 
 	if ( args ){
@@ -422,15 +393,12 @@ token_t *syntax_expand( gbg_collector_t *gbg, token_t *args, variable_t *vars ){
 						unsigned hash = hash_string( name );
 						hash = hash_string_accum( " #vararg", hash );
 
-						//ret = gc_clone_token( gbg, hashmap_get( map, hash ));
-						//ret = hashmap_get( map, hash );
 						tempvar = variable_find( vars, hash );
 						if ( tempvar ){
 							ret = tempvar->token;
 						}
 
 					} else {
-						//temp = hashmap_get( map, hash_string( name ));
 						tempvar = variable_find( vars, hash_string( name ));
 
 						ret = tempvar? gc_clone_token( gbg, tempvar->token )
@@ -441,7 +409,6 @@ token_t *syntax_expand( gbg_collector_t *gbg, token_t *args, variable_t *vars ){
 					}
 
 				} else {
-					//temp = hashmap_get( map, hash_string( name ));
 					tempvar = variable_find( vars, hash_string( name ));
 
 					ret = tempvar? gc_clone_token( gbg, tempvar->token )
@@ -484,27 +451,13 @@ token_t *expand_syntax_rules( stack_frame_t *frame, token_t *tokens ){
 			template = cur->down->next;
 
 			if ( syntax_matches( pattern, tokens )){
-				//hashmap_t *map;
 				variable_t *vars;
-				unsigned i;
 
 				DEBUGP( "[%s] matched successfully\n", __func__ );
 
 				matched = true;
 				vars = syntax_get_names( get_current_gc( frame ), pattern, tokens, NULL );
-
-				//printf( "got vars, %p\n", vars );
-
-				//ret = gc_register_tokens( get_current_gc( frame ), syntax_expand( template, map ));
 				ret = syntax_expand( get_current_gc( frame ), template, vars );
-
-				// free the map's resources
-				/*
-				for ( i = 0; i < map->nbuckets; i++ ){
-					list_free_nodes( map->buckets[i].base );
-				}
-				hashmap_free( map );
-				*/
 
 				break;
 

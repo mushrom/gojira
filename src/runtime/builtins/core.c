@@ -34,11 +34,6 @@ token_t *builtin_get_last_continuation( stack_frame_t *frame ){
 			temp = temp->last;
 		}
 
-		// TODO: mark this frame and all lower as captured
-		//ret->cont = frame->last->last;
-		//ret->cont = frame_capture( frame->last->last );
-
-		//ret->cont = frame_capture( frame->last->last->last );
 		ret->cont = frame_capture( temp );
 	}
 
@@ -50,14 +45,8 @@ token_t *builtin_car( stack_frame_t *frame ){
 	token_t *ret = NULL;
 
 	if ( move && move->type == TYPE_LIST && move->down ){
-		//ret = move->down;
 		ret = gc_clone_token( get_current_gc( frame ), move->down );
 		ret->next = NULL;
-
-		/*
-    } else if ( move && move->type == TYPE_ITERATOR ){
-        ret = builtin_iterator_access( frame );
-		*/
 
 	} else {
 		FRAME_ERROR_ARGTYPE( frame, "list", move->type );
@@ -75,11 +64,6 @@ token_t *builtin_cdr( stack_frame_t *frame ){
 		ret->type = TYPE_LIST;
 		ret->down = move->down->next;
 
-		/*
-    } else if ( move && move->type == TYPE_ITERATOR ){
-        ret = builtin_iterator_next( frame );
-		*/
-
 	} else {
 		FRAME_ERROR_ARGTYPE( frame, "list", move->type );
 	}
@@ -94,7 +78,6 @@ token_t *builtin_cons( stack_frame_t *frame ){
 
 	if ( move && move->next ){
 		if ( move->next->type == TYPE_LIST ){
-			//temp = clone_token_tree( move );
 			temp = gc_clone_token( get_current_gc( frame ), move );
 			temp->next = move->next->down;
 
@@ -174,11 +157,6 @@ token_t *builtin_greaterthan( stack_frame_t *frame ){
 
 		ret = gc_alloc_token( get_current_gc( frame ));
 		ret->type = TYPE_BOOLEAN;
-		/*
-		ret->smalldata = ( op1->type          == op2->type )
-		              && ((int)op1->smalldata > (int)op2->smalldata );
-
-	     */
 
 		if ( op1->type == op2->type ){
 			switch( op1->type ){
@@ -225,12 +203,9 @@ static bool set_variable( stack_frame_t *frame, const token_t *tokens, unsigned 
 		temp = var->token;
 
 		if ( var->is_mutable ){
-			//var->token = gc_clone_token( get_current_gc( frame ), tokens->next );
 			free_tokens( var->token );
 			var->token = clone_token_tree( tokens->next );
-			//var->token = clone_token( tokens->next );
-			//frame_register_tokens( frame, temp );
-			//gc_mark_tree( tokens->next );
+
 			ret = true;
 
 		} else {
@@ -251,7 +226,6 @@ static bool set_variable( stack_frame_t *frame, const token_t *tokens, unsigned 
 token_t *builtin_intern_set( stack_frame_t *frame ){
 	token_t *ret = NULL;
 	token_t *move;
-	//bool mutable = false;
 	unsigned mutable = VAR_MUTABLE;
 	bool error = false;
 
@@ -308,7 +282,6 @@ token_t *builtin_intern_set( stack_frame_t *frame ){
 token_t *builtin_intern_set_global( stack_frame_t *frame ){
 	token_t *ret = NULL;
 	token_t *move;
-	env_t *first;
 
 	move = frame->expr->next;
 
@@ -342,7 +315,6 @@ token_t *builtin_is_list( stack_frame_t *frame ){
 		ret->type = TYPE_BOOLEAN;
 
 		move = frame->expr->next;
-		//ret->smalldata = move->type == TYPE_LIST;
 		ret->boolean = move->type == TYPE_LIST;
 
 	} else {
@@ -361,7 +333,6 @@ token_t *builtin_is_null( stack_frame_t *frame ){
 
 		ret = gc_alloc_token( get_current_gc( frame ));
 		ret->type = TYPE_BOOLEAN;
-		//ret->smalldata = tok->type == TYPE_LIST && tok->down == NULL;
 		ret->boolean = tok->type == TYPE_LIST && tok->down == NULL;
 
 	} else {
@@ -380,7 +351,6 @@ token_t *builtin_is_symbol( stack_frame_t *frame ){
 
 		ret = gc_alloc_token( get_current_gc( frame ));
 		ret->type = TYPE_BOOLEAN;
-		//ret->smalldata = tok->type == TYPE_SYMBOL && tok->down == NULL;
 		ret->boolean = tok->type == TYPE_SYMBOL && tok->down == NULL;
 
 	} else {
@@ -389,29 +359,6 @@ token_t *builtin_is_symbol( stack_frame_t *frame ){
 
 	return ret;
 }
-
-/*
-token_t *builtin_lessthan( stack_frame_t *frame ){
-	token_t *ret = NULL;
-	token_t *op1, *op2;
-
-	if ( frame->ntokens == 3 ){
-		ret = alloc_token( );
-		ret->type = TYPE_BOOLEAN;
-
-		op1 = frame->expr->next;
-		op2 = frame->expr->next->next;
-
-		ret->smalldata = ( op1->type          == op2->type )
-			          && ((int)op1->smalldata < (int)op2->smalldata );
-
-	} else {
-		FRAME_ERROR_ARGNUM( frame, 2 );
-	}
-
-	return ret;
-}
-*/
 
 token_t *builtin_lessthan( stack_frame_t *frame ){
 	token_t *ret = NULL;
@@ -424,11 +371,6 @@ token_t *builtin_lessthan( stack_frame_t *frame ){
 
 		ret = gc_alloc_token( get_current_gc( frame ));
 		ret->type = TYPE_BOOLEAN;
-		/*
-		ret->smalldata = ( op1->type          == op2->type )
-		              && ((int)op1->smalldata > (int)op2->smalldata );
-
-	     */
 
 		if ( op1->type == op2->type ){
 			switch( op1->type ){
@@ -541,18 +483,12 @@ token_t *builtin_load_global_file( stack_frame_t *frame ){
 	stack_frame_t *tempframe;
 	stack_frame_t *global;
 	env_t *env;
-	token_t *oldptr;
 	bool eval_return;
 
 	if ( frame->ntokens == 2 ){
 		if ( frame->expr->next->type == TYPE_STRING ){
 			char *fname = shared_get( frame->expr->next->data );
-			//tempframe = frame;
-			//for ( ; tempframe->last; tempframe = tempframe->last );
 
-			//oldptr = tempframe->ptr;
-			//eval_return = evaluate_file( tempframe, fname );
-			//tempframe->ptr = oldptr;
 			env = frame->env;
 			for ( ; env->last; env = env->last );
 
@@ -561,21 +497,11 @@ token_t *builtin_load_global_file( stack_frame_t *frame ){
 
 			tempframe = frame_create( frame, NULL, DONT_MAKE_ENV );
 			tempframe->flags |= RUNTIME_FLAG_NO_EVAL;
-			//tempframe->garbage = calloc( 1, sizeof( gbg_collector_t ));
-			//gc_init( frame->garbage, tempframe->garbage );
-			//tempframe->gc.id = frame->gc.id + 1;
 			tempframe->env = env;
 			eval_return = evaluate_file( tempframe, fname );
-			//gc_collect( &tempframe->gc, NULL, 0 );
-			//gc_merge( get_current_gc( frame ), &tempframe->gc );
-			//gc_merge( &global->gc, &tempframe->gc );
-			//gc_collect( get_current_gc( tempframe ));
-			//gc_merge( get_current_gc( global ), get_current_gc( tempframe ));
-			//frame_free( tempframe );
 
 			ret = gc_alloc_token( get_current_gc( frame ));
-			ret->type      = TYPE_BOOLEAN;
-			//ret->smalldata = eval_return;
+			ret->type = TYPE_BOOLEAN;
 			ret->boolean = eval_return;
 
 		} else {
