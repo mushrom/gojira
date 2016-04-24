@@ -116,10 +116,7 @@ struct global_builtin {
 // Adds an "external function" to a frame, and handles registering the tokens for garbage collection
 variable_t *global_add_func( stack_frame_t *frame, char *name, scheme_func handle ){
 	token_t *proc = gc_register( get_current_gc( frame ), ext_proc_token( handle ));
-	//variable_t *ret = env_add_var( frame->env, name, proc, NO_RECURSE, VAR_IMMUTABLE );
 	variable_t *ret = env_add_var( frame->env, name, proc, NO_RECURSE, VAR_MUTABLE_BUILTIN );
-
-	//free_token( proc );
 
 	return ret;
 }
@@ -176,9 +173,6 @@ static const char *stack_trace_ext_name( token_t *token ){
 void stack_trace( st_frame_t *frame ){
 	st_frame_t *move = frame;
 	token_t *token = NULL;
-	list_node_t *vars;
-	variable_t *var;
-	hashmap_t *map;
 
 	unsigned i, k, limit = 3;
 	int start = 0, m;
@@ -193,7 +187,6 @@ void stack_trace( st_frame_t *frame ){
 		k = m = 0;
 		foreach_in_list( token ){
 			if ( m >= start || m == 0 ){
-				//print_token( token, true );
 				if (( name = stack_trace_ext_name( token ))){
 					printf( "%s", name );
 				} else {
@@ -202,18 +195,15 @@ void stack_trace( st_frame_t *frame ){
 
 				if ( token->next )
 					printf( " " );
-					//printf( " -> " );
 
 				k++;
 				m++;
 
 			} else if ( m == 1 ){
-				//printf( "(%d truncated) -> ", start - 1);
 				printf( "(%d truncated) ", start - 1);
 				m++;
 
 			} else {
-				//printf( ".. " );
 				m++;
 			}
 		}
@@ -223,28 +213,6 @@ void stack_trace( st_frame_t *frame ){
 		}
 
 		printf( ")\n" );
-		/*
-		map = move->vars;
-
-		if ( map ){
-			printf( " `- has variables:\n    " );
-			k = 0;
-
-			for ( m = 0; m < map->nbuckets; m++ ){
-				vars = map->buckets[m].base;
-				foreach_in_list( vars ){
-					var = shared_get( vars->data );
-					printf( "%s%*s", var->key, 16 - utf8len( var->key ), "" );
-
-					k = (k + 1) % 6;
-					if ( !k )
-						printf( "\n    " );
-				}
-			}
-
-			printf( "\n" );
-		}
-		*/
 	}
 }
 
@@ -256,7 +224,6 @@ void default_error_printer( stack_frame_t *frame, char *fmt, ... ){
 	stack_trace( frame );
 #endif
 	vprintf( fmt, args );
-	//printf( "[%s] got here\n", __func__ );
 
 	va_end( args );
 }
@@ -264,7 +231,6 @@ void default_error_printer( stack_frame_t *frame, char *fmt, ... ){
 st_frame_t *frame_create( st_frame_t *cur_frame, token_t *ptr, bool make_env ){
 	st_frame_t *ret;
 
-	//ret = calloc( 1, sizeof( st_frame_t ));
 	ret = alloc_block( );
 	ret->last = cur_frame;
 	ret->ptr = ptr;
@@ -278,20 +244,15 @@ st_frame_t *frame_create( st_frame_t *cur_frame, token_t *ptr, bool make_env ){
 	if ( cur_frame ){
 		ret->error_call = cur_frame->error_call;
 		ret->flags |= cur_frame->flags & RUNTIME_FLAG_TRACE;
-		//ret->cur_func = cur_frame->cur_func;
 		ret->garbage = cur_frame->garbage;
 
-		//gc_init( &cur_frame->gc, &ret->gc );
-
 		if ( !make_env && cur_frame->env ){
-			//ret->env = env_aquire( cur_frame->env );
 			ret->env = cur_frame->env;
 		}
 
 		gc_register( get_current_gc( ret ), ret );
 
 	} else {
-		//gc_init( NULL, &ret->gc );
 		ret->error_call = default_error_printer;
 		ret->garbage = calloc( 1, sizeof( gbg_collector_t ));
 		gc_init( NULL, ret->garbage );
@@ -302,45 +263,25 @@ st_frame_t *frame_create( st_frame_t *cur_frame, token_t *ptr, bool make_env ){
 		ret->env = env_create( get_current_gc( ret ), cur_frame? cur_frame->env : NULL );
 	}
 
-
-	//printf( "[%s] Current frame is %p\n", __func__, ret->env );
-
 	return ret;
 }
 
+// TODO: remove this at some point
 st_frame_t *frame_free( st_frame_t *frame ){
-	/*
-	list_node_t *move, *temp;
-	hashmap_t *map;
-	unsigned i;
-	*/
-
-	if ( frame ){
-		//frame_free_vars( frame );
-		//env_release( frame->env );
-		free( frame );
-	}
+	free( frame );
 
 	return NULL;
 }
 
 token_t *frame_add_token( st_frame_t *frame, token_t *token ){
 	token_t *ret = token;
-	token_t *meh;
 
 	if ( !frame->expr ){
-		//frame->expr = frame->end = meh = clone_token_tree( token );
-		//frame_register_token_tree( frame, meh );
 		frame->expr = frame->end = gc_clone_token( get_current_gc( frame ), token );
 		frame->end->next = NULL;
-		//frame_register_one_token( frame, meh );
-		//meh->status = GC_UNMARKED;
 
 	} else {
-		//frame->end->next = clone_token_tree( token );
-		//frame->end->next = frame_register_token_tree( frame, frame->end->next );
 		frame->end->next = gc_clone_token( get_current_gc( frame ), token );
-		//frame->end->next->status = GC_UNMARKED;
 		frame->end = frame->end->next;
 		frame->end->next = NULL;
 	}
@@ -355,14 +296,9 @@ token_t *frame_add_token_noclone( st_frame_t *frame, token_t *token ){
 
 	if ( !frame->expr ){
 		frame->expr = frame->end = token;
-		//frame_register_token_tree( frame, token );
-		//frame_register_one_token( frame, token );
-		//token->status = GC_UNMARKED;
 
 	} else {
 		frame->end->next = token;
-		//frame->end->next = frame_register_token_tree( frame, frame->end->next );
-		//frame->end->next->status = GC_UNMARKED;
 		frame->end = frame->end->next;
 	}
 
@@ -374,8 +310,6 @@ token_t *frame_add_token_noclone( st_frame_t *frame, token_t *token ){
 stack_frame_t *frame_capture( stack_frame_t *frame ){
 	stack_frame_t *temp = frame;
 
-	//printf( "[%s] got here\n", __func__ );
-
 	for ( ; temp && !(temp->flags & RUNTIME_FLAG_CAPTURED); temp = temp->last ){
 		temp->flags |= RUNTIME_FLAG_CAPTURED;
 	}
@@ -386,11 +320,7 @@ stack_frame_t *frame_capture( stack_frame_t *frame ){
 stack_frame_t *frame_restore( stack_frame_t *frame ){
 	stack_frame_t *ret = frame;
 
-	//printf( "[%s] Got here too\n", __func__ );
-
 	if ( frame->last && frame->flags & RUNTIME_FLAG_CAPTURED ){
-		//printf( "[%s] Restoring frame at %p...\n", __func__, frame );
-		//ret = malloc( sizeof( stack_frame_t ));
 		ret = alloc_block_nozero( );
 		*ret = *frame;
 		gc_register( get_current_gc( ret ), ret );
@@ -405,41 +335,3 @@ stack_frame_t *frame_restore( stack_frame_t *frame ){
 
 	return ret;
 }
-
-/*
-token_t *frame_register_tokens( st_frame_t *frame, token_t *token ){
-	if ( token ){
-		frame_register_tokens( frame, token->down );
-		frame_register_tokens( frame, token->next );
-
-		token->gc_link = frame->heap;
-		frame->heap = token;
-	}
-
-	return token;
-}
-
-token_t *frame_register_token_tree( st_frame_t *frame, token_t *token ){
-	if ( token ){
-		frame_register_tokens( frame, token->down );
-
-		token->gc_link = frame->heap;
-		frame->heap = token;
-	}
-
-	return token;
-}
-
-token_t *frame_register_one_token( st_frame_t *frame, token_t *token ){
-	if ( token ){
-		token->gc_link = frame->heap;
-		frame->heap = token;
-	}
-
-	return token;
-}
-
-token_t *frame_alloc_token( st_frame_t *frame ){
-	return frame_register_one_token( frame, alloc_token( ));
-}
-*/
