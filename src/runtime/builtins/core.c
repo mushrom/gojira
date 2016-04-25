@@ -306,6 +306,19 @@ token_t *builtin_intern_set_global( stack_frame_t *frame ){
 	return ret;
 }
 
+token_t *builtin_is_boolean( stack_frame_t *frame ){
+	token_t *ret = NULL;
+
+	if ( frame->ntokens == 2 ){
+		ret = gc_alloc_token( get_current_gc( frame ));
+
+		ret->type = TYPE_BOOLEAN;
+		ret->boolean = frame->expr->next->type == TYPE_BOOLEAN;
+	}
+
+	return ret;
+}
+
 token_t *builtin_is_list( stack_frame_t *frame ){
 	token_t *ret = NULL;
 	token_t *move;

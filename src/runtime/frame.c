@@ -34,6 +34,7 @@ struct global_builtin {
 	{ "cons",            builtin_cons },
 	{ "null?",           builtin_is_null },
 	{ "list",            builtin_list },
+	{ "boolean?",        builtin_is_boolean },
 	{ "list?",           builtin_is_list },
 	{ "symbol?",         builtin_is_symbol },
 	{ "intern-set",      builtin_intern_set },
