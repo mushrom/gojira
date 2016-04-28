@@ -60,7 +60,10 @@ token_t *compile_lambda_body( stack_frame_t *frame, token_t *body ){
 			}
 		}
 
-		ret->down = compile_lambda_body( frame, ret->down );
+		if ( ret->type != TYPE_QUOTED_TOKEN ){
+			ret->down = compile_lambda_body( frame, ret->down );
+		}
+
 		ret->next = compile_lambda_body( frame, ret->next );
 	}
 
