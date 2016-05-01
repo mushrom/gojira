@@ -276,3 +276,47 @@ token_t *builtin_is_real( stack_frame_t *frame ){
 
 	return ret;
 }
+
+token_t *builtin_char_to_integer( stack_frame_t *frame ){
+	token_t *ret = NULL;
+
+	if ( frame->ntokens == 2 ){
+		token_t *arg = frame->expr->next;
+
+		if ( arg->type == TYPE_CHAR ){
+			ret = gc_alloc_token( get_current_gc( frame ));
+			ret->type = TYPE_NUMBER;
+			ret->number = as_int_number( arg->character );
+
+		} else {
+			FRAME_ERROR_ARGTYPE( frame, "character", arg->type );
+		}
+
+	} else {
+		FRAME_ERROR_ARGNUM( frame, 2 );
+	}
+
+	return ret;
+}
+
+token_t *builtin_integer_to_char( stack_frame_t *frame ){
+	token_t *ret = NULL;
+
+	if ( frame->ntokens == 2 ){
+		token_t *arg = frame->expr->next;
+
+		if ( arg->type == TYPE_NUMBER ){
+			ret = gc_alloc_token( get_current_gc( frame ));
+			ret->type = TYPE_CHAR;
+			ret->character = arg->number.u_int;
+
+		} else {
+			FRAME_ERROR_ARGTYPE( frame, "integer", arg->type );
+		}
+
+	} else {
+		FRAME_ERROR_ARGNUM( frame, 2 );
+	}
+
+	return ret;
+}

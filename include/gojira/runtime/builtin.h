@@ -56,11 +56,14 @@ token_t *builtin_is_null( stack_frame_t *frame );
 token_t *builtin_is_list( stack_frame_t *frame );
 token_t *builtin_is_symbol( stack_frame_t *frame );
 
+// number functions
 token_t *builtin_is_number( stack_frame_t *frame );
 token_t *builtin_is_integer( stack_frame_t *frame );
 token_t *builtin_is_rational( stack_frame_t *frame );
 token_t *builtin_is_real( stack_frame_t *frame );
 token_t *builtin_floor( stack_frame_t *frame );
+token_t *builtin_char_to_integer( stack_frame_t *frame );
+token_t *builtin_integer_to_char( stack_frame_t *frame );
 
 token_t *builtin_eval( stack_frame_t *frame );
 token_t *builtin_apply( stack_frame_t *frame );

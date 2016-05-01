@@ -47,6 +47,8 @@ struct global_builtin {
 	{ "rational?",       builtin_is_rational },
 	{ "real?",           builtin_is_real },
 	{ "floor",           builtin_floor },
+	{ "char->integer",   builtin_char_to_integer },
+	{ "integer->char",   builtin_integer_to_char },
 
 	{ "eval",            builtin_eval },
 	{ "apply",           builtin_apply },
