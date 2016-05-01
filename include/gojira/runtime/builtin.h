@@ -55,6 +55,7 @@ token_t *builtin_is_boolean( stack_frame_t *frame );
 token_t *builtin_is_null( stack_frame_t *frame );
 token_t *builtin_is_list( stack_frame_t *frame );
 token_t *builtin_is_symbol( stack_frame_t *frame );
+token_t *builtin_is_char( stack_frame_t *frame );
 
 // number functions
 token_t *builtin_is_number( stack_frame_t *frame );

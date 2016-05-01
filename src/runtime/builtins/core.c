@@ -364,7 +364,25 @@ token_t *builtin_is_symbol( stack_frame_t *frame ){
 
 		ret = gc_alloc_token( get_current_gc( frame ));
 		ret->type = TYPE_BOOLEAN;
-		ret->boolean = tok->type == TYPE_SYMBOL && tok->down == NULL;
+		ret->boolean = tok->type == TYPE_SYMBOL;
+
+	} else {
+		FRAME_ERROR_ARGNUM( frame, 1 );
+	}
+
+	return ret;
+}
+
+token_t *builtin_is_char( stack_frame_t *frame ){
+	token_t *ret = NULL;
+	token_t *tok;
+
+	if ( frame->ntokens == 2 ){
+		tok = frame->expr->next;
+
+		ret = gc_alloc_token( get_current_gc( frame ));
+		ret->type = TYPE_BOOLEAN;
+		ret->boolean = tok->type == TYPE_CHAR;
 
 	} else {
 		FRAME_ERROR_ARGNUM( frame, 1 );
