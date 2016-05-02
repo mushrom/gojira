@@ -322,7 +322,14 @@ token_t *builtin_read( stack_frame_t *frame ){
 			fp = shared_get( move->data );
 			buf = read_s_expr( fp );
 
-			ret = gc_register_tokens( get_current_gc( frame ), parse_scheme_tokens( buf ));
+			if ( strlen( buf ) != 0 ){
+				ret = gc_register_tokens( get_current_gc( frame ), parse_scheme_tokens( buf ));
+
+			} else {
+				ret = gc_alloc_token( get_current_gc( frame ));
+				ret->type = TYPE_BOOLEAN;
+				ret->boolean = false;
+			}
 
 			free( buf );
 
