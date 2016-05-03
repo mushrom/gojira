@@ -49,7 +49,9 @@ int main( int argc, char *argv[] ){
 		// otherwise parse options
 		lastopt = 1;
 
-		while (( option = getopt( argc, argv, "hiLg:" )) != -1 && i++ < argc ){
+		for ( i = 1; i < argc && argv[i][0] == '-'; i++ ){
+			option = argv[i][1];
+
 			switch ( option ){
 				case 'i':
 					interactive = true;
@@ -86,7 +88,6 @@ int main( int argc, char *argv[] ){
 							new_gc_profile = GC_PROFILE_BALANCED;
 						}
 					}
-
 
 				case 'v':
 					break;
@@ -143,7 +144,7 @@ int main( int argc, char *argv[] ){
 void print_help( ){
 	printf( "Usage: gojira [-hiLG] [file] [program arguments ...]\n"
 			"\t-i: enter REPL after [file] is executed. If no file is specified this is the default.\n"
-			"\t-G: Specify a garbage collector profile to use, out of the following:\n"
+			"\t-g: Specify a garbage collector profile to use, out of the following:\n"
 			"\t      lowmem   : run the garbage collector frequently to reduce memory usage\n"
 			"\t      balanced : a compromise between speed and memory usage (default)\n"
 			"\t      fast     : run the garbage collector infrequently for better performance\n"
