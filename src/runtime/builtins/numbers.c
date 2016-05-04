@@ -143,7 +143,14 @@ token_t *builtin_modulo( stack_frame_t *frame ){
 		if ( op1->type == TYPE_NUMBER && op2->type == TYPE_NUMBER ){
 			ret = gc_alloc_token( get_current_gc( frame ));
 			ret->type = TYPE_NUMBER;
-			ret->number.s_int = op1->number.s_int % op2->number.s_int;
+
+			if ((op1->number.s_int < 0) != (op2->number.s_int < 0)) {
+				ret->number.s_int = op2->number.s_int + (op1->number.s_int % op2->number.s_int);
+
+			} else {
+				ret->number.s_int = op1->number.s_int % op2->number.s_int;
+			}
+
 			ret->number.type = TYPE_NUMBER;
 
 		} else {
