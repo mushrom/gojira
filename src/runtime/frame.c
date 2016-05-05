@@ -88,6 +88,7 @@ struct global_builtin {
 #if ! GOJIRA_PUBLIC_MODE
 	{ "stacktrace",      builtin_stacktrace },
 	{ "intern-sleep",    builtin_sleep },
+	{ "system",          builtin_system },
 
 	// debugger breakpoint
 	{ "debug-break",     debugger_loop },

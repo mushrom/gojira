@@ -7,6 +7,7 @@ extern "C" {
 #include <gojira/runtime/runtime.h>
 #include <gojira/tokens.h>
 #include <gojira/debugger/debugger.h>
+#include <gojira/parse_debug.h>
 
 #include <gojira/runtime/builtins/bytevector.h>
 
@@ -72,6 +73,7 @@ token_t *builtin_get_last_continuation( stack_frame_t *frame );
 
 // miscellaneous
 token_t *builtin_random_int( stack_frame_t *frame );
+token_t *builtin_system( stack_frame_t *frame );
 
 // String functions
 token_t *builtin_string_append( stack_frame_t *frame );
