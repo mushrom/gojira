@@ -89,6 +89,7 @@ struct global_builtin {
 	{ "stacktrace",      builtin_stacktrace },
 	{ "intern-sleep",    builtin_sleep },
 	{ "system",          builtin_system },
+	{ "exit",            builtin_exit },
 
 	// debugger breakpoint
 	{ "debug-break",     debugger_loop },

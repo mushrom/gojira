@@ -24,3 +24,17 @@ token_t *builtin_system( stack_frame_t *frame ){
 
 	return ret;
 }
+
+token_t *builtin_exit( stack_frame_t *frame ){
+	if ( frame->ntokens == 2 ){
+		token_t *status = frame->expr->next;
+
+		if ( status->type == TYPE_NUMBER ){
+			exit( status->number.s_int );
+		}
+	}
+
+	exit( 0 );
+
+	return NULL;
+}
