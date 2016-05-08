@@ -98,6 +98,7 @@ struct global_builtin {
 #if GOJIRA_ENABLE_FILES
 	// file functions
 	{ "open",            builtin_open },
+	{ "close",           builtin_close },
 	{ "readall",         builtin_readall },
 	{ "read-char",       builtin_read_char },
 	{ "write-char",      builtin_write_char },

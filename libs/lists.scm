@@ -25,7 +25,8 @@
       (cons (car xs) (append (cdr xs) obj)))))
 
 (define :builtin (reverse xs)
-  (if (null? (cdr xs))
+  (if (or (null? xs)
+          (null? (cdr xs)))
     xs
     (append (reverse (cdr xs)) (list (car xs)))))
 

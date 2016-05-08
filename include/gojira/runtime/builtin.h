@@ -110,6 +110,7 @@ token_t *builtin_load_global_file( stack_frame_t *frame );
 
 // File functions
 token_t *builtin_open( stack_frame_t *frame );
+token_t *builtin_close( stack_frame_t *frame );
 token_t *builtin_readall( stack_frame_t *frame );
 token_t *builtin_read_char( stack_frame_t *frame );
 token_t *builtin_write_char( stack_frame_t *frame );
