@@ -42,3 +42,7 @@
    (write foo)
    (newline))
  #(:foo :bar :baz))
+
+; test for bug fix at 432eca7e4
+;; => #(a b c d)
+(print (list->vector '(a b c d)))

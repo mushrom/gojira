@@ -122,7 +122,7 @@ void file_print_token( FILE *fp, token_t *token, print_readable_t readable ){
 						if ( i > 0 )
 							fputc( ' ', fp );
 
-						file_dump_tokens( fp, dlist_get( foo, i ), readable );
+						file_print_token( fp, dlist_get( foo, i ), readable );
 					}
 				}
 

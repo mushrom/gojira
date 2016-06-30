@@ -174,14 +174,11 @@ token_t *builtin_vector_from_list( stack_frame_t *frame ){
 		token_t *move = frame->expr->next;
 
 		if ( move->type == TYPE_LIST ){
-			unsigned len;
-			dlist_t *nlist;
-			shared_t *shr;
-
 			move = move->down;
-			len = tokens_length( move );
-			nlist = dlist_create( 1, len );
-			shr = shared_new( nlist, free_vector );
+
+			unsigned len = tokens_length( move );
+			dlist_t *nlist = dlist_create( 1, len );
+			shared_t *shr = shared_new( nlist, free_vector );
 
 			for ( ; move; move = move->next ){
 				dlist_add( nlist, move );
