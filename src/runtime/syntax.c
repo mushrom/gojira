@@ -135,7 +135,7 @@ static void expand_procedure_args( stack_frame_t *frame, token_t *args, token_t 
 				const char *var_name = shared_get( temp->data );
 
 				// Handle variable-length arguments, which use the :rest keyword
-				if ( strcmp( var_name, ":rest" ) == 0 ){
+				if ( strcmp( var_name, ":rest" ) == 0 || strcmp( var_name, "." ) == 0 ) {
 					if ( temp->next && temp->next->type == TYPE_SYMBOL ){
 						token_t *newlist;
 

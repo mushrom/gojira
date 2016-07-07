@@ -162,12 +162,6 @@ static token_return_t get_token_from_str( const char *string ){
 			ret.token->type = TYPE_COMMA;
 			ret.found = true;
 
-		// Check for periods and special conditions ("." signifies a pair, while ".." is an identifier)
-		} else if ( *string == '.' && strchr( SEPERATOR, string[1])){
-			ret.string = string + 1;
-			ret.token->type = TYPE_PERIOD;
-			ret.found = true;
-
 		} else if ( strchr( NEWLINE, *string )){
 			ret.string = string + 1;
 			ret.token->type = TYPE_NEWLINE;
