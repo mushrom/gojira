@@ -478,7 +478,20 @@ token_t *builtin_sleep( stack_frame_t *frame ){
 
 	ret = gc_alloc_token( get_current_gc( frame ));
 	ret->type = TYPE_NULL;
-	sleep( 1 );
+
+	if ( frame->ntokens == 2 ){
+		token_t *tok = frame->expr->next;
+
+		if ( has_number_type( tok )){
+			usleep( tok->number.u_int );
+
+		} else {
+			FRAME_ERROR_ARGTYPE( frame, "integer", tok->type );
+		}
+
+	} else {
+		FRAME_ERROR_ARGNUM( frame, 1 );
+	}
 
 	return ret;
 }
