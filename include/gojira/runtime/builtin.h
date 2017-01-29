@@ -47,6 +47,7 @@ token_t *builtin_write( stack_frame_t *frame );
 token_t *builtin_newline( stack_frame_t *frame );
 token_t *builtin_stacktrace( stack_frame_t *frame );
 token_t *builtin_sleep( stack_frame_t *frame );
+token_t *builtin_current_seconds( stack_frame_t *frame );
 
 token_t *builtin_greaterthan( stack_frame_t *frame );
 token_t *builtin_lessthan( stack_frame_t *frame );
@@ -123,6 +124,7 @@ token_t *builtin_file_exists( stack_frame_t *frame );
 token_t *builtin_tcp_socket( stack_frame_t *frame );
 token_t *builtin_tcp_getchar( stack_frame_t *frame );
 token_t *builtin_tcp_putchar( stack_frame_t *frame );
+token_t *builtin_tcp_getchar_async( stack_frame_t *frame );
 
 // debugger breakpoint function
 token_t *debugger_loop( stack_frame_t *frame );

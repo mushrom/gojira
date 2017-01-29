@@ -12,6 +12,8 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <netdb.h>
+#include <fcntl.h>
+#include <errno.h>
 
 token_t *builtin_tcp_socket( stack_frame_t *frame ){
 	token_t *ret = NULL;
@@ -108,6 +110,59 @@ token_t *builtin_tcp_getchar( stack_frame_t *frame ){
 
 	return ret;
 }
+
+token_t *builtin_tcp_getchar_async( stack_frame_t *frame ){
+	token_t *ret = NULL;
+	token_t *move;
+
+	if ( frame->ntokens == 2 ){
+		move = frame->expr->next;
+
+		if ( move->type == TYPE_SOCKET ){
+			int recv_ret;
+			unsigned char ch;
+
+			int orig_flags = fcntl(move->misc, F_GETFL, 0 );
+			fcntl(move->misc, F_SETFL, orig_flags | O_NONBLOCK );
+
+			recv_ret = recv( move->misc, &ch, 1, 0 );
+
+			fcntl(move->misc, F_SETFL, orig_flags );
+			
+			if ( recv_ret > 0 ){
+				//ret = alloc_token( );
+				ret = gc_alloc_token( get_current_gc( frame ));
+				ret->type = TYPE_CHAR;
+				ret->character = ch;
+
+			} else if (recv_ret == EWOULDBLOCK) {
+				ret = gc_alloc_token( get_current_gc( frame ));
+				//ret->data = shared_new( "no-data", NO_DTOR);
+				//ret->data = shared_new(strdup("no-data"), free_string);
+				//ret->type = TYPE_SYMBOL;
+				ret->type = TYPE_BOOLEAN;
+				ret->boolean = true;
+
+			} else {
+				//ret = alloc_token( );
+				ret = gc_alloc_token( get_current_gc( frame ));
+				ret->type = TYPE_BOOLEAN;
+				ret->boolean = false;
+			}
+
+		} else {
+			frame->error_call( frame, "[%s] Expected argument 1 to be a socket, but have %s\n",
+				__func__, type_str( move->type ));
+		}
+
+	} else {
+		frame->error_call( frame, "[%s] Expected 1 argument, but have %d\n",
+			__func__, frame->ntokens - 1 );
+	}
+
+	return ret;
+}
+
 
 token_t *builtin_tcp_putchar( stack_frame_t *frame ){
 	token_t *ret = NULL;

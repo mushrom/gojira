@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <time.h>
 
 token_t *ext_proc_token( scheme_func handle ){
 	token_t *ret = NULL;
@@ -492,6 +493,15 @@ token_t *builtin_sleep( stack_frame_t *frame ){
 	} else {
 		FRAME_ERROR_ARGNUM( frame, 1 );
 	}
+
+	return ret;
+}
+
+token_t *builtin_current_seconds( stack_frame_t *frame ){
+	token_t *ret = gc_alloc_token( get_current_gc( frame ));
+
+	ret->type = TYPE_NUMBER;
+	ret->number = as_int_number( time( NULL ));
 
 	return ret;
 }

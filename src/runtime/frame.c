@@ -88,6 +88,7 @@ struct global_builtin {
 #if ! GOJIRA_PUBLIC_MODE
 	{ "stacktrace",      builtin_stacktrace },
 	{ "intern-sleep",    builtin_sleep },
+	{ "current-seconds", builtin_current_seconds },
 	{ "system",          builtin_system },
 	{ "exit",            builtin_exit },
 
@@ -114,9 +115,10 @@ struct global_builtin {
 
 #if GOJIRA_ENABLE_SOCKETS
 	// networking functions
-	{ "tcp-socket",      builtin_tcp_socket },
-	{ "tcp-getchar",     builtin_tcp_getchar },
-	{ "tcp-putchar",     builtin_tcp_putchar },
+	{ "tcp-socket",        builtin_tcp_socket },
+	{ "tcp-getchar",       builtin_tcp_getchar },
+	{ "tcp-getchar-async", builtin_tcp_getchar_async },
+	{ "tcp-putchar",       builtin_tcp_putchar },
 #endif
 };
 
