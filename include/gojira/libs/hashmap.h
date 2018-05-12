@@ -11,6 +11,7 @@ hashmap_t *hashmap_create( unsigned n );
 void hashmap_free( hashmap_t *map );
 
 void *hashmap_add( hashmap_t *map, unsigned hash, void *val );
+void *hashmap_set( hashmap_t *map, unsigned hash, void *val );
 void *hashmap_get( hashmap_t *map, unsigned hash );
 void hashmap_remove( hashmap_t *map, unsigned hash );
 unsigned hash_string( const char *str );

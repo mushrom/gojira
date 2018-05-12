@@ -76,6 +76,7 @@ struct global_builtin {
 	//hashmap functions
 	{ "hashmap",         builtin_hashmap_make },
 	{ "hashmap-get",     builtin_hashmap_get },
+	{ "hashmap-set",     builtin_hashmap_set },
 
 	// misc
 	{ "random-int",      builtin_random_int },

@@ -31,40 +31,30 @@ token_t *builtin_hashmap_make( stack_frame_t *frame ){
 	token_t *ret = NULL;
 	hashmap_t *map = NULL;
 
-	if ( frame->ntokens >= 3 ){
-		token_t *move = frame->expr->next;
-		char *str;
+	token_t *move = frame->expr->next;
+	char *str;
 
-		map = hashmap_create( 4 );
+	map = hashmap_create(32);
 
-		for ( ; move; (move = move->next) && (move = move->next) ){
-			if ( move->type == TYPE_SYMBOL || move->type == TYPE_STRING ){
-				str = shared_get( move->data );
-				hashmap_add( map, hash_string( str ), move->next );
+	for ( ; move; (move = move->next) && (move = move->next) ){
+		if ( move->type == TYPE_SYMBOL || move->type == TYPE_STRING ){
+			str = shared_get( move->data );
+			hashmap_add( map, hash_string( str ), move->next );
 
-			} else {
-				frame->error_call(
-					frame,
-					"[%s] Error: Expected symbol or string as key, but have %s\n",
-					__func__, type_str( move->type ));
+		} else {
+			hashmap_free( map );
+			map = NULL;
 
-				hashmap_free( map );
-				map = NULL;
-			}
+			FRAME_ERROR_ARGTYPE(frame, "symbol or string",
+								frame->expr->next->type);
 		}
+	}
 
-		if ( map ){
-			ret = gc_alloc_token( get_current_gc( frame ));
-			ret->type = TYPE_HASHMAP;
-			ret->flags = T_FLAG_HAS_SHARED;
-			ret->data = shared_new( map, free_hashmap_token );
-		}
-
-	} else {
-		frame->error_call(
-			frame,
-			"[%s] Error: Expected at least 2 arguments, but have %d\n",
-			__func__, frame->ntokens - 1 );
+	if ( map ){
+		ret = gc_alloc_token( get_current_gc( frame ));
+		ret->type = TYPE_HASHMAP;
+		ret->flags = T_FLAG_HAS_SHARED;
+		ret->data = shared_new( map, free_hashmap_token );
 	}
 
 	return ret;
@@ -93,24 +83,52 @@ token_t *builtin_hashmap_get( stack_frame_t *frame ){
 				}
 
 			} else {
-				frame->error_call(
-					frame,
-					"[%s] Error: Expected symbol, but have %s\n",
-					__func__, type_str( frame->expr->next->next->type ));
+				FRAME_ERROR_ARGTYPE( frame, "symbol",
+				                     frame->expr->next->type );
 			}
 
 		} else {
-			frame->error_call(
-				frame,
-				"[%s] Error: Expected hashmap, but have %s\n",
-				__func__, type_str( frame->expr->next->type ));
+			FRAME_ERROR_ARGTYPE( frame, "symbol",
+			                     frame->expr->next->type );
 		}
 	} else {
-		frame->error_call(
-			frame,
-			"[%s] Error: Expected at least 2 arguments, but have %d\n",
-			__func__, frame->ntokens - 1 );
+		FRAME_ERROR_ARGNUM(frame, 2);
 	}
+
+	return ret;
+}
+
+token_t *builtin_hashmap_set( stack_frame_t *frame ){
+	token_t *ret = NULL;
+
+	if ( frame->ntokens == 4 ){
+		if ( frame->expr->next->type == TYPE_HASHMAP ){
+			if ( frame->expr->next->next->type == TYPE_SYMBOL ||
+					frame->expr->next->next->type == TYPE_STRING )
+			{
+				token_t *sym = frame->expr->next->next;
+				char *buf = shared_get( sym->data );
+				hashmap_t *map = shared_get( frame->expr->next->data );
+
+				hashmap_set( map, hash_string(buf),
+				             frame->expr->next->next->next );
+			} else {
+				FRAME_ERROR_ARGTYPE( frame, "symbol",
+				                     frame->expr->next->type );
+			}
+
+		} else {
+			FRAME_ERROR_ARGTYPE( frame, "hashmap",
+			                     frame->expr->next->type );
+		}
+
+	} else {
+		FRAME_ERROR_ARGNUM(frame, 3);
+	}
+
+	ret = gc_alloc_token( get_current_gc( frame ));
+	ret->type = TYPE_BOOLEAN;
+	ret->boolean = true;
 
 	return ret;
 }

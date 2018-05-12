@@ -34,6 +34,24 @@ void *hashmap_add( hashmap_t *map, unsigned hash, void *val ){
 	return ret;
 }
 
+void *hashmap_set( hashmap_t *map, unsigned hash, void *val ){
+	list_head_t *list;
+	list_node_t *node;
+	void *ret = 0;
+
+	list = map->buckets + (hash % map->nbuckets);
+	node = list_get_val(list, hash);
+
+	if ( node ){
+		node->data = val;
+
+	} else {
+		hashmap_add(map, hash, val);
+	}
+
+	return val;
+}
+
 void *hashmap_get( hashmap_t *map, unsigned hash ){
 	list_head_t *list;
 	list_node_t *node;
